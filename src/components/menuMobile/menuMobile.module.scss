@@ -1,0 +1,92 @@
+.burgerMenu {
+  position: relative;
+  z-index: 100;
+  .burgerButton {
+    width: 32px;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+
+    .bar {
+      height: 4px;
+      width: 100%;
+      background-color: #333;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+  }
+}
+
+/* Animation du bouton burger */
+.open .bar:nth-child(1) {
+  transform: translateY(12px) rotate(45deg);
+}
+
+.open .bar:nth-child(2) {
+  opacity: 0;
+}
+
+.open .bar:nth-child(3) {
+  transform: translateY(-12px) rotate(-45deg);
+}
+
+/* Menu latéral animé */
+.menuPanel {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 250px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+
+  opacity: 0;
+  transform: translateX(20px);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+
+      .link {
+        width: 8rem;
+        font-size: 1.1rem;
+        color: #333;
+        padding: 10px;
+        border: 2px black solid;
+
+        &:active {
+          color: rgb(116, 108, 108);
+          transform: scale(1.07);
+        }
+      }
+    }
+  }
+}
+
+/* Menu ouvert */
+.menuPanel.open {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+
+  li {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

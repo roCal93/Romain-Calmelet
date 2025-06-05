@@ -2,31 +2,17 @@ import styles from './header.module.scss'
 import LogoDesktop from '../logoDesktop/LogoDesktop'
 import LogoMobile from '../logoMobile/LogoMobile'
 import { useMediaQuery } from 'react-responsive'
-import { Link } from 'react-router'
+import MenuDesktop from '../menuDesktop/MenuDesktop'
+import MenuMobile from '../menuMobile/MenuMobile'
 
 const Header = () => {
-  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+  const isMobileLogo = useMediaQuery({ query: '(max-width: 768px)' })
+  const isMobileMenu = useMediaQuery({ query: '(max-width: 1250px)' })
   return (
     <header>
       <nav className={styles.nav}>
-        {isMobile ? <LogoMobile /> : <LogoDesktop />}
-        <ul className={styles.menu}>
-          <li className={styles.li}>
-            <Link className={styles.link}>PRESENTATION</Link>
-          </li>
-          <li className={styles.li}>
-            <Link className={styles.link}>COMPETENCES</Link>
-          </li>
-          <li className={styles.li}>
-            <Link className={styles.link}>FORMATION</Link>
-          </li>
-          <li className={styles.li}>
-            <Link className={styles.link}>PORTFOLIO</Link>
-          </li>
-          <li className={styles.li}>
-            <Link className={styles.link}>CONTACT</Link>
-          </li>
-        </ul>
+        {isMobileLogo ? <LogoMobile /> : <LogoDesktop />}
+        {isMobileMenu ? <MenuMobile /> : <MenuDesktop />}
       </nav>
     </header>
   )
