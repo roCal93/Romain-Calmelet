@@ -7,7 +7,7 @@ import NotFound from './pages/not-found/NotFound.jsx'
 // Creating a browser router with defined routes
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/Portfolio/',
     element: <App />,
     children: [
       {
