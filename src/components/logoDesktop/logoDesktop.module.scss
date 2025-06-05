@@ -1,0 +1,136 @@
+.logo {
+  display: flex;
+  width: 600px;
+  height: 100px;
+  text-decoration: none;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  cursor: pointer;
+
+  .cWithR {
+    height: 70px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: white;
+    position: relative;
+    transition: color 0.2s ease;
+    &:hover {
+      color: rgb(116, 108, 108);
+    }
+
+    .bigC {
+      font-size: 100px;
+      font-weight: 400;
+      font-family: 'Raleway', sans-serif;
+      font-optical-sizing: auto;
+      position: absolute;
+      top: 50%;
+      left: 7%;
+      transform: translate(-50%, -50%);
+      animation: rotateC 20s 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)
+        forwards;
+    }
+
+    .smallR {
+      font-size: 50px;
+      font-family: 'Raleway', sans-serif;
+      font-weight: 500;
+      position: absolute;
+      top: 50%;
+      left: 7.5%;
+      transform: translate(-50%, -50%);
+      animation: translateEvery5s 4.3s 2.5s ease-in-out forwards;
+    }
+
+    .surname {
+      display: flex;
+      position: absolute;
+      left: 12.5%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .firstname {
+      display: flex;
+      position: absolute;
+      left: 56.5%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .letter {
+      font-size: 40px;
+      font-family: 'Raleway', sans-serif;
+      font-weight: 300;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: appearLetter 8s ease-out forwards;
+      margin-right: 2px;
+    }
+    // Animation delays pour les lettres du nom de famille (ALMELET) - Version avec boucle
+    .surname {
+      @for $i from 1 through 7 {
+        .letter:nth-child(#{$i}) {
+          animation-delay: #{2.4 + ($i - 1) * 0.2}s;
+        }
+      }
+    }
+    .firstname {
+      @for $i from 1 through 5 {
+        .letter:nth-child(#{$i}) {
+          animation-delay: #{4.4 + ($i - 1) * 0.2}s;
+        }
+      }
+    }
+  }
+}
+
+// Animation pour la rotation du C toutes les 5s en 0,5s
+@keyframes rotateC {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 0.2;
+  }
+  8% {
+    transform: translate(-50%, -50%) rotate(360deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes translateEvery5s {
+  0% {
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+  }
+  30% {
+    font-size: 40px;
+  }
+
+  100% {
+    transform: translate(650%, -50%);
+    font-size: 60px;
+    font-weight: 400;
+  }
+}
+@keyframes appearLetter {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  25% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

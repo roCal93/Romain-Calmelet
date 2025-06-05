@@ -1,0 +1,93 @@
+.logo {
+  display: flex;
+  width: 600px;
+  height: 100px;
+  text-decoration: none;
+  align-items: center;
+  justify-content: flex-start;
+  transition: transform 0.2s ease;
+  overflow: hidden;
+  cursor: pointer;
+  &:hover {
+    transform: scale(1.01);
+  }
+
+  .cWithR {
+    height: 70px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: white;
+    position: relative;
+
+    .bigC {
+      font-size: 100px;
+      font-weight: 400;
+      font-family: 'Raleway', sans-serif;
+      font-optical-sizing: auto;
+      color: black;
+      position: absolute;
+      top: 50%;
+      left: 7%;
+      transform: translate(-50%, -50%);
+      animation: rotateC 20s 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+
+    .smallR {
+      font-size: 50px;
+      font-family: 'Raleway', sans-serif;
+      font-weight: 500;
+      color: black;
+      position: absolute;
+      top: 50%;
+      left: 7.5%;
+      transform: translate(-50%, -50%);
+      animation: translateEvery5s 20s 10s ease-in-out infinite;
+    }
+  }
+}
+
+// Animation pour la rotation du C toutes les 5s en 0,5s
+@keyframes rotateC {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 0.2;
+  }
+  8% {
+    transform: translate(-50%, -50%) rotate(360deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes translateEvery5s {
+  0% {
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+  }
+  5% {
+    font-size: 40px;
+  }
+
+  10% {
+    transform: translate(100%, -50%);
+    font-size: 60px;
+    font-weight: 400;
+  }
+
+  15% {
+    font-size: 40px;
+  }
+
+  20% {
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+  }
+  100% {
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+  }
+}

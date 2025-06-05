@@ -1,0 +1,120 @@
+// reset.scss
+
+// Reset de base
+* {
+  margin: 0;
+  padding: 0;
+}
+
+// Réinitialisation du HTML5
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+// Réinitialisation des éléments de liste
+ul,
+ol {
+  list-style: none;
+}
+
+// Gestion des liens
+a {
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+// Réinitialisation des formulaires
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  outline: none;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+// Boutons
+button {
+  cursor: pointer;
+  background: none;
+}
+
+// Tableaux
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+// Correction de focus
+:focus {
+  outline: 0;
+}
+
+// Accessibilité pour les éléments interactifs
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+}
+
+// Correction de style pour IE/Edge
+input[type='text'],
+input[type='email'],
+input[type='password'],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+// Suppression des marges et paddings par défaut sur mobile
+@media (max-width: 768px) {
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// Variables de base
+:root {
+  // Tailles de police
+  --font-small: 0.8rem;
+  --font-normal: 1rem;
+  --font-medium: 1.2rem;
+  --font-large: 1.5rem;
+
+  // Couleurs neutres
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-100: #f8f9fa;
+  --color-gray-200: #e9ecef;
+  --color-gray-300: #dee2e6;
+}
