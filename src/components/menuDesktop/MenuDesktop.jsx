@@ -9,12 +9,6 @@ const MenuDesktop = () => {
           <Link className={styles.link}>PRESENTATION</Link>
         </li>
         <li>
-          <Link className={styles.link}>COMPETENCES</Link>
-        </li>
-        <li>
-          <Link className={styles.link}>FORMATION</Link>
-        </li>
-        <li>
           <Link className={styles.link}>PORTFOLIO</Link>
         </li>
         <li>

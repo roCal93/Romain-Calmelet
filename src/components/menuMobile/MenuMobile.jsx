@@ -9,6 +9,10 @@ const MenuMobile = () => {
 
   const toggleMenu = () => setIsOpen(!isOpen)
 
+  const handleLinkClick = () => {
+    setIsOpen(false)
+  }
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -56,19 +60,19 @@ const MenuMobile = () => {
       >
         <ul>
           <li>
-            <Link className={styles.link}>PRESENTATION</Link>
+            <Link className={styles.link} onClick={handleLinkClick}>
+              PRESENTATION
+            </Link>
           </li>
           <li>
-            <Link className={styles.link}>COMPETENCES</Link>
+            <Link className={styles.link} onClick={handleLinkClick}>
+              PORTFOLIO
+            </Link>
           </li>
           <li>
-            <Link className={styles.link}>FORMATION</Link>
-          </li>
-          <li>
-            <Link className={styles.link}>PORTFOLIO</Link>
-          </li>
-          <li>
-            <Link className={styles.link}>CONTACT</Link>
+            <Link className={styles.link} onClick={handleLinkClick}>
+              CONTACT
+            </Link>
           </li>
         </ul>
       </nav>
