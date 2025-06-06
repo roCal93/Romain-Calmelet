@@ -1,10 +1,9 @@
 .logo {
   display: flex;
-  width: 600px;
+  width: 8rem;
   height: 100px;
   text-decoration: none;
   align-items: center;
-  justify-content: flex-start;
   transition: transform 0.2s ease;
   overflow: hidden;
   cursor: pointer;
@@ -17,7 +16,6 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     background-color: white;
     position: relative;
 
@@ -29,7 +27,7 @@
       color: black;
       position: absolute;
       top: 50%;
-      left: 7%;
+      left: 30%;
       transform: translate(-50%, -50%);
       animation: rotateC 20s 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     }
@@ -41,7 +39,7 @@
       color: black;
       position: absolute;
       top: 50%;
-      left: 7.5%;
+      left: 32%;
       transform: translate(-50%, -50%);
       animation: translateEvery5s 20s 10s ease-in-out infinite;
     }

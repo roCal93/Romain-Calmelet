@@ -1,6 +1,6 @@
 .burgerMenu {
   position: relative;
-  z-index: 100;
+  padding: 1rem;
   .burgerButton {
     width: 32px;
     height: 28px;
@@ -11,7 +11,6 @@
     background: none;
     cursor: pointer;
     padding: 0;
-
     .bar {
       height: 4px;
       width: 100%;
