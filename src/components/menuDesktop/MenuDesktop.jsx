@@ -6,13 +6,19 @@ const MenuDesktop = () => {
     <div>
       <ul className={styles.menu}>
         <li>
-          <Link className={styles.link}>PRESENTATION</Link>
+          <Link to="presentation" className={styles.link}>
+            PRESENTATION
+          </Link>
         </li>
         <li>
-          <Link className={styles.link}>PORTFOLIO</Link>
+          <Link to="portfolio" className={styles.link}>
+            PORTFOLIO
+          </Link>
         </li>
         <li>
-          <Link className={styles.link}>CONTACT</Link>
+          <Link to="contact" className={styles.link}>
+            CONTACT
+          </Link>
         </li>
       </ul>
     </div>

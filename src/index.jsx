@@ -11,7 +11,7 @@ import Contact from './pages/contact/contact.jsx'
 // Creating a browser router with defined routes
 const router = createBrowserRouter([
   {
-    path: '/Romain-Calmelet',
+    path: '/Romain-Calmelet/',
     element: <App />,
     children: [
       {

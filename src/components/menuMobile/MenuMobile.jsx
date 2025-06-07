@@ -60,17 +60,29 @@ const MenuMobile = () => {
       >
         <ul>
           <li>
-            <Link className={styles.link} onClick={handleLinkClick}>
+            <Link
+              to="presentation"
+              className={styles.link}
+              onClick={handleLinkClick}
+            >
               PRESENTATION
             </Link>
           </li>
           <li>
-            <Link className={styles.link} onClick={handleLinkClick}>
+            <Link
+              to="portfolio"
+              className={styles.link}
+              onClick={handleLinkClick}
+            >
               PORTFOLIO
             </Link>
           </li>
           <li>
-            <Link className={styles.link} onClick={handleLinkClick}>
+            <Link
+              to="contact"
+              className={styles.link}
+              onClick={handleLinkClick}
+            >
               CONTACT
             </Link>
           </li>

@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 const LogoDesktop = () => {
   return (
     <div>
-      <Link to="/Portfolio/" className={styles.logo} aria-label="Home">
+      <Link to="/Romain-Calmelet/" className={styles.logo} aria-label="Home">
         <div className={styles.cWithR}>
           <span className={styles.bigC}>C</span>
           <span className={styles.surname}>
