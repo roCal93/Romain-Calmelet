@@ -67,3 +67,171 @@ p {
 .sign-in-icon {
   font-size: 5rem;
 }
+////
+///
+
+/* Styles pour la navigation fluide - À ajouter à votre global.scss */
+
+/* Assure que chaque page occupe toute la hauteur disponible */
+.page-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Animation d'entrée pour les pages */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.6s ease-in-out;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.6s ease-in-out;
+}
+
+/* Empêche le scroll par défaut sur le body */
+body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Style pour le conteneur principal */
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/////
+/* Styles pour la navigation fluide - À ajouter à votre global.scss */
+
+/* Assure que chaque page occupe toute la hauteur disponible */
+.page-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Animation d'entrée pour les pages */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.6s ease-in-out;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.6s ease-in-out;
+}
+
+/* Empêche le scroll par défaut sur le body */
+body {
+  overflow: hidden;
+  height: 100vh;
+  /* Empêche le zoom sur mobile lors du double tap */
+  touch-action: pan-x pan-y;
+}
+
+/* Style pour le conteneur principal */
+#root {
+  height: 100vh;
+  overflow: hidden;
+  /* Améliore les performances de scroll sur mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimisations mobiles */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  /* Améliore la réactivité tactile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Indicateur de section (optionnel - pour montrer dans quelle section on est) */
+.section-indicator {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* Améliore la zone de toucher sur mobile */
+  min-width: 24px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-dot::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.section-dot.active {
+  background-color: #fff;
+  transform: scale(1.2);
+}
+
+.section-dot:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Mobile: ajuste la position de l'indicateur */
+@media (max-width: 768px) {
+  .section-indicator {
+    right: 1rem;
+  }
+}

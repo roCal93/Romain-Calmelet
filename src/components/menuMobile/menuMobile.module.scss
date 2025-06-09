@@ -1,6 +1,7 @@
 .burgerMenu {
   position: relative;
   padding: 1rem;
+
   .burgerButton {
     width: 32px;
     height: 28px;
@@ -11,16 +12,20 @@
     background: none;
     cursor: pointer;
     padding: 0;
+    z-index: 1001; // S'assurer que le bouton reste au-dessus du menu
+
     .bar {
       height: 4px;
       width: 100%;
       background-color: #000000;
       border-radius: 4px;
       transition: all 0.3s ease;
+      transform-origin: center;
     }
   }
 }
 
+// Animations hover du burger
 .burgerButton:hover .bar:nth-child(1) {
   transition-delay: 0s;
   background-color: rgb(116, 108, 108);
@@ -47,15 +52,16 @@
   background-color: #000000;
 }
 
-.open .bar:nth-child(1) {
+// Animation du burger vers X
+.burgerButton.open .bar:nth-child(1) {
   transform: translateY(12px) rotate(45deg);
 }
 
-.open .bar:nth-child(2) {
+.burgerButton.open .bar:nth-child(2) {
   opacity: 0;
 }
 
-.open .bar:nth-child(3) {
+.burgerButton.open .bar:nth-child(3) {
   transform: translateY(-12px) rotate(-45deg);
 }
 
@@ -63,15 +69,19 @@
   position: absolute;
   top: 6rem;
   right: 0;
-  width: 250px;
+  width: 12rem;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   padding: 1rem;
+  border-radius: 8px;
+  z-index: 1000;
 
+  // État fermé
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(20px) translateY(-10px);
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   ul {
     list-style: none;
@@ -82,36 +92,80 @@
       display: flex;
       justify-content: center;
       margin-bottom: 1.5rem;
+
+      // Animation initiale des items
       opacity: 0;
-      transform: translateX(10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateX(30px);
+      transition: all 0.3s ease;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
 
       .link {
-        width: 8rem;
+        width: 10rem;
         font-size: 1.1rem;
         color: #000000;
-        padding: 10px;
+        padding: 12px 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        &:active {
-          color: rgb(116, 108, 108);
-          transform: scale(1.07);
-        }
+        border: none;
+        background: white;
+        cursor: pointer;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
         &:hover {
           color: rgb(116, 108, 108);
-          transform: scale(1.07);
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &:active {
+          color: rgb(116, 108, 108);
+          transform: scale(0.98);
         }
       }
     }
   }
 }
 
+// État ouvert du menu
 .menuPanel.open {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) translateY(0);
   pointer-events: auto;
+  visibility: visible;
 
   li {
     opacity: 1;
     transform: translateX(0);
+
+    // Animation décalée pour chaque item
+    &:nth-child(1) {
+      transition-delay: 0.1s;
+    }
+
+    &:nth-child(2) {
+      transition-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      transition-delay: 0.3s;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .menuPanel {
+    width: 200px;
+    right: -0.5rem;
+
+    ul li .link {
+      width: 10rem;
+      font-size: 1rem;
+    }
   }
 }
