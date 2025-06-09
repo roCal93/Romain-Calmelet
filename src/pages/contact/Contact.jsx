@@ -1,6 +1,4 @@
-// Exemple pour Home.jsx (adaptez pour vos autres pages)
 import { useEffect, useState } from 'react'
-
 function Contact() {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -21,7 +19,7 @@ function Contact() {
     >
       <h1>Contact</h1>
       <p>Contenu de votre page de contact</p>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '2rem' }}>
+      <p>
         Utilisez la molette de la souris ou les flèches du clavier pour naviguer
       </p>
     </div>

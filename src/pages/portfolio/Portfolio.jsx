@@ -1,4 +1,3 @@
-// Exemple pour Home.jsx (adaptez pour vos autres pages)
 import { useEffect, useState } from 'react'
 
 function Portfolio() {
@@ -21,7 +20,7 @@ function Portfolio() {
     >
       <h1>Portfolio</h1>
       <p>Contenu de votre page Portfolio</p>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '2rem' }}>
+      <p>
         Utilisez la molette de la souris ou les flèches du clavier pour naviguer
       </p>
     </div>
