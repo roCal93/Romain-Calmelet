@@ -22,9 +22,9 @@ export default function ProjectCarousel({ cards = [] }) {
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
   const [focusedIndex, setFocusedIndex] = useState(0)
+  const [isTouching, setIsTouching] = useState(false)
 
-  // Stocker les dimensions dans des refs au lieu d'états
-  // pour éviter des re-rendus inutiles
+  // Stocker les dimensions dans des refs
   const dimensionsRef = useRef({
     containerWidth: 0,
     itemWidth: 0,
@@ -94,16 +94,21 @@ export default function ProjectCarousel({ cards = [] }) {
       }
     }
 
-    // Exécuter immédiatement et après un court délai pour s'assurer que tout est rendu
+    // Exécuter immédiatement et après un court délai
     updateDimensions()
     const timeoutId = setTimeout(updateDimensions, 100)
 
-    // Ajouter l'écouteur de redimensionnement
-    window.addEventListener('resize', updateDimensions)
+    // Orientation change pour mobiles
+    const handleOrientationChange = () => {
+      setTimeout(updateDimensions, 200) // Délai pour laisser l'orientation se stabiliser
+    }
 
-    // Nettoyage
+    window.addEventListener('resize', updateDimensions)
+    window.addEventListener('orientationchange', handleOrientationChange)
+
     return () => {
       window.removeEventListener('resize', updateDimensions)
+      window.removeEventListener('orientationchange', handleOrientationChange)
       clearTimeout(timeoutId)
     }
   }, [cards.length])
@@ -117,16 +122,16 @@ export default function ProjectCarousel({ cards = [] }) {
     if (!container) return
 
     const onScroll = () => {
-      if (!isProgrammaticScroll.current) {
+      if (!isProgrammaticScroll.current && !isTouching) {
         debouncedUpdateFocusedIndex()
-      } else {
+      } else if (isProgrammaticScroll.current) {
         isProgrammaticScroll.current = false
       }
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
     return () => container.removeEventListener('scroll', onScroll)
-  }, [debouncedUpdateFocusedIndex])
+  }, [debouncedUpdateFocusedIndex, isTouching])
 
   // Fonction pour faire défiler vers une carte spécifique
   const scrollToCard = useCallback(
@@ -188,7 +193,7 @@ export default function ProjectCarousel({ cards = [] }) {
     [cards.length, focusedIndex, scrollToCard]
   )
 
-  // Gestion du glisser-déposer
+  // Gestion du glisser-déposer (souris)
   const onMouseDown = useCallback((e) => {
     const container = containerRef.current
     if (!container) return
@@ -201,7 +206,7 @@ export default function ProjectCarousel({ cards = [] }) {
     if (isDragging) {
       setIsDragging(false)
       // Actualiser l'index de focus après avoir arrêté de faire glisser
-      updateFocusedIndex()
+      setTimeout(updateFocusedIndex, 100) // Petit délai pour laisser le scroll se stabiliser
     }
   }, [isDragging, updateFocusedIndex])
 
@@ -219,36 +224,125 @@ export default function ProjectCarousel({ cards = [] }) {
     [isDragging, startX, scrollLeft]
   )
 
-  // Gestion tactile
-  const [touchStart, setTouchStart] = useState(0)
+  // ---- GESTION TACTILE AMÉLIORÉE ----
+  // Utiliser des refs pour stocker les informations de toucher
+  const touchInfoRef = useRef({
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    initialScrollLeft: 0,
+    lastX: 0,
+    isScrolling: false,
+    touchIdentifier: null,
+  })
 
   const onTouchStart = useCallback((e) => {
-    if (e.touches && e.touches.length > 0) {
-      setTouchStart(e.touches[0].pageX)
+    const container = containerRef.current
+    if (!container || !e.touches || e.touches.length === 0) return
+
+    const touch = e.touches[0]
+    touchInfoRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startTime: Date.now(),
+      initialScrollLeft: container.scrollLeft,
+      lastX: touch.clientX,
+      isScrolling: false,
+      touchIdentifier: touch.identifier,
     }
+
+    setIsTouching(true)
   }, [])
 
   const onTouchMove = useCallback(
     (e) => {
-      if (!e.touches || e.touches.length === 0) return
-
       const container = containerRef.current
-      if (!container || touchStart === 0) return
+      if (!container || !e.touches || e.touches.length === 0 || !isTouching)
+        return
 
-      const x = e.touches[0].pageX
-      const walk = (touchStart - x) * 2
-      container.scrollLeft += walk
-      setTouchStart(x)
+      // Trouver le bon toucher en utilisant l'identifiant
+      let touchIndex = -1
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === touchInfoRef.current.touchIdentifier) {
+          touchIndex = i
+          break
+        }
+      }
+
+      if (touchIndex === -1) return // Le toucher n'existe plus
+      const touch = e.touches[touchIndex]
+
+      // Calculer le delta X et Y depuis le début du toucher
+      const deltaX = touchInfoRef.current.startX - touch.clientX
+      const deltaY = touchInfoRef.current.startY - touch.clientY
+
+      // Si c'est le début du mouvement, déterminer si l'utilisateur veut défiler horizontalement ou verticalement
+      if (
+        !touchInfoRef.current.isScrolling &&
+        (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)
+      ) {
+        // Si le défilement horizontal est plus important, empêcher le défilement vertical de la page
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          touchInfoRef.current.isScrolling = true
+          e.preventDefault() // Empêcher le défilement vertical
+        } else {
+          // Laisser le défilement vertical se produire naturellement
+          return
+        }
+      }
+
+      // Si nous avons déterminé qu'il s'agit d'un défilement horizontal
+      if (touchInfoRef.current.isScrolling) {
+        // Calculer la distance depuis le dernier événement de toucher
+        const moveDelta = touch.clientX - touchInfoRef.current.lastX
+        container.scrollLeft -= moveDelta
+        touchInfoRef.current.lastX = touch.clientX
+      }
     },
-    [touchStart]
+    [isTouching]
   )
 
   const onTouchEnd = useCallback(() => {
-    if (touchStart !== 0) {
-      setTouchStart(0)
-      updateFocusedIndex()
+    if (!isTouching) return
+
+    const container = containerRef.current
+    if (!container) {
+      setIsTouching(false)
+      return
     }
-  }, [touchStart, updateFocusedIndex])
+
+    // Calculer la vitesse du geste pour éventuellement ajouter un effet d'inertie
+    const touchDuration = Date.now() - touchInfoRef.current.startTime
+    const distance =
+      touchInfoRef.current.initialScrollLeft - container.scrollLeft
+
+    // Geste de swipe rapide (moins de 300ms)
+    if (touchDuration < 300 && Math.abs(distance) > 50) {
+      // Déterminer la direction du swipe
+      const direction = distance > 0 ? 1 : -1
+
+      // Swipe à droite = carte précédente, swipe à gauche = carte suivante
+      const targetIndex = Math.max(
+        0,
+        Math.min(focusedIndex - direction, cards.length - 1)
+      )
+
+      if (targetIndex !== focusedIndex) {
+        // Utiliser scrollToCard pour un mouvement fluide
+        scrollToCard(targetIndex)
+      } else {
+        // Si nous sommes déjà à la première ou dernière carte, ajuster le scroll
+        updateFocusedIndex()
+      }
+    } else {
+      // Pour les mouvements plus lents, snapper à la carte la plus proche
+      setTimeout(updateFocusedIndex, 50)
+    }
+
+    setIsTouching(false)
+    touchInfoRef.current.isScrolling = false
+    touchInfoRef.current.touchIdentifier = null
+  }, [isTouching, focusedIndex, cards.length, scrollToCard, updateFocusedIndex])
 
   // Gestion de la molette de la souris
   useEffect(() => {
@@ -273,7 +367,6 @@ export default function ProjectCarousel({ cards = [] }) {
 
   // Mettre à jour l'index au changement de cartes
   useEffect(() => {
-    // Délai pour laisser le temps au DOM de se mettre à jour
     const timeoutId = setTimeout(() => {
       updateFocusedIndex()
     }, 150)
@@ -302,7 +395,11 @@ export default function ProjectCarousel({ cards = [] }) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{ touchAction: 'pan-x' }}
+        onTouchCancel={onTouchEnd}
+        style={{
+          touchAction: 'pan-y', // Permettre le défilement vertical mais pas horizontal
+          WebkitOverflowScrolling: 'touch', // Pour une meilleure inertie sur iOS
+        }}
       >
         {cards.map((card, index) => (
           <div
