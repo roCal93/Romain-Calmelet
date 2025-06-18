@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import styles from './presentation.module.scss'
 
 function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
@@ -18,11 +19,15 @@ function Presentation() {
         isVisible ? 'page-enter-active' : 'page-enter'
       }`}
     >
-      <h1>Presentation</h1>
-      <p>Contenu de votre page de presentation</p>
-      <p>
-        Utilisez la molette de la souris ou les flèches du clavier pour naviguer
-      </p>
+      {' '}
+      <div className={styles.container}>
+        <h1>Presentation</h1>
+        <p>Contenu de votre page de presentation</p>
+        <p>
+          Utilisez la molette de la souris ou les flèches du clavier pour
+          naviguer
+        </p>
+      </div>
     </div>
   )
 }

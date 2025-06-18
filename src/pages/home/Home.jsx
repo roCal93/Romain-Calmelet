@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import styles from './home.module.scss'
 
 function Home() {
   const [isVisible, setIsVisible] = useState(false)
@@ -18,11 +19,14 @@ function Home() {
         isVisible ? 'page-enter-active' : 'page-enter'
       }`}
     >
-      <h1>Accueil</h1>
-      <p>Contenu de votre page d'accueil</p>
-      <p>
-        Utilisez la molette de la souris ou les flèches du clavier pour naviguer
-      </p>
+      <div className={styles.container}>
+        <h1>Accueil</h1>
+        <p>Contenu de votre page d'accueil</p>
+        <p>
+          Utilisez la molette de la souris ou les flèches du clavier pour
+          naviguer
+        </p>
+      </div>
     </div>
   )
 }

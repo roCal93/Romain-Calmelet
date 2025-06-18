@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import styles from './contact.module.scss'
+
 function Contact() {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -17,11 +19,15 @@ function Contact() {
         isVisible ? 'page-enter-active' : 'page-enter'
       }`}
     >
-      <h1>Contact</h1>
-      <p>Contenu de votre page de contact</p>
-      <p>
-        Utilisez la molette de la souris ou les flèches du clavier pour naviguer
-      </p>
+      {' '}
+      <div className={styles.container}>
+        <h1>Contact</h1>
+        <p>Contenu de votre page de contact</p>
+        <p>
+          Utilisez la molette de la souris ou les flèches du clavier pour
+          naviguer
+        </p>
+      </div>
     </div>
   )
 }

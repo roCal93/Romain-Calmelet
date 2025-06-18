@@ -1,7 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { useEffect, useRef, useCallback } from 'react'
 import Header from '../components/header/Header'
-import Footer from '../components/footer/Footer'
 import '../styles/reset.scss'
 import '../styles/global.scss'
 
@@ -157,14 +156,13 @@ function App() {
       <Header />
       <main
         style={{
-          height: 'calc(100vh - 120px)', // Ajustez selon la hauteur de votre header/footer
+          height: '100%', // Ajustez selon la hauteur de votre header/footer
           overflow: 'hidden',
           transition: 'all 0.6s ease-in-out',
         }}
       >
         <Outlet />
       </main>
-      <Footer />
     </div>
   )
 }

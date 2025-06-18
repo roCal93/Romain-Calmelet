@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import styles from './portfolio.module.scss'
 
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
@@ -18,11 +19,15 @@ function Portfolio() {
         isVisible ? 'page-enter-active' : 'page-enter'
       }`}
     >
-      <h1>Portfolio</h1>
-      <p>Contenu de votre page Portfolio</p>
-      <p>
-        Utilisez la molette de la souris ou les flèches du clavier pour naviguer
-      </p>
+      {' '}
+      <div className={styles.container}>
+        <h1>Portfolio</h1>
+        <p>Contenu de votre page Portfolio</p>
+        <p>
+          Utilisez la molette de la souris ou les flèches du clavier pour
+          naviguer
+        </p>
+      </div>
     </div>
   )
 }
