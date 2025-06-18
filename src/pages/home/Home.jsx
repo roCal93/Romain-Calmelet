@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import { NavigationContext } from '../../app/navigationContext'
 import styles from './home.module.scss'
 
 function Home() {
   const [isVisible, setIsVisible] = useState(false)
+  const { direction } = useContext(NavigationContext)
 
   useEffect(() => {
-    // Animation d'entrée
     setIsVisible(true)
-
-    return () => {
-      setIsVisible(false)
-    }
+    return () => setIsVisible(false)
   }, [])
 
   return (
     <div
       className={`page-container ${
-        isVisible ? 'page-enter-active' : 'page-enter'
+        isVisible
+          ? direction === 'down'
+            ? 'page-enter-down'
+            : 'page-enter-up'
+          : ''
       }`}
     >
       <div className={styles.container}>

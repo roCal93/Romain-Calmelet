@@ -79,7 +79,7 @@ p {
 /* Styles pour la navigation fluide - À ajouter à votre global.scss */
 
 .page-container {
-  height: 100%;
+  height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -88,22 +88,37 @@ p {
   box-sizing: border-box;
 }
 
-/* Animation d'entrée pour les pages */
-.page-enter {
-  opacity: 0;
-  transform: translateY(30%);
-}
-
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.8s ease-in-out;
-}
-
 /* Optimisations mobiles */
 @media (max-width: 768px) {
   /* Améliore la réactivité tactile */
   * {
     -webkit-tap-highlight-color: transparent;
+  }
+}
+/* Animation vers le bas */
+.page-enter-down {
+  opacity: 0;
+  transform: translateY(15%);
+  animation: enterDown 0.8s ease-in-out forwards;
+}
+
+/* Animation vers le haut */
+.page-enter-up {
+  opacity: 0;
+  transform: translateY(-15%);
+  animation: enterUp 0.8s ease-in-out forwards;
+}
+
+@keyframes enterDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enterUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

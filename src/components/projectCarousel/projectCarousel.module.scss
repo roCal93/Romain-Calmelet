@@ -1,0 +1,106 @@
+.carouselWrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem;
+}
+
+.carouselContainer {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem; // Un espacement constant entre les éléments
+  overflow-x: scroll;
+  scroll-behavior: smooth; // Pour un défilement doux par programmation
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+  cursor: grab;
+  user-select: none;
+  scroll-snap-type: x mandatory; // Force le défilement à s'arrêter sur les éléments
+  -webkit-overflow-scrolling: touch; // Améliore le défilement sur iOS
+  padding-bottom: 10px; // Évite que le défilement ne soit trop proche du bas
+
+  &:active {
+    cursor: grabbing;
+  }
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
+.carouselItem {
+  flex: 0 0 auto;
+  width: 250px; // Largeur fixe pour chaque carte
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.2rem;
+  scroll-snap-align: center; // L'élément se centre dans la vue
+  transition: transform 0.3s ease; // Pour d'éventuelles animations futures
+
+  // Style optionnel pour mettre en évidence la carte active
+  &[aria-selected='true'] {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.empty-card {
+  width: 100%;
+  height: 150px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  font-size: 1rem;
+}
+
+.carouselIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: #ccc;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &.active {
+    background-color: #007bff;
+  }
+}
+
+// Animation optionnelle pour le changement de carte
+@keyframes cardFocus {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1.03);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

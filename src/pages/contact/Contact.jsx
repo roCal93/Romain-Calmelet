@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import { NavigationContext } from '../../app/navigationContext'
 import styles from './contact.module.scss'
 
 function Contact() {
   const [isVisible, setIsVisible] = useState(false)
+  const { direction } = useContext(NavigationContext)
 
   useEffect(() => {
-    // Animation d'entrée
     setIsVisible(true)
-
-    return () => {
-      setIsVisible(false)
-    }
+    return () => setIsVisible(false)
   }, [])
 
   return (
     <div
       className={`page-container ${
-        isVisible ? 'page-enter-active' : 'page-enter'
+        isVisible
+          ? direction === 'down'
+            ? 'page-enter-down'
+            : 'page-enter-up'
+          : ''
       }`}
     >
       {' '}
