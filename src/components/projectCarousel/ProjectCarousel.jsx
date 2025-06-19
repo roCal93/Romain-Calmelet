@@ -260,28 +260,33 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
       const endX = e.clientX || e.changedTouches?.[0]?.clientX
       const deltaX = dragStartX.current - endX
 
-      // Si le mouvement est minimal, c'est un clic
-      if (Math.abs(deltaX) < 5) {
+      // Seuil pour différencier clic et swipe (très petit)
+      if (Math.abs(deltaX) < 2) {
         setIsDragging(false)
         return
       }
 
       setIsDragging(false)
-      const velocity = Math.abs(deltaX) / 300 // Calculate velocity
 
-      // Conditions to trigger loop:
-      // 1. Have reached edge during drag
-      // 2. Make significant movement (> 50px) in the right direction
-      // 3. Have sufficient velocity (> 0.5)
-      if (hasReachedEnd.current && deltaX > 50 && velocity > 0.5) {
-        // Loop to start if "pulling" right at the end
+      // RÉDUIRE DRASTIQUEMENT les seuils
+      const velocity = Math.abs(deltaX) / 100 // Réduire le diviseur (était 300)
+      const swipeThreshold = 5 // Réduire à 10 pixels (était 50)
+      const velocityThreshold = 0.1 // Réduire à 0.1 (était 0.5)
+
+      if (
+        hasReachedEnd.current &&
+        deltaX > swipeThreshold &&
+        velocity > velocityThreshold
+      ) {
         scrollToCard(0)
-      } else if (hasReachedStart.current && deltaX < -50 && velocity > 0.5) {
-        // Loop to end if "pulling" left at the start
+      } else if (
+        hasReachedStart.current &&
+        deltaX < -swipeThreshold &&
+        velocity > velocityThreshold
+      ) {
         scrollToCard(cards.length - 1)
       }
 
-      // Update index after a short delay
       setTimeout(updateFocusedIndex, 100)
     }
   }
