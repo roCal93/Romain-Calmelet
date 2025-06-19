@@ -38,11 +38,16 @@
   font-size: 1.2rem;
   scroll-snap-align: center; // L'élément se centre dans la vue
   transition: transform 0.3s ease; // Pour d'éventuelles animations futures
+  cursor: pointer;
 
   // Style optionnel pour mettre en évidence la carte active
   &[aria-selected='true'] {
     transform: scale(1.03);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+
+  &:hover {
+    transform: scale(1.05);
   }
 }
 
@@ -103,4 +108,130 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+// Modal styles
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.modalOpen {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.modalContent {
+  position: relative;
+  animation: modalZoomIn 0.4s ease;
+}
+
+.modalCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  transform-origin: center;
+  animation: bounceIn 0.5s ease;
+}
+
+.closeButton {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  z-index: 1;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// Animations
+@keyframes modalZoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Animations alternatives (optionnelles)
+@keyframes slideUp {
+  from {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInRotate {
+  from {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modalCard {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .closeButton {
+    top: -30px;
+    right: -30px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+  }
 }

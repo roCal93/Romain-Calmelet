@@ -97,14 +97,14 @@ p {
 }
 /* Animation vers le bas */
 .page-enter-down {
-  opacity: 0;
+  opacity: 0.5;
   transform: translateY(15%);
   animation: enterDown 0.8s ease-in-out forwards;
 }
 
 /* Animation vers le haut */
 .page-enter-up {
-  opacity: 0;
+  opacity: 0.5;
   transform: translateY(-15%);
   animation: enterUp 0.8s ease-in-out forwards;
 }

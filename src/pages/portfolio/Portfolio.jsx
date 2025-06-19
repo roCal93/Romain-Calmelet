@@ -2,16 +2,66 @@ import { useEffect, useState, useContext } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './portfolio.module.scss'
 import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
+import { projects } from '../../assets/data/projects'
 
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
   const { direction } = useContext(NavigationContext)
-  const cards = Array.from({ length: 10 }, (_, i) => (
-    <div key={i} className={styles.emptyCard}>
-      Carte {i + 1}
+
+  // Transformer les projets en cards pour le carousel
+  const cardsTitle = projects.map((projet) => (
+    <div key={projet.id} className={styles.projectCard}>
+      <h2>{projet.name}</h2>
+      <img src="" alt="" />
     </div>
   ))
+  const cards = projects.map((projet) => (
+    <div key={projet.id} className={styles.projectCard}>
+      <h2>{projet.name}</h2>
+      <p className={styles.description}>{projet.description}</p>
 
+      <div className={styles.technologies}>
+        {projet.technologies.map((tech, index) => (
+          <span key={index} className={styles.techBadge}>
+            {tech}
+          </span>
+        ))}
+      </div>
+
+      <div className={styles.details}>
+        <span className={styles.status}>{projet.status}</span>
+        <span className={styles.duration}>{projet.duration}</span>
+      </div>
+
+      <div className={styles.features}>
+        <h4>Fonctionnalités principales:</h4>
+        <ul>
+          {projet.features.slice(0, 3).map((feature, index) => (
+            <li key={index}>{feature}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className={styles.links}>
+        <a
+          href={projet.githubLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.githubLink}
+        >
+          GitHub
+        </a>
+        <a
+          href={projet.demoLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.demoLink}
+        >
+          Démo Live
+        </a>
+      </div>
+    </div>
+  ))
   useEffect(() => {
     setIsVisible(true)
     return () => setIsVisible(false)
@@ -27,11 +77,10 @@ function Portfolio() {
           : ''
       }`}
     >
-      {' '}
       <div className={styles.container}>
         <h1>Portfolio</h1>
         <p>Contenu de votre page Portfolio</p>
-        <ProjectCarousel cards={cards} loop={true} />
+        <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
         <p>
           Utilisez la molette de la souris ou les flèches du clavier pour
           naviguer

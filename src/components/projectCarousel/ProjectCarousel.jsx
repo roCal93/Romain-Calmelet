@@ -6,8 +6,9 @@ import styles from './projectCarousel.module.scss'
  * wheel, keyboard navigation and position indicators
  *
  * @param {Array} cards - Array of elements (React components) to display in the carousel
+ * @param {Array} cardsTitle
  */
-export default function ProjectCarousel({ cards = [] }) {
+export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   // References and state
   const containerRef = useRef(null) // Reference to the carousel container
   const [focusedIndex, setFocusedIndex] = useState(0) // Index of the currently centered card
@@ -16,6 +17,10 @@ export default function ProjectCarousel({ cards = [] }) {
   const scrollStartX = useRef(0) // Scroll position at drag start
   const hasReachedEnd = useRef(false) // Flag if we reached the end during drag
   const hasReachedStart = useRef(false) // Flag if we reached the start during drag
+
+  // Nouveaux états pour le retournement et l'agrandissement
+  const [selectedCard, setSelectedCard] = useState(null) // Index de la carte sélectionnée
+  const [isModalOpen, setIsModalOpen] = useState(false) // État du modal
 
   /**
    * Updates the index of the card currently in the center of the carousel
@@ -76,6 +81,36 @@ export default function ProjectCarousel({ cards = [] }) {
     },
     [cards.length]
   )
+
+  /**
+   * Gère le clic sur une carte
+   * Ouvre la modal avec la carte sélectionnée
+   */
+  const handleCardClick = (index, e) => {
+    // Empêcher le clic de déclencher le drag
+    if (
+      Math.abs(dragStartX.current - (e.clientX || e.touches?.[0]?.clientX)) > 5
+    ) {
+      return
+    }
+
+    setSelectedCard(index)
+    setIsModalOpen(true)
+
+    // Empêcher le scroll quand le modal est ouvert
+    document.body.style.overflow = 'hidden'
+  }
+
+  /**
+   * Ferme le modal et réinitialise la carte
+   */
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => {
+      setSelectedCard(null)
+      document.body.style.overflow = 'unset'
+    }, 300) // Attendre la fin de l'animation
+  }
 
   /**
    * Effect to center margins on load
@@ -218,13 +253,20 @@ export default function ProjectCarousel({ cards = [] }) {
   /**
    * End of drag-and-drop
    * Checks if we should loop to start/end based on movement
+   * Modified to detect clicks
    */
   const handlePointerUp = (e) => {
     if (isDragging) {
-      setIsDragging(false)
-
       const endX = e.clientX || e.changedTouches?.[0]?.clientX
       const deltaX = dragStartX.current - endX
+
+      // Si le mouvement est minimal, c'est un clic
+      if (Math.abs(deltaX) < 5) {
+        setIsDragging(false)
+        return
+      }
+
+      setIsDragging(false)
       const velocity = Math.abs(deltaX) / 300 // Calculate velocity
 
       // Conditions to trigger loop:
@@ -280,53 +322,90 @@ export default function ProjectCarousel({ cards = [] }) {
     return () => container.removeEventListener('wheel', handleWheel)
   }, [cards.length, scrollToCard])
 
+  /**
+   * Effect to handle Escape key for modal
+   */
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        closeModal()
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [isModalOpen])
   return (
-    <div className={styles.carouselWrapper}>
-      {/* Main carousel container */}
-      <div
-        ref={containerRef}
-        className={`${styles.carouselContainer} allowScroll`}
-        tabIndex={0} // Enable keyboard navigation
-        onKeyDown={handleKeyDown}
-        // Mouse events
-        onMouseDown={handlePointerDown}
-        onMouseMove={handlePointerMove}
-        onMouseUp={handlePointerUp}
-        onMouseLeave={handlePointerUp} // Stop drag if mouse leaves
-        // Touch events
-        onTouchStart={handlePointerDown}
-        onTouchMove={handlePointerMove}
-        onTouchEnd={handlePointerUp}
-        style={{
-          cursor: isDragging ? 'grabbing' : 'grab',
-          userSelect: 'none', // Prevent text selection during drag
-        }}
-      >
-        {/* Render cards */}
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className={styles.carouselItem}
-            aria-selected={index === focusedIndex} // Accessibility
-          >
-            {card}
-          </div>
-        ))}
+    <>
+      <div className={styles.carouselWrapper}>
+        {/* Main carousel container */}
+        <div
+          ref={containerRef}
+          className={`${styles.carouselContainer} allowScroll`}
+          tabIndex={0} // Enable keyboard navigation
+          onKeyDown={handleKeyDown}
+          // Mouse events
+          onMouseDown={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onMouseLeave={handlePointerUp} // Stop drag if mouse leaves
+          // Touch events
+          onTouchStart={handlePointerDown}
+          onTouchMove={handlePointerMove}
+          onTouchEnd={handlePointerUp}
+          style={{
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none', // Prevent text selection during drag
+          }}
+        >
+          {/* Render cards */}
+          {cardsTitle.map((cardsTitle, index) => (
+            <div
+              key={index}
+              className={styles.carouselItem}
+              aria-selected={index === focusedIndex}
+              onClick={(e) => handleCardClick(index, e)}
+            >
+              {cardsTitle}
+            </div>
+          ))}
+        </div>
+
+        <div className={styles.carouselIndicator}>
+          {cards.map((_, index) => (
+            <button
+              key={index}
+              className={`${styles.dot} ${
+                index === focusedIndex ? styles.active : ''
+              }`}
+              onClick={() => scrollToCard(index)}
+              aria-label={`Go to project ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Position indicators (dots) */}
-      <div className={styles.carouselIndicator}>
-        {cards.map((_, index) => (
-          <button
-            key={index}
-            className={`${styles.dot} ${
-              index === focusedIndex ? styles.active : ''
-            }`}
-            onClick={() => scrollToCard(index)}
-            aria-label={`Go to project ${index + 1}`} // Accessibility
-          />
-        ))}
-      </div>
-    </div>
+      {/* Modal pour la carte agrandie */}
+      {isModalOpen && (
+        <div
+          className={`${styles.modal} ${isModalOpen ? styles.modalOpen : ''}`}
+          onClick={closeModal}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.closeButton}
+              onClick={closeModal}
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+            <div className={styles.modalCard}>{cards[selectedCard]}</div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
