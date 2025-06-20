@@ -1,6 +1,9 @@
 import { useEffect, useState, useContext } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './home.module.scss'
+import GeometricBackgroundHome from '../../components/geometricBackgroundHome/GeometricBackgroundHome'
+import ArrowDown from '../../components/navigationArrows/ArrowDown'
+import TextIntro from '../../components/textIntro/TextIntro'
 
 function Home() {
   const [isVisible, setIsVisible] = useState(false)
@@ -12,24 +15,32 @@ function Home() {
   }, [])
 
   return (
-    <div
-      className={`page-container ${
-        isVisible
-          ? direction === 'down'
-            ? 'page-enter-down'
-            : 'page-enter-up'
-          : ''
-      }`}
-    >
-      <div className={styles.container}>
-        <h1>Accueil</h1>
-        <p>Contenu de votre page d'accueil</p>
-        <p>
-          Utilisez la molette de la souris ou les flèches du clavier pour
-          naviguer
-        </p>
+    <>
+      <div
+        className={`page-container ${
+          isVisible
+            ? direction === 'down'
+              ? 'page-enter-down'
+              : 'page-enter-up'
+            : ''
+        }`}
+      >
+        <GeometricBackgroundHome />
+        <div className={styles.container}>
+          <div className={styles.intro}>
+            <h2>Salut !</h2>
+            <TextIntro />
+          </div>
+          <div className={styles.nav}>
+            <p>
+              Utilisez la molette de la souris le clavier ou les bouttons de
+              navigation pour changer de page.
+            </p>
+            <ArrowDown />
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

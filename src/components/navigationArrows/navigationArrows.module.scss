@@ -1,0 +1,130 @@
+// components/arrow.module.scss
+.arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+  }
+
+  // Effet hover
+  &:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+  }
+
+  &.up:hover:not(.disabled) svg {
+    transform: translateY(-2px);
+  }
+
+  &.down:hover:not(.disabled) svg {
+    transform: translateY(2px);
+  }
+
+  // Effet de clic
+  &:active:not(.disabled) {
+    transform: scale(0.95);
+  }
+
+  // État désactivé
+  &.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  // État en navigation
+  &.navigating {
+    animation: pulse 0.8s;
+  }
+
+  // Animation d'onde au clic
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active:not(.disabled)::before {
+    width: 100px;
+    height: 100px;
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+// Variantes de style
+.minimal {
+  background: transparent;
+  border: 2px solid #ddd;
+  color: #666;
+
+  &:hover:not(.disabled) {
+    border-color: #333;
+    color: #000;
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+
+  &:hover:not(.disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+}
+
+.ghost {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+
+  &:hover:not(.disabled) {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

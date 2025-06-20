@@ -1,5 +1,71 @@
 .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
   width: 100%;
-  height: 100%;
-  background-color: gray;
+  margin: 3rem 2rem 8rem 2rem;
+  .intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 3rem;
+    width: 60%;
+    height: 60%;
+    padding-top: 1rem;
+    @media (max-width: 768px) {
+      align-items: center;
+      text-align: center;
+      gap: 2rem;
+    }
+    h2 {
+      font-size: 100px;
+      @media (max-width: 768px) {
+        font-size: 50px;
+      }
+    }
+    p {
+      font-size: 45px;
+      margin: 0;
+      @media (max-width: 768px) {
+        font-size: 30px;
+      }
+    }
+    .alternatingText {
+      position: relative;
+      display: inline-block;
+      min-width: 200px;
+    }
+
+    .alternatingText span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      animation: textFade 4s infinite;
+      font-weight: bold;
+    }
+
+    .alternatingText span:nth-child(2) {
+      animation-delay: 2s;
+    }
+
+    @keyframes textFade {
+      0%,
+      45% {
+        opacity: 1;
+      }
+      50%,
+      100% {
+        opacity: 0;
+      }
+    }
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }

@@ -1,0 +1,26 @@
+.typingEffect {
+  display: inline-block;
+  min-width: 180px;
+  font-weight: bold;
+  color: #e74c3c; // Vous pouvez adapter cette couleur
+}
+
+.typingCursor {
+  &::after {
+    content: '|';
+    animation: blink 1s infinite;
+    color: #e74c3c; // Même couleur que le texte ou différente
+    margin-left: 2px;
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}

@@ -3,6 +3,8 @@ import { NavigationContext } from '../../app/navigationContext'
 import styles from './portfolio.module.scss'
 import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
 import { projects } from '../../assets/data/projects'
+import ArrowUp from '../../components/navigationArrows/ArrowUp'
+import ArrowDown from '../../components/navigationArrows/ArrowDown'
 
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
@@ -78,6 +80,7 @@ function Portfolio() {
       }`}
     >
       <div className={styles.container}>
+        <ArrowUp />
         <h1>Portfolio</h1>
         <p>Contenu de votre page Portfolio</p>
         <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
@@ -85,6 +88,7 @@ function Portfolio() {
           Utilisez la molette de la souris ou les flèches du clavier pour
           naviguer
         </p>
+        <ArrowDown />
       </div>
     </div>
   )

@@ -1,0 +1,26 @@
+// Variables CSS pour les couleurs du fond géométrique
+:root {
+  /* Palette Orange/Rouge (active) */
+  --bg-gradient-start: #ffffff;
+  --bg-gradient-end: #cdcdcd;
+  --particle-fill-center: rgba(191, 54, 12, 1);
+  --particle-fill-edge: rgba(255, 87, 34, 1);
+  --particle-stroke: rgba(230, 74, 25, 1);
+  --particle-connections: rgba(244, 81, 30, 1);
+}
+
+// Styles pour le canvas géométrique
+.geometricCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    var(--bg-gradient-start) 20%,
+    var(--bg-gradient-end) 100%
+  );
+  pointer-events: none;
+}

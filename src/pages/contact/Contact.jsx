@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './contact.module.scss'
+import ArrowUp from '../../components/navigationArrows/ArrowUp'
 
 function Contact() {
   const [isVisible, setIsVisible] = useState(false)
@@ -23,6 +24,7 @@ function Contact() {
     >
       {' '}
       <div className={styles.container}>
+        <ArrowUp />
         <h1>Contact</h1>
         <p>Contenu de votre page de contact</p>
         <p>

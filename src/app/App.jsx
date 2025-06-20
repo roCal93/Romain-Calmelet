@@ -149,7 +149,7 @@ function App() {
         <Header />
         <main
           style={{
-            height: '100%',
+            height: '100vh',
             overflow: 'hidden',
             transition: 'all 0.6s ease-in-out',
           }}
