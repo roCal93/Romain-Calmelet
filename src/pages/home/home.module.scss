@@ -3,9 +3,12 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 70vh;
-  width: 100%;
-  margin: 3rem 2rem 10rem 2rem;
+  height: 82vh;
+  margin: 1rem 1rem 1rem 1rem;
+  @media (max-width: 768px) {
+    height: 65vh;
+  }
+
   .intro {
     display: flex;
     flex-direction: column;
@@ -67,5 +70,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+    @media (max-width: 768px) {
+      gap: 0;
+    }
   }
 }
