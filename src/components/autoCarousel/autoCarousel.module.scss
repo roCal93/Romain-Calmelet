@@ -1,0 +1,38 @@
+.container {
+  width: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0);
+  padding: 2rem 0;
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: scroll 20s linear infinite;
+}
+
+.slide {
+  flex-shrink: 0;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+
+  img {
+    width: 95%;
+    height: 95%;
+    object-fit: contain;
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

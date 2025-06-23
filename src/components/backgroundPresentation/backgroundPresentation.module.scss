@@ -1,0 +1,118 @@
+// Variables SCSS
+$primary-bg: #0a0a0a;
+$white: #ffffff;
+$black: #000000;
+$purple: #a855f7;
+$pink: #ec4899;
+
+// Mixins
+@mixin absolute-center {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+@mixin will-change-optimized {
+  will-change: transform, opacity;
+}
+
+// Container principal
+.container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+// Particules
+.particle {
+  @include absolute-center;
+  @include will-change-optimized;
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+// Cercle suiveur de souris
+.mouseFollower {
+  @include absolute-center;
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  filter: blur(15px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+// Effet de vague au curseur
+.cursorRing {
+  @include absolute-center;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse 1.5s infinite;
+  will-change: transform;
+}
+
+// Animations
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes titleGlow {
+  0% {
+    text-shadow: 0 0 10px rgba($purple, 0.3);
+  }
+  100% {
+    text-shadow: 0 0 20px rgba($pink, 0.5);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .contentBox {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .mouseFollower {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .mouseFollower {
+    width: 80px;
+    height: 80px;
+  }
+
+  .cursorRing {
+    width: 30px;
+    height: 30px;
+  }
+}

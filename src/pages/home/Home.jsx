@@ -36,16 +36,15 @@ function Home() {
           <div className={styles.nav}>
             {isMobileNav ? (
               <p>
-                Swiper ou utiliser les bouttons de navigation pour changer de
+                Swiper ou utiliser les boutons de navigation pour changer de
                 page.
               </p>
             ) : (
               <p>
-                Utiliser la molette de la souris le clavier ou les bouttons de
+                Utiliser la molette de la souris, le clavier ou les boutons de
                 navigation pour changer de page.
               </p>
             )}
-
             <ArrowDown />
           </div>
         </div>
