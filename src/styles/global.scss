@@ -1,6 +1,14 @@
+/* Ajout du box-sizing global - TRÈS IMPORTANT */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* Style pour le conteneur principal */
 #root {
   height: 100vh;
+  width: 100vw; /* Ajouté pour limiter la largeur */
   overflow: hidden;
   /* Améliore les performances de scroll sur mobile */
   -webkit-overflow-scrolling: touch;
@@ -12,14 +20,20 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  /* Empêche le débordement horizontal */
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  padding: 0; /* Ajouté pour sécurité */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden; /* Modifié : permet scroll vertical mais pas horizontal */
+  overflow-y: auto; /* Ajouté explicitement */
   height: 100vh;
+  width: 100vw; /* Ajouté pour contraindre la largeur */
+  min-width: 0; /* Permet la réduction des flex items */
   /* Empêche le zoom sur mobile lors du double tap */
   touch-action: pan-x pan-y;
 }
@@ -42,6 +56,7 @@ input {
   border: solid 1px black;
   border-radius: 3px;
   appearance: auto;
+  max-width: 100%; /* Ajouté pour éviter débordement */
 }
 
 h1 {
@@ -53,6 +68,9 @@ h1 {
   margin-inline-end: 0px;
   font-weight: bold;
   unicode-bidi: isolate;
+  /* Évite le débordement de texte long */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 h3 {
@@ -64,6 +82,9 @@ h3 {
   margin-inline-end: 0px;
   font-weight: bold;
   unicode-bidi: isolate;
+  /* Évite le débordement de texte long */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 p {
@@ -73,19 +94,42 @@ p {
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   unicode-bidi: isolate;
+  /* Évite le débordement de texte long */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /////
-/* Styles pour la navigation fluide - À ajouter à votre global.scss */
+/* Styles pour la navigation fluide */
 
 .page-container {
   height: 100vh;
   width: 100%;
+  max-width: 100vw; /* Ajouté pour éviter débordement */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   box-sizing: border-box;
+  padding: 0; /* Ajouté pour éviter débordement avec padding */
+  margin: 0; /* Ajouté pour éviter débordement avec margin */
+  overflow-x: hidden; /* Ajouté pour sécurité */
+}
+
+/* Styles pour les images et médias */
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Styles pour les tableaux */
+table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  word-wrap: break-word;
 }
 
 /* Optimisations mobiles */
@@ -94,7 +138,17 @@ p {
   * {
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* S'assure que tout reste dans les limites sur mobile */
+  body {
+    min-width: 320px; /* Largeur minimum des smartphones */
+  }
+
+  .page-container {
+    padding: 0 10px; /* Ajoute un peu de padding sur mobile */
+  }
 }
+
 /* Animation vers le bas */
 .page-enter-down {
   opacity: 0.5;
