@@ -8,9 +8,8 @@
 /* Style pour le conteneur principal */
 #root {
   height: 100vh;
-  width: 100vw; /* Ajouté pour limiter la largeur */
+  width: 100vw;
   overflow: hidden;
-  /* Améliore les performances de scroll sur mobile */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -20,43 +19,48 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  /* Empêche le débordement horizontal */
   overflow-x: hidden;
+  /* IMPORTANT : Empêche le dépassement en hauteur */
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   margin: 0;
-  padding: 0; /* Ajouté pour sécurité */
+  padding: 0;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden; /* Modifié : permet scroll vertical mais pas horizontal */
-  overflow-y: auto; /* Ajouté explicitement */
-  height: 100vh;
-  width: 100vw; /* Ajouté pour contraindre la largeur */
-  min-width: 0; /* Permet la réduction des flex items */
-  /* Empêche le zoom sur mobile lors du double tap */
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* CHANGEMENT : Utiliser 100% au lieu de 100vh pour éviter les problèmes sur mobile */
+  height: 100%;
+  width: 100%;
+  min-width: 0;
   touch-action: pan-x pan-y;
+  /* IMPORTANT : Empêche le body de dépasser */
+  max-height: 100vh;
 }
 
 .sr-only {
   border: 0 !important;
-  clip: rect(1px, 1px, 1px, 1px) !important; /* 1 */
+  clip: rect(1px, 1px, 1px, 1px) !important;
   -webkit-clip-path: inset(50%) !important;
-  clip-path: inset(50%) !important; /* 2 */
+  clip-path: inset(50%) !important;
   height: 1px !important;
   margin: -1px !important;
   overflow: hidden !important;
   padding: 0 !important;
   position: absolute !important;
   width: 1px !important;
-  white-space: nowrap !important; /* 3 */
+  white-space: nowrap !important;
 }
 
 input {
   border: solid 1px black;
   border-radius: 3px;
   appearance: auto;
-  max-width: 100%; /* Ajouté pour éviter débordement */
+  max-width: 100%;
 }
 
 h1 {
@@ -68,7 +72,6 @@ h1 {
   margin-inline-end: 0px;
   font-weight: bold;
   unicode-bidi: isolate;
-  /* Évite le débordement de texte long */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -82,7 +85,6 @@ h3 {
   margin-inline-end: 0px;
   font-weight: bold;
   unicode-bidi: isolate;
-  /* Évite le débordement de texte long */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -94,27 +96,28 @@ p {
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   unicode-bidi: isolate;
-  /* Évite le débordement de texte long */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-/////
 /* Styles pour la navigation fluide */
-
 .page-container {
-  height: 100vh;
+  /* CHANGEMENT : Utiliser height: 100% au lieu de 100vh */
+  height: 100%;
   width: 100%;
-  max-width: 100vw; /* Ajouté pour éviter débordement */
+  max-width: 100vw;
+  /* IMPORTANT : Limiter la hauteur maximale */
   max-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   box-sizing: border-box;
-  padding: 0; /* Ajouté pour éviter débordement avec padding */
-  margin: 0; /* Ajouté pour éviter débordement avec margin */
-  overflow-x: hidden; /* Ajouté pour sécurité */
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+  /* AJOUT : Permettre le scroll si nécessaire dans le conteneur */
+  overflow-y: auto;
 }
 
 /* Styles pour les images et médias */
@@ -135,18 +138,27 @@ table {
 
 /* Optimisations mobiles */
 @media (max-width: 768px) {
-  /* Améliore la réactivité tactile */
   * {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* S'assure que tout reste dans les limites sur mobile */
   body {
-    min-width: 320px; /* Largeur minimum des smartphones */
+    min-width: 320px;
   }
 
   .page-container {
-    padding: 0 1rem; /* Ajoute un peu de padding sur mobile */
+    padding: 0 1rem;
+  }
+}
+
+/* AJOUT : Fix pour les problèmes de hauteur sur iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    height: -webkit-fill-available;
+  }
+
+  #root {
+    height: -webkit-fill-available;
   }
 }
 

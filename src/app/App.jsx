@@ -144,14 +144,22 @@ function App() {
           height: '100vh',
           overflow: 'hidden',
           position: 'relative',
+          // AJOUT : Utiliser flexbox pour gérer l'espace
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <Header />
         <main
           style={{
-            height: '100vh',
+            // CHANGEMENT : Utiliser flex: 1 au lieu de height: 100vh
+            flex: 1,
+            minHeight: 0, // Important pour que flex fonctionne correctement
             overflow: 'hidden',
             transition: 'all 0.6s ease-in-out',
+            // AJOUT : S'assurer que le main se comporte comme un conteneur flex
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Outlet />

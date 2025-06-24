@@ -44,9 +44,7 @@ function Presentation() {
                 Après dix années passées dans l'horlogerie, où précision,
                 rigueur et sens du détail faisaient partie de mon quotidien,
                 j'ai décidé de relever un nouveau défi&nbsp;:
-                <br />
-                <br />
-                <strong>le&nbsp;développement&nbsp;web.</strong>
+                le&nbsp;développement&nbsp;web.
               </p>
               <p>
                 Ce domaine me passionne par la diversité de ses tâches et

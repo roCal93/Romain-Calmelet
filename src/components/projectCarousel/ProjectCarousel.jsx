@@ -3,24 +3,26 @@ import styles from './projectCarousel.module.scss'
 
 /**
  * ProjectCarousel Component - A horizontal carousel with drag-and-drop,
- * wheel, keyboard navigation and position indicators
+ * wheel, keyboard navigation, position indicators and arrow navigation
  *
  * @param {Array} cards - Array of elements (React components) to display in the carousel
  * @param {Array} cardsTitle
  */
 export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   // References and state
-  const containerRef = useRef(null) // Reference to the carousel container
-  const [focusedIndex, setFocusedIndex] = useState(0) // Index of the currently centered card
-  const [isDragging, setIsDragging] = useState(false) // Drag-and-drop state
-  const dragStartX = useRef(0) // X position at drag start
-  const scrollStartX = useRef(0) // Scroll position at drag start
-  const hasReachedEnd = useRef(false) // Flag if we reached the end during drag
-  const hasReachedStart = useRef(false) // Flag if we reached the start during drag
+  const containerRef = useRef(null)
+  const [focusedIndex, setFocusedIndex] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartX = useRef(0)
+  const scrollStartX = useRef(0)
+  const hasReachedEnd = useRef(false)
+  const hasReachedStart = useRef(false)
+  const [selectedCard, setSelectedCard] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Nouveaux états pour le retournement et l'agrandissement
-  const [selectedCard, setSelectedCard] = useState(null) // Index de la carte sélectionnée
-  const [isModalOpen, setIsModalOpen] = useState(false) // État du modal
+  // Nouveaux états pour les flèches
+  const [showLeftArrow, setShowLeftArrow] = useState(false)
+  const [showRightArrow, setShowRightArrow] = useState(true)
 
   /**
    * Updates the index of the card currently in the center of the carousel
@@ -30,14 +32,12 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     const container = containerRef.current
     if (!container) return
 
-    // Calculate the center of the visible container
     const containerCenter = container.scrollLeft + container.clientWidth / 2
     const items = container.querySelectorAll(`.${styles.carouselItem}`)
 
     let closestIndex = 0
     let minDistance = Infinity
 
-    // Loop through all cards to find the closest to the center
     items.forEach((item, index) => {
       const itemCenter = item.offsetLeft + item.offsetWidth / 2
       const distance = Math.abs(containerCenter - itemCenter)
@@ -49,7 +49,11 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     })
 
     setFocusedIndex(closestIndex)
-  }, [])
+
+    // Mettre à jour la visibilité des flèches
+    setShowLeftArrow(closestIndex > 0)
+    setShowRightArrow(closestIndex < cards.length - 1)
+  }, [cards.length])
 
   /**
    * Scrolls the carousel to a specific card
@@ -63,16 +67,13 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
       if (!container) return
 
       const items = container.querySelectorAll(`.${styles.carouselItem}`)
-      // Ensure index is within valid bounds
       const targetItem = items[Math.max(0, Math.min(index, cards.length - 1))]
 
       if (targetItem) {
-        // Calculate position to center the card
         const scrollLeft =
           targetItem.offsetLeft -
           (container.clientWidth - targetItem.offsetWidth) / 2
 
-        // Scroll with smooth animation
         container.scrollTo({
           left: scrollLeft,
           behavior: 'smooth',
@@ -83,11 +84,29 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   )
 
   /**
+   * Navigation avec les flèches
+   */
+  const handlePrevious = useCallback(() => {
+    if (focusedIndex === 0) {
+      scrollToCard(cards.length - 1) // Boucle vers la fin
+    } else {
+      scrollToCard(focusedIndex - 1)
+    }
+  }, [focusedIndex, cards.length, scrollToCard])
+
+  const handleNext = useCallback(() => {
+    if (focusedIndex === cards.length - 1) {
+      scrollToCard(0) // Boucle vers le début
+    } else {
+      scrollToCard(focusedIndex + 1)
+    }
+  }, [focusedIndex, cards.length, scrollToCard])
+
+  /**
    * Gère le clic sur une carte
    * Ouvre la modal avec la carte sélectionnée
    */
   const handleCardClick = (index, e) => {
-    // Empêcher le clic de déclencher le drag
     if (
       Math.abs(dragStartX.current - (e.clientX || e.touches?.[0]?.clientX)) > 5
     ) {
@@ -96,8 +115,6 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
     setSelectedCard(index)
     setIsModalOpen(true)
-
-    // Empêcher le scroll quand le modal est ouvert
     document.body.style.overflow = 'hidden'
   }
 
@@ -109,13 +126,11 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     setTimeout(() => {
       setSelectedCard(null)
       document.body.style.overflow = 'unset'
-    }, 300) // Attendre la fin de l'animation
+    }, 300)
   }
 
   /**
    * Effect to center margins on load
-   * Adds margins to first and last card to allow them
-   * to be properly centered in the viewport
    */
   useEffect(() => {
     const container = containerRef.current
@@ -123,11 +138,9 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
     const firstItem = container.querySelector(`.${styles.carouselItem}`)
     if (firstItem) {
-      // Calculate margin needed to center first/last card
       const margin = (container.clientWidth - firstItem.offsetWidth) / 2
       const items = container.querySelectorAll(`.${styles.carouselItem}`)
 
-      // Apply margins
       items[0].style.marginLeft = `${margin}px`
       items[items.length - 1].style.marginRight = `${margin}px`
     }
@@ -135,8 +148,6 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
   /**
    * Effect to handle scroll event
-   * Updates focused card index after scrolling
-   * Resets end/start flags if we're no longer at the edges
    */
   useEffect(() => {
     const container = containerRef.current
@@ -144,7 +155,6 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
     let scrollTimeout
     const handleScroll = () => {
-      // Use timeout to wait for scroll to finish
       clearTimeout(scrollTimeout)
       scrollTimeout = setTimeout(() => {
         updateFocusedIndex()
@@ -152,7 +162,6 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
         const maxScroll = container.scrollWidth - container.clientWidth
         const currentScroll = container.scrollLeft
 
-        // Reset flags if we're in the middle of the carousel
         if (currentScroll > 10 && currentScroll < maxScroll - 10) {
           hasReachedEnd.current = false
           hasReachedStart.current = false
@@ -169,29 +178,17 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
   /**
    * Keyboard navigation handler
-   * Arrows: navigate between cards with infinite loop
-   * Home/End: go to start/end
    */
   const handleKeyDown = useCallback(
     (e) => {
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault()
-          // If at start, go to end (loop)
-          if (focusedIndex === 0) {
-            scrollToCard(cards.length - 1)
-          } else {
-            scrollToCard(focusedIndex - 1)
-          }
+          handlePrevious()
           break
         case 'ArrowRight':
           e.preventDefault()
-          // If at end, go back to start (loop)
-          if (focusedIndex === cards.length - 1) {
-            scrollToCard(0)
-          } else {
-            scrollToCard(focusedIndex + 1)
-          }
+          handleNext()
           break
         case 'Home':
           e.preventDefault()
@@ -203,27 +200,22 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
           break
       }
     },
-    [focusedIndex, cards.length, scrollToCard]
+    [handlePrevious, handleNext, cards.length, scrollToCard]
   )
 
   /**
    * Start of drag-and-drop (mouse or touch)
-   * Records starting position and initial scroll state
    */
   const handlePointerDown = (e) => {
     setIsDragging(true)
-    // Handle both mouse and touch events
     dragStartX.current = e.clientX || e.touches?.[0]?.clientX
     scrollStartX.current = containerRef.current.scrollLeft
-    // Reset edge flags
     hasReachedEnd.current = false
     hasReachedStart.current = false
   }
 
   /**
    * Movement during drag-and-drop
-   * Updates scroll position based on movement
-   * Blocks scroll at limits and marks if we've reached an edge
    */
   const handlePointerMove = (e) => {
     if (!isDragging) return
@@ -235,32 +227,25 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
     const maxScroll = container.scrollWidth - container.clientWidth
 
-    // Handle scroll limits
     if (newScrollLeft >= maxScroll) {
-      // Block at end and mark that we've reached the end
       container.scrollLeft = maxScroll
       hasReachedEnd.current = true
     } else if (newScrollLeft <= 0) {
-      // Block at start and mark that we've reached the start
       container.scrollLeft = 0
       hasReachedStart.current = true
     } else {
-      // Normal scroll
       container.scrollLeft = newScrollLeft
     }
   }
 
   /**
    * End of drag-and-drop
-   * Checks if we should loop to start/end based on movement
-   * Modified to detect clicks
    */
   const handlePointerUp = (e) => {
     if (isDragging) {
       const endX = e.clientX || e.changedTouches?.[0]?.clientX
       const deltaX = dragStartX.current - endX
 
-      // Seuil pour différencier clic et swipe (très petit)
       if (Math.abs(deltaX) < 2) {
         setIsDragging(false)
         return
@@ -268,10 +253,9 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
       setIsDragging(false)
 
-      // RÉDUIRE DRASTIQUEMENT les seuils
-      const velocity = Math.abs(deltaX) / 100 // Réduire le diviseur (était 300)
-      const swipeThreshold = 5 // Réduire à 10 pixels (était 50)
-      const velocityThreshold = 0.1 // Réduire à 0.1 (était 0.5)
+      const velocity = Math.abs(deltaX) / 100
+      const swipeThreshold = 5
+      const velocityThreshold = 0.1
 
       if (
         hasReachedEnd.current &&
@@ -293,36 +277,28 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
   /**
    * Effect to handle mouse wheel
-   * Enables horizontal scrolling and immediate infinite loop at edges
    */
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const handleWheel = (e) => {
-      // Only handle vertical scroll (deltaY)
       if (e.deltaY !== 0) {
         e.preventDefault()
 
         const maxScroll = container.scrollWidth - container.clientWidth
         const currentScroll = container.scrollLeft
 
-        // Immediate loop if trying to scroll past the end
         if (currentScroll >= maxScroll - 1 && e.deltaY > 0) {
-          scrollToCard(0) // Back to start
-        }
-        // Immediate loop if trying to scroll before the start
-        else if (currentScroll <= 1 && e.deltaY < 0) {
-          scrollToCard(cards.length - 1) // Go to end
-        }
-        // Normal scroll (deltaY * 40 to adjust sensitivity)
-        else {
+          scrollToCard(0)
+        } else if (currentScroll <= 1 && e.deltaY < 0) {
+          scrollToCard(cards.length - 1)
+        } else {
           container.scrollLeft = currentScroll + e.deltaY * 40
         }
       }
     }
 
-    // passive: false to allow preventDefault()
     container.addEventListener('wheel', handleWheel, { passive: false })
     return () => container.removeEventListener('wheel', handleWheel)
   }, [cards.length, scrollToCard])
@@ -340,6 +316,7 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
   }, [isModalOpen])
+
   return (
     <>
       <div className={styles.carouselWrapper}>
@@ -347,23 +324,20 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
         <div
           ref={containerRef}
           className={`${styles.carouselContainer} allowScroll`}
-          tabIndex={0} // Enable keyboard navigation
+          tabIndex={0}
           onKeyDown={handleKeyDown}
-          // Mouse events
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerUp}
-          onMouseLeave={handlePointerUp} // Stop drag if mouse leaves
-          // Touch events
+          onMouseLeave={handlePointerUp}
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
           style={{
             cursor: isDragging ? 'grabbing' : 'grab',
-            userSelect: 'none', // Prevent text selection during drag
+            userSelect: 'none',
           }}
         >
-          {/* Render cards */}
           {cardsTitle.map((cardsTitle, index) => (
             <div
               key={index}
@@ -376,17 +350,73 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
           ))}
         </div>
 
-        <div className={styles.carouselIndicator}>
-          {cards.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.dot} ${
-                index === focusedIndex ? styles.active : ''
-              }`}
-              onClick={() => scrollToCard(index)}
-              aria-label={`Go to project ${index + 1}`}
-            />
-          ))}
+        {/* Indicateur avec flèches intégrées */}
+        <div className={styles.navigationWrapper}>
+          {/* Flèche gauche */}
+          <button
+            className={`${styles.arrowButton} ${styles.arrowLeft} ${
+              !showLeftArrow ? styles.hidden : ''
+            }`}
+            onClick={handlePrevious}
+            aria-label="Projet précédent"
+            disabled={!showLeftArrow && !cards.length}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {/* Indicateur de position */}
+          <div className={styles.carouselIndicator}>
+            {cards.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${
+                  index === focusedIndex ? styles.active : ''
+                }`}
+                onClick={() => scrollToCard(index)}
+                aria-label={`Go to project ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Flèche droite */}
+          <button
+            className={`${styles.arrowButton} ${styles.arrowRight} ${
+              !showRightArrow ? styles.hidden : ''
+            }`}
+            onClick={handleNext}
+            aria-label="Projet suivant"
+            disabled={!showRightArrow && !cards.length}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 18L15 12L9 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 

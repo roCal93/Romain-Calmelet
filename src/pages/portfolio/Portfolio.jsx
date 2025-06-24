@@ -81,13 +81,11 @@ function Portfolio() {
     >
       <div className={styles.container}>
         <ArrowUp />
-        <h1>Portfolio</h1>
-        <p>Contenu de votre page Portfolio</p>
+        <div className={styles.title}>
+          <h1>Mes réalisations</h1>
+          <p>Voici les différents projets que j’ai accomplis</p>
+        </div>
         <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
-        <p>
-          Utilisez la molette de la souris ou les flèches du clavier pour
-          naviguer
-        </p>
         <ArrowDown />
       </div>
     </div>
