@@ -4,7 +4,6 @@ import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
 import AutoCarousel from '../../components/autoCarousel/AutoCarousel'
-import { useMediaQuery } from 'react-responsive'
 import portraitDesktop from '../../assets/img/portraitDesktop.jpeg'
 import portraitTablet from '../../assets/img/portraitTablet.jpeg'
 import portraitMobile from '../../assets/img/portraitMobile.jpeg'
@@ -13,7 +12,6 @@ import BackgroundPresentation from '../../components/backgroundPresentation/Back
 function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
   const { direction } = useContext(NavigationContext)
-  const isMobileNav = useMediaQuery({ query: '(max-width: 768px)' })
 
   useEffect(() => {
     setIsVisible(true)
@@ -32,58 +30,49 @@ function Presentation() {
     >
       <BackgroundPresentation />
       <div className={styles.container}>
+        <ArrowUp />
         <div className={styles.aboutMe}>
           <div className={styles.text}>
             <h1>Quelques mots sur moi </h1>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime in
-              non quo possimus, suscipit numquam maiores aut neque fugiat
-              deserunt nisi officiis sapiente voluptate beatae facere atque illo
-              totam eveniet! Lorem ipsum dolor sit amet consectetur adipisicing
-              elit. Maxime in non quo possimus, suscipit numquam maiores aut
-              neque fugiat deserunt nisi officiis sapiente voluptate beatae
-              facere atque illo totam eveniet! Lorem ipsum dolor sit amet
-              consectetur adipisicing elit. Maxime in non quo possimus, suscipit
-              numquam maiores aut neque fugiat deserunt nisi officiis sapiente
-              voluptate beatae facere atque illo totam eveniet! Lorem ipsum
-              dolor sit amet consectetur adipisicing elit. Maxime in non quo
-              possimus, suscipit numquam maiores aut neque fugiat deserunt nisi
-              officiis sapiente voluptate beatae facere atque illo totam
-              eveniet! Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              Maxime in non quo possimus, suscipit numquam maiores aut neque
-              fugiat deserunt nisi officiis sapiente voluptate beatae facere
-              atque illo totam eveniet! Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Maxime in non quo possimus, suscipit numquam
-              maiores aut neque fugiat deserunt nisi officiis sapiente voluptate
-              beatae facere atque illo totam eveniet! Lorem ipsum dolor sit amet
-              consectetur adipisicing elit. Maxime in non quo possimus, suscipit
-              numquam maiores aut neque fugiat deserunt nisi officiis sapiente
-              voluptate beatae facere atque illo totam eveniet!
-            </p>
+            <section>
+              <picture className={styles.floatingImage}>
+                <source srcSet={portraitMobile} media="(max-width: 480px)" />
+                <source srcSet={portraitTablet} media="(max-width: 768px)" />
+                <img src={portraitTablet} alt="Portrait de Romain Calmelet" />
+              </picture>
+              <p>
+                Après dix années passées dans l'horlogerie, où précision,
+                rigueur et sens du détail faisaient partie de mon quotidien,
+                j'ai décidé de relever un nouveau défi&nbsp;:
+                <br />
+                <br />
+                <strong>le&nbsp;développement&nbsp;web.</strong>
+              </p>
+              <p>
+                Ce domaine me passionne par la diversité de ses tâches et
+                l'infinité de ses possibilités. On peut établir de nombreux
+                parallèles entre la mécanique horlogère et celle du code, et je
+                prends plaisir chaque jour à imaginer et inventer de nouveaux
+                mécanismes virtuels.
+              </p>
+              <p>
+                Je suis plus motivé que jamais à évoluer dans cet univers, et à
+                y apporter ma sensibilité artisanale acquise au long de mon
+                parcours.
+              </p>
+            </section>
             <AutoCarousel />
           </div>
-          <ArrowUp />
-          <picture>
-            <source srcSet={portraitMobile} media="(max-width: 480px)" />
-            <source srcSet={portraitDesktop} media="(min-width: 1200px)" />
+          <picture className={styles.desktopImage}>
+            <source srcSet={portraitDesktop} media="(min-width: 769px)" />
             <img
               className={styles.img}
-              src={portraitTablet}
-              alt="A tree representing banking services at Argent Bank"
+              src={portraitDesktop}
+              alt="Portrait de Romain Calmelet"
             />
           </picture>
         </div>
         <div className={styles.nav}>
-          {isMobileNav ? (
-            <p>
-              Swiper ou utiliser les boutons de navigation pour changer de page.
-            </p>
-          ) : (
-            <p>
-              Utiliser la molette de la souris, le clavier ou les boutons de
-              navigation pour changer de page.
-            </p>
-          )}
           <ArrowDown />
         </div>
       </div>

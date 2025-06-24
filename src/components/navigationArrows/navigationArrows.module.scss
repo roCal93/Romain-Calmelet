@@ -13,7 +13,6 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  margin: 5px;
 
   svg {
     width: 40px;
@@ -73,8 +72,8 @@
 
   // Responsive
   @media (max-width: 768px) {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
 
     svg {
       width: 20px;

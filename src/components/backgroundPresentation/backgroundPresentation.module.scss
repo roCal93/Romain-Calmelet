@@ -1,10 +1,3 @@
-// Variables SCSS
-$primary-bg: #0a0a0a;
-$white: #ffffff;
-$black: #000000;
-$purple: #a855f7;
-$pink: #ec4899;
-
 // Mixins
 @mixin absolute-center {
   position: absolute;
@@ -15,11 +8,13 @@ $pink: #ec4899;
   will-change: transform, opacity;
 }
 
-// Container principal
+// Container principal - MODIFIÉ pour arrière-plan
 .container {
   position: fixed;
   inset: 0;
   overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
 }
 
 // Particules
@@ -41,6 +36,7 @@ $pink: #ec4899;
   filter: blur(15px);
   pointer-events: none;
   will-change: transform;
+  z-index: 1;
 }
 
 // Effet de vague au curseur
@@ -53,6 +49,7 @@ $pink: #ec4899;
   pointer-events: none;
   animation: pulse 1.5s infinite;
   will-change: transform;
+  z-index: 2;
 }
 
 // Animations
@@ -64,15 +61,6 @@ $pink: #ec4899;
   100% {
     transform: translate(-50%, -50%) scale(4);
     opacity: 0;
-  }
-}
-
-@keyframes titleGlow {
-  0% {
-    text-shadow: 0 0 10px rgba($purple, 0.3);
-  }
-  100% {
-    text-shadow: 0 0 20px rgba($pink, 0.5);
   }
 }
 
