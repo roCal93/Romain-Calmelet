@@ -1,7 +1,7 @@
 .logo {
   display: flex;
   width: 8rem;
-  height: 100px;
+  height: 80px;
   text-decoration: none;
   align-items: center;
   transition: transform 0.2s ease;
@@ -12,14 +12,14 @@
   }
 
   .cWithR {
-    height: 70px;
+    height: 60px;
     width: 100%;
     display: flex;
     align-items: center;
     position: relative;
 
     .bigC {
-      font-size: 100px;
+      font-size: 80px;
       font-weight: 400;
       font-family: 'Raleway', sans-serif;
       font-optical-sizing: auto;
@@ -32,7 +32,7 @@
     }
 
     .smallR {
-      font-size: 50px;
+      font-size: 40px;
       font-family: 'Raleway', sans-serif;
       font-weight: 500;
       color: black;
