@@ -186,11 +186,12 @@
 
 .carouselItem {
   flex: 0 0 auto;
-  width: 250px; // Largeur fixe pour chaque carte
+  width: 500px; // Largeur fixe pour chaque carte
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
+  padding: 0.5rem;
+  margin-top: 3rem;
   text-align: center;
   font-size: 1.2rem;
   scroll-snap-align: center; // L'élément se centre dans la vue
@@ -298,7 +299,6 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  padding: 2rem;
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
@@ -308,8 +308,8 @@
 
 .closeButton {
   position: absolute;
-  top: -40px;
-  right: -40px;
+  top: 0px;
+  right: -50px;
   width: 40px;
   height: 40px;
   background: white;
@@ -379,16 +379,14 @@
 
 // Responsive
 @media (max-width: 768px) {
-  .modalCard {
-    padding: 1.5rem;
-    margin: 1rem;
-  }
-
   .closeButton {
-    top: -30px;
-    right: -30px;
+    top: 20px;
+    right: 20px;
     width: 30px;
     height: 30px;
     font-size: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 28px;
   }
 }

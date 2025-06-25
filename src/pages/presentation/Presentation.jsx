@@ -4,9 +4,9 @@ import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
 import AutoCarousel from '../../components/autoCarousel/AutoCarousel'
-import portraitDesktop from '../../assets/img/portraitDesktop.jpeg'
-import portraitTablet from '../../assets/img/portraitTablet.jpeg'
-import portraitMobile from '../../assets/img/portraitMobile.jpeg'
+import portraitDesktop from '../../assets/img/portraitRC/portraitDesktop.webp'
+import portraitTablet from '../../assets/img/portraitRC/portraitTablet.webp'
+import portraitMobile from '../../assets/img/portraitRC/portraitMobile.webp'
 import BackgroundPresentation from '../../components/backgroundPresentation/BackgroundPresentation'
 
 function Presentation() {
@@ -38,7 +38,7 @@ function Presentation() {
               <picture className={styles.floatingImage}>
                 <source srcSet={portraitMobile} media="(max-width: 480px)" />
                 <source srcSet={portraitTablet} media="(max-width: 768px)" />
-                <img src={portraitTablet} alt="Portrait de Romain Calmelet" />
+                <img src={portraitDesktop} alt="Portrait de Romain Calmelet" />
               </picture>
               <p>
                 Après dix années passées dans l'horlogerie, où précision,

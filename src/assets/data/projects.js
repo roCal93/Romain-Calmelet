@@ -1,21 +1,19 @@
 export const projects = [
     {
         id: 1,
-        name: "E-commerce React",
-        description: "Application e-commerce complète avec panier, authentification et paiement",
-        technologies: ["React", "Node.js", "MongoDB", "Stripe API", "Redux"],
-        image: "/images/ecommerce-preview.jpg",
-        githubLink: "https://github.com/username/ecommerce-react",
-        demoLink: "https://ecommerce-demo.netlify.app",
-        creationDate: "2024-01",
-        duration: "3 mois",
-        status: "Terminé",
+        name: "Kasa",
+        description: "Développer en React le front-end d'une plateforme de location d'appartements, en utilisant React/Vite, React Router et Sass selon des maquettes Figma responsives. Le projet inclut une galerie d'images avec navigation circulaire et des composants Collapse animés, alimentés par des données JSON simulées. Focus sur le développement front-end moderne.",
+        technologies: ["React", "React Router", "Node.js", "Vite", "Sass"],
+        image: "src/assets/img/imgPortfolio/kasa.png",
+        logo: "src/assets/img/imgPortfolio/kasaLogo.webp",
+        githubLink: "https://github.com/roCal93/Kasa.git",
+        demoLink: "https://roCal93.github.io/Kasa",
         features: [
-            "Authentification JWT",
-            "Panier d'achat persistant",
-            "Paiement sécurisé Stripe",
-            "Dashboard admin",
-            "Recherche et filtres avancés"
+            "Initialisation d'une application avec Vite",
+            "Configuration de la navigation entre les pages de l'application avec React Router",
+            "Développement des éléments de l'interface d'un site web grâce à des composants React",
+            "Mise en œuvre d'animations CSS",
+            "Développement d'une interface web avec Sass"
         ]
     },
     {

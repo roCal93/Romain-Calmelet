@@ -294,7 +294,7 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
         } else if (currentScroll <= 1 && e.deltaY < 0) {
           scrollToCard(cards.length - 1)
         } else {
-          container.scrollLeft = currentScroll + e.deltaY * 40
+          container.scrollLeft = currentScroll + e.deltaY * 120
         }
       }
     }
