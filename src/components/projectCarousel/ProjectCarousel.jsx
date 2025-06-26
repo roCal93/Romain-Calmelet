@@ -138,11 +138,17 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
     const firstItem = container.querySelector(`.${styles.carouselItem}`)
     if (firstItem) {
-      const margin = (container.clientWidth - firstItem.offsetWidth) / 2
+      // Récupérer le gap calculé depuis les styles CSS
+      const computedStyle = window.getComputedStyle(container)
+      const gapValue = parseFloat(computedStyle.gap) || 16 // fallback à 16px si gap non défini
+
+      const margin =
+        (container.clientWidth - firstItem.offsetWidth) / 2 - gapValue / 2
+
       const items = container.querySelectorAll(`.${styles.carouselItem}`)
 
-      items[0].style.marginLeft = `${margin}px`
-      items[items.length - 1].style.marginRight = `${margin}px`
+      items[0].style.marginLeft = `${Math.max(0, margin)}px`
+      items[items.length - 1].style.marginRight = `${Math.max(0, margin)}px`
     }
   }, [cards])
 

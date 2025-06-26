@@ -6,6 +6,9 @@
   @media (max-width: 1300px) {
     padding: 1rem 0;
   }
+  @media (max-width: 380px) {
+    padding: 0.5rem 0;
+  }
 }
 
 .carouselTrack {
@@ -33,6 +36,9 @@
 .slide:hover {
   transform: scale(1.6);
   z-index: 10;
+  @media (max-width: 480px) {
+    transform: scale(1.2);
+  }
 }
 
 .slide img {

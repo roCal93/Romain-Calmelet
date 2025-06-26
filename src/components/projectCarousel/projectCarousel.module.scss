@@ -2,20 +2,97 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  padding: 1rem 0;
 }
 
-// Navigation wrapper qui contient les flèches et l'indicateur
+.carouselContainer {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+  cursor: grab;
+  user-select: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1.5rem;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
+.carouselItem {
+  flex: 0 0 auto;
+  width: 50%;
+  max-width: 750px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 1.2rem;
+  scroll-snap-align: center;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  @media (max-width: 1000px) {
+    width: 90%;
+  }
+
+  &[aria-selected='true'] {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
 .navigationWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-top: 16px;
+  margin: 0.5rem 0;
   position: relative;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 }
 
-// Styles pour les flèches
+.navigationBar {
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 0.2rem;
+
+  .arrowButton {
+    box-shadow: none;
+    border: none;
+    background: transparent;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+}
+
 .arrowButton {
   background: white;
   border: 1px solid #e0e0e0;
@@ -49,28 +126,19 @@
   &.hidden {
     opacity: 0;
     pointer-events: none;
+    animation: fadeOut 0.3s ease;
+  }
+
+  &:not(.hidden) {
+    animation: fadeIn 0.3s ease;
   }
 
   svg {
     width: 16px;
     height: 16px;
   }
-}
 
-// Mise à jour du carouselIndicator pour s'aligner avec les flèches
-.carouselIndicator {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-// Responsive pour la navigation
-@media (max-width: 768px) {
-  .navigationWrapper {
-    gap: 12px;
-  }
-
-  .arrowButton {
+  @media (max-width: 768px) {
     width: 32px;
     height: 32px;
 
@@ -79,14 +147,8 @@
       height: 14px;
     }
   }
-}
 
-@media (max-width: 480px) {
-  .navigationWrapper {
-    gap: 8px;
-  }
-
-  .arrowButton {
+  @media (max-width: 480px) {
     width: 28px;
     height: 28px;
 
@@ -97,136 +159,10 @@
   }
 }
 
-// Ajustement du wrapper principal (enlever le padding latéral)
-.carouselWrapper {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  padding: 1rem 0; // Retour au padding original sans espace pour les flèches
-}
-
-// Animation pour l'apparition/disparition des flèches
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-}
-
-.arrowButton:not(.hidden) {
-  animation: fadeIn 0.3s ease;
-}
-
-.arrowButton.hidden {
-  animation: fadeOut 0.3s ease;
-}
-
-// Style avec flèches intégrées dans une barre
-.navigationBar {
-  background: white;
-  border-radius: 24px;
-  padding: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin: 16px auto 0;
-
-  .arrowButton {
-    box-shadow: none;
-    border: none;
-    background: transparent;
-
-    &:hover {
-      background: #f5f5f5;
-    }
-  }
-
-  .carouselIndicator {
-    margin: 0;
-    padding: 0 8px;
-  }
-}
-.carouselContainer {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 1rem; // Un espacement constant entre les éléments
-  overflow-x: scroll;
-  scroll-behavior: smooth; // Pour un défilement doux par programmation
-  -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none; /* Firefox */
-  cursor: grab;
-  user-select: none;
-  scroll-snap-type: x mandatory; // Force le défilement à s'arrêter sur les éléments
-  -webkit-overflow-scrolling: touch; // Améliore le défilement sur iOS
-  padding-bottom: 10px; // Évite que le défilement ne soit trop proche du bas
-
-  &:active {
-    cursor: grabbing;
-  }
-  &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-}
-
-.carouselItem {
-  flex: 0 0 auto;
-  width: 500px; // Largeur fixe pour chaque carte
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
-  margin-top: 3rem;
-  text-align: center;
-  font-size: 1.2rem;
-  scroll-snap-align: center; // L'élément se centre dans la vue
-  transition: transform 0.3s ease; // Pour d'éventuelles animations futures
-  cursor: pointer;
-
-  // Style optionnel pour mettre en évidence la carte active
-  &[aria-selected='true'] {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  }
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}
-
-.empty-card {
-  width: 100%;
-  height: 150px;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #777;
-  font-size: 1rem;
-}
-
 .carouselIndicator {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 16px;
 }
 
 .dot {
@@ -239,36 +175,10 @@
   transition: background-color 0.2s;
 
   &.active {
-    background-color: #007bff;
+    background-color: #f8b478;
   }
 }
 
-// Animation optionnelle pour le changement de carte
-@keyframes cardFocus {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1.03);
-  }
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-// Modal styles
 .modal {
   position: fixed;
   top: 0;
@@ -299,8 +209,8 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 85vw;
+  max-height: 85vh;
   overflow: auto;
   transform-origin: center;
   animation: bounceIn 0.5s ease;
@@ -308,7 +218,7 @@
 
 .closeButton {
   position: absolute;
-  top: 0px;
+  top: 0;
   right: -50px;
   width: 40px;
   height: 40px;
@@ -326,9 +236,64 @@
   &:hover {
     transform: scale(1.1);
   }
+
+  @media (max-width: 768px) {
+    top: 20px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+  }
 }
 
-// Animations
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes cardFocus {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1.03);
+  }
+}
+
 @keyframes modalZoomIn {
   from {
     transform: scale(0.8);
@@ -354,7 +319,6 @@
   }
 }
 
-// Animations alternatives (optionnelles)
 @keyframes slideUp {
   from {
     transform: translateY(100vh);
@@ -374,19 +338,5 @@
   to {
     transform: scale(1) rotate(0deg);
     opacity: 1;
-  }
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .closeButton {
-    top: 20px;
-    right: 20px;
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-size: 28px;
   }
 }

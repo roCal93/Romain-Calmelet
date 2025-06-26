@@ -2,24 +2,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-around;
   width: 100%;
-  padding: 1rem 5rem;
+  height: 100%;
+  padding: 1rem 3rem;
+  @media (max-width: 780px) {
+    height: 90%;
+  }
+  @media (max-width: 550px) {
+    gap: 1rem;
+    padding: 1rem 1rem;
+  }
 
   .title {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     position: relative;
+    @media (max-width: 900px) {
+      flex-direction: column-reverse;
+    }
 
     .text {
-      flex: 1;
-      // Optionnel : limiter la largeur du texte
-      max-width: 50%;
+      text-align: left;
+      @media (max-width: 900px) {
+        text-align: center;
+        margin-top: 3rem;
+      }
     }
 
     h1 {
-      margin-bottom: 0;
+      margin: 0;
+    }
+    .arrowUp {
+      position: absolute;
+      left: 50%;
+      top: -15px;
+      transform: translateX(-50%);
+      @media (max-width: 900px) {
+        position: relative;
+        left: 0;
+        top: 0;
+        transform: translateX(0);
+      }
     }
   }
 }

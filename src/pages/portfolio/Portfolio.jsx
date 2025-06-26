@@ -89,7 +89,7 @@ function Portfolio() {
             <h1>Mes réalisations</h1>
             <p>Voici les différents projets que j’ai accomplis</p>
           </div>
-          <ArrowUp />
+          <ArrowUp className={styles.arrowUp} />
         </div>
         <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
         <ArrowDown />
