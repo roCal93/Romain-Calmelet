@@ -8,9 +8,10 @@
   position: relative;
   @media (max-width: 1024px) {
     padding-bottom: 1rem;
-    height: 80%;
   }
-
+  @media (max-width: 480px) {
+    justify-content: flex-start;
+  }
   .aboutMe {
     display: flex;
     justify-content: space-between;
@@ -25,7 +26,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 0;
     }
 
     .text {
@@ -63,7 +64,7 @@
         @media (max-width: 768px) {
           min-height: 0;
           overflow: hidden;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
         }
 
         .floatingImage {

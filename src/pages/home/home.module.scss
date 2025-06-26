@@ -1,13 +1,13 @@
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   height: 80%;
   width: 100%;
   margin: 1rem 1rem 1rem 1rem;
   @media (max-width: 768px) {
-    height: 65vh;
+    height: 75vh;
   }
 
   .intro {
