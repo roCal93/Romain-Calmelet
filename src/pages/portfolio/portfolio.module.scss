@@ -11,8 +11,13 @@
   }
   @media (max-width: 550px) {
     height: 100%;
-    gap: 0;
+    gap: 1rem;
     padding: 0 1rem;
+    justify-content: center;
+    margin-bottom: 10rem;
+  }
+  @media (max-width: 380px) {
+    gap: 0;
     justify-content: flex-start;
   }
 
