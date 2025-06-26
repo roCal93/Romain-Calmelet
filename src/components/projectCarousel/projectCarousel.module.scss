@@ -35,7 +35,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 0.5rem;
-  margin-top: 3rem;
+  margin-top: 2.5rem;
   text-align: center;
   font-size: 1.2rem;
   scroll-snap-align: center;
@@ -43,6 +43,9 @@
   cursor: pointer;
   @media (max-width: 1050px) {
     width: 90%;
+  }
+  @media (max-width: 480px) {
+    margin-top: 1.6rem;
   }
 
   &[aria-selected='true'] {

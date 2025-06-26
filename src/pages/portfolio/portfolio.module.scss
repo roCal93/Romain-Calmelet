@@ -39,6 +39,9 @@
 
     h1 {
       margin: 0;
+      @media (max-width: 480px) {
+        font-size: 24px;
+      }
     }
     .arrowUp {
       position: absolute;
@@ -72,16 +75,18 @@
 
   .imageTitle {
     position: absolute;
-    top: -60px;
+    top: -3.5rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(50%);
     color: rgb(0, 0, 0);
     text-align: center;
     margin: 0;
-    padding: 10px;
-
     border-radius: 5px;
     font-size: 1.5rem;
+    @media (max-width: 480px) {
+      font-size: 1.2rem;
+      top: -3rem;
+    }
   }
 }
 
@@ -98,8 +103,6 @@
     padding: 1rem;
     background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     border-bottom: 1px solid #f1f5f9;
-
-    // Mobile
     @media (max-width: 768px) {
       flex-direction: column;
       text-align: center;
