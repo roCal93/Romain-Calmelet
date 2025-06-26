@@ -1,11 +1,14 @@
+import kasacover from '../img/imgPortfolio/kasa.webp'
+import kasaLogo from '../img/imgPortfolio/kasaLogo.webp'
+
 export const projects = [
     {
         id: 1,
         name: "Kasa",
         description: "Développer en React le front-end d'une plateforme de location d'appartements, en utilisant React/Vite, React Router et Sass selon des maquettes Figma responsives. Le projet inclut une galerie d'images avec navigation circulaire et des composants Collapse animés, alimentés par des données JSON simulées. Focus sur le développement front-end moderne.",
         technologies: ["React", "React Router", "Node.js", "Vite", "Sass"],
-        image: "src/assets/img/imgPortfolio/kasa.png",
-        logo: "src/assets/img/imgPortfolio/kasaLogo.webp",
+        image: kasacover,
+        logo: kasaLogo,
         githubLink: "https://github.com/roCal93/Kasa.git",
         demoLink: "https://roCal93.github.io/Kasa",
         features: [
