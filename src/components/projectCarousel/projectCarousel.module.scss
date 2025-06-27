@@ -16,7 +16,7 @@
   user-select: none;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 1.5rem;
+  padding-bottom: 1rem;
 
   &:active {
     cursor: grabbing;
@@ -31,16 +31,18 @@
   flex: 0 0 auto;
   width: 50%;
   max-width: 750px;
+  max-height: 45vh;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 0.5rem;
-  margin-top: 2.5rem;
+  margin-top: 2.7rem;
   text-align: center;
   font-size: 1.2rem;
   scroll-snap-align: center;
   transition: transform 0.3s ease;
   cursor: pointer;
+  box-sizing: border-box;
   @media (max-width: 1050px) {
     width: 90%;
   }

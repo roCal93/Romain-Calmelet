@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: start;
   width: 100%;
   height: 100%;
   padding: 1rem 3rem;
@@ -40,6 +40,15 @@
           margin-top: 1rem;
         }
       }
+      h1 {
+        margin: 0;
+        @media (max-width: 480px) {
+          font-size: 24px;
+        }
+      }
+      p {
+        margin-bottom: 0;
+      }
     }
 
     h1 {
@@ -64,23 +73,19 @@
 }
 
 .projectCardFront {
+  max-height: calc(45vh - 1rem);
+  overflow: hidden; // Ajout important pour éviter le débordement
+  pointer-events: none;
   .imageContainer {
-    position: relative;
     width: 100%;
     height: 100%;
     .img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Pour que l'image couvre tout l'espace sans déformation */
+      object-fit: cover;
       pointer-events: none;
+      display: block; // Évite les espaces indésirables sous l'image
     }
-  }
-
-  .img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Pour que l'image couvre tout l'espace sans déformation */
-    pointer-events: none;
   }
 
   .imageTitle {
@@ -252,9 +257,51 @@
       flex-direction: column;
       gap: 0.5rem;
 
+      // Scroll après 4 éléments
+      max-height: calc(
+        4 * (1rem + 0.3rem) + 4 * 0.5rem
+      ); // hauteur pour 3 items + gaps
+      overflow-y: scroll; // ← Changé de 'auto' à 'scroll' pour forcer l'affichage
+      padding-right: 8px;
+
+      // Pour Firefox - doit être avant les règles imbriquées
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
+
       // Mobile
       @media (max-width: 768px) {
         gap: 0.4rem;
+        max-height: calc(3 * (0.8rem + 0.4rem) + 3 * 0.4rem);
+        padding-right: 6px;
+      }
+
+      // Très petit écran
+      @media (max-width: 480px) {
+        max-height: calc(3 * (0.8rem + 0.4rem) + 2.5 * 0.4rem);
+        padding-right: 4px;
+      }
+
+      // Style de la scrollbar
+      &::-webkit-scrollbar {
+        width: 6px;
+
+        @media (max-width: 768px) {
+          width: 4px;
+        }
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.3);
+        }
       }
 
       li {
@@ -266,6 +313,7 @@
         background: rgba(0, 0, 0, 0.05);
         border-radius: 8px;
         padding-left: 48px;
+        flex-shrink: 0; // Empêche la compression des items
 
         // Tablette
         @media (max-width: 1024px) {

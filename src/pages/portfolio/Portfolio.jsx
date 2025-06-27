@@ -41,7 +41,7 @@ function Portfolio() {
       <div className={styles.features}>
         <h4>Fonctionnalités principales:</h4>
         <ul>
-          {projet.features.slice(0, 3).map((feature, index) => (
+          {projet.features.map((feature, index) => (
             <li key={index}>{feature}</li>
           ))}
         </ul>

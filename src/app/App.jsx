@@ -56,7 +56,14 @@ function App() {
 
   useEffect(() => {
     const handleWheel = (e) => {
-      if (e.target.closest('.allowScroll')) return // Ne scroll pas si dans un carousel
+      // Vérifier si on est dans une zone qui doit pouvoir scroller
+      if (
+        e.target.closest('.allowScroll') ||
+        e.target.closest('.features') || // ← Ajouté
+        e.target.closest('[class*="features"]')
+      )
+        return // ← Pour les CSS modules
+
       e.preventDefault()
       const dir = e.deltaY > 0 ? 'down' : 'up'
       navigateToSection(dir)
@@ -155,7 +162,7 @@ function App() {
             // CHANGEMENT : Utiliser flex: 1 au lieu de height: 100vh
             flex: 1,
             minHeight: 0, // Important pour que flex fonctionne correctement
-            overflow: 'hidden',
+            overflow: 'auto',
             transition: 'all 0.6s ease-in-out',
             // AJOUT : S'assurer que le main se comporte comme un conteneur flex
             display: 'flex',

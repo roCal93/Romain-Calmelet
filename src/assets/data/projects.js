@@ -1,5 +1,7 @@
 import kasacover from '../img/imgPortfolio/kasa.webp'
 import kasaLogo from '../img/imgPortfolio/kasaLogo.webp'
+import sophieBluelCover from '../img/imgPortfolio/sophieBluel.webp'
+import sophieBluelLogo from '../img/imgPortfolio/sophieBluelLogo.webp'
 
 export const projects = [
     {
@@ -21,21 +23,22 @@ export const projects = [
     },
     {
         id: 2,
-        name: "Application de Gestion de Tâches",
-        description: "Gestionnaire de tâches collaboratif avec système de drag & drop",
-        technologies: ["Vue.js", "Firebase", "Vuetify", "Chart.js"],
-        image: "/images/taskmanager-preview.jpg",
-        githubLink: "https://github.com/username/task-manager",
-        demoLink: "https://taskmanager-app.web.app",
-        creationDate: "2023-11",
-        duration: "2 mois",
-        status: "Terminé",
+        name: "Portfolio d'architecte",
+        description: "Dans ce projet, j’ai développé une page web dynamique pour une architecte d’intérieur en utilisant JavaScript et en interagissant avec une API. J’ai conçu la partie Front-End, avec une page de présentation des travaux, une interface de connexion pour l’administrateur et une modale d’upload de médias, tout en gérant les événements utilisateurs et en manipulant le DOM. Ce projet m’a permis de renforcer mes compétences en JavaScript et en communication avec une API, des savoir-faire indispensables pour le développement web moderne.",
+        technologies: ["HTML5", "CSS3", "JavaScript(ES6+)", "APIs REST"],
+        image: sophieBluelCover,
+        logo: sophieBluelLogo,
+        githubLink: "https://github.com/roCal93/Sophie_Bluel.git",
+        demoLink: "https://rocal93.github.io/sophie-bluel-frontend/",
         features: [
-            "Drag & drop des tâches",
-            "Collaboration en temps réel",
-            "Notifications push",
-            "Statistiques et graphiques",
-            "Export PDF des rapports"
+            "Affichage d’un portfolio de projets",
+            "Filtres de projets par catégorie",
+            "Gestion des projets (Backoffice/Admin)",
+            "Connexion et Authentification",
+            "Stockage local temporaire",
+            "Appels API REST",
+            "Gestion d’erreurs",
+            "Affichage responsive"
         ]
     },
     {
