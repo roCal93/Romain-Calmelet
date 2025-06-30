@@ -15,7 +15,7 @@ function Portfolio() {
     <div key={projet.id} className={styles.projectCardFront}>
       <div className={styles.imageContainer}>
         <img src={projet.image} alt={projet.description} />
-        <h2 className={styles.imageTitle}>{projet.name}</h2>
+        <h2 className={styles.cardTitle}>{projet.name}</h2>
       </div>
     </div>
   ))

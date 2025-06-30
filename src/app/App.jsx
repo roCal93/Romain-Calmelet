@@ -45,26 +45,45 @@ function App() {
 
       setDirection(direction)
       isNavigatingRef.current = true
-      navigate(SECTIONS[nextIndex].path)
 
+      // CORRECTION 1: Déclencher la navigation après avoir défini la direction
+      requestAnimationFrame(() => {
+        navigate(SECTIONS[nextIndex].path)
+      })
+
+      // CORRECTION 2: Ajuster le timeout selon la durée de transition CSS
       setTimeout(() => {
         isNavigatingRef.current = false
-      }, 800)
+      }, 600) // Correspond à la transition CSS de 0.6s
     },
     [getCurrentSectionIndex, navigate]
   )
+
+  // CORRECTION 3: Synchroniser avec le changement de route
+  useEffect(() => {
+    // Reset du flag de navigation quand la route change effectivement
+    const timer = setTimeout(() => {
+      isNavigatingRef.current = false
+    }, 650) // Légèrement plus long que la transition
+
+    return () => clearTimeout(timer)
+  }, [location.pathname])
 
   useEffect(() => {
     const handleWheel = (e) => {
       // Vérifier si on est dans une zone qui doit pouvoir scroller
       if (
         e.target.closest('.allowScroll') ||
-        e.target.closest('.features') || // ← Ajouté
+        e.target.closest('.features') ||
         e.target.closest('[class*="features"]')
       )
-        return // ← Pour les CSS modules
+        return
 
       e.preventDefault()
+
+      // CORRECTION 4: Debounce pour éviter les events multiples
+      if (isNavigatingRef.current) return
+
       const dir = e.deltaY > 0 ? 'down' : 'up'
       navigateToSection(dir)
     }
@@ -80,6 +99,9 @@ function App() {
 
   useEffect(() => {
     const handleTouchStart = (e) => {
+      // CORRECTION 5: Vérifier qu'on n'est pas en train de naviguer
+      if (isNavigatingRef.current) return
+
       touchStartRef.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
@@ -87,10 +109,13 @@ function App() {
     }
 
     const handleTouchMove = (e) => {
+      if (isNavigatingRef.current) return
       e.preventDefault()
     }
 
     const handleTouchEnd = (e) => {
+      if (isNavigatingRef.current) return
+
       touchEndRef.current = {
         x: e.changedTouches[0].clientX,
         y: e.changedTouches[0].clientY,
@@ -127,6 +152,8 @@ function App() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (isNavigatingRef.current) return
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
         navigateToSection('down')
@@ -151,7 +178,6 @@ function App() {
           height: '100vh',
           overflow: 'hidden',
           position: 'relative',
-          // AJOUT : Utiliser flexbox pour gérer l'espace
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -159,14 +185,14 @@ function App() {
         <Header />
         <main
           style={{
-            // CHANGEMENT : Utiliser flex: 1 au lieu de height: 100vh
             flex: 1,
-            minHeight: 0, // Important pour que flex fonctionne correctement
-            overflow: 'auto',
+            minHeight: 0,
+            overflow: 'hidden', // CORRECTION 6: Changer 'auto' en 'hidden' pour éviter le scroll
             transition: 'all 0.6s ease-in-out',
-            // AJOUT : S'assurer que le main se comporte comme un conteneur flex
             display: 'flex',
             flexDirection: 'column',
+            // CORRECTION 7: S'assurer de la position relative pour les animations
+            position: 'relative',
           }}
         >
           <Outlet />
