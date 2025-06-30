@@ -4,6 +4,9 @@ import sophieBluelCover from '../img/imgPortfolio/sophieBluel.webp'
 import sophieBluelLogo from '../img/imgPortfolio/sophieBluelLogo.webp'
 import ohMyFoodCover from '../img/imgPortfolio/ohMyFood.webp'
 import ohMyFoodLogo from '../img/imgPortfolio/ohMyFoodLogo.webp'
+import portfolioCover from '../img/imgPortfolio/portfolioCover.webp'
+import portfolioLogo from '../img/imgPortfolio/portfolioLogo.webp'
+
 
 export const projects = [
     {
@@ -64,20 +67,19 @@ export const projects = [
     {
         id: 4,
         name: "Mon portfolio",
-        description: "",
-        technologies: ["Angular", "D3.js", "TypeScript", "RxJS", "Material UI"],
-        image: "/images/dashboard-preview.jpg",
-        githubLink: "https://github.com/username/analytics-dashboard",
-        demoLink: "https://analytics-dashboard.vercel.app",
-        creationDate: "2024-02",
-        duration: "2.5 mois",
-        status: "En cours",
+        description: "Dans ce projet, j’ai choisi React et React Router pour développer mon portfolio, alliant performance, modularité et navigation sans rechargement de page. Il présente mon parcours, mes compétences, mes réalisations et permet une navigation dynamique entre les différentes sections.",
+        technologies: ["React", "React Router", "React Responsive", "Sass", "Vite", "ESLint", "gh-pages"],
+        image: portfolioCover,
+        logo: portfolioLogo,
+        githubLink: "https://github.com/roCal93/Romain-Calmelet",
         features: [
-            "Graphiques interactifs",
-            "Données en temps réel",
-            "Export des données",
-            "Thème sombre/clair",
-            "Responsive design"
+            "Navigation entre différentes sections du site grâce à React Router.",
+            "Scroll, drag & drop, navigation au clavier et avec la molette.",
+            "Affichage détaillé d’un projet dans une modale (popup) au clic",
+            "Design responsive pour s’adapter à tous les écrans.",
+            "Navigation fluide entre les pages/sections du portfolio.",
+            "Expérience utilisateur améliorée par des transitions et animations modernes.",
+            "Accessibilité : navigation possible au clavier, organisation sémantique."
         ]
     },
 

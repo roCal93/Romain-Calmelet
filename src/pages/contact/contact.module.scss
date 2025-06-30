@@ -1,4 +1,369 @@
-.container {
+// Styles pour les logos flottants avec collision
+.floatingLogos {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.floatingLogo {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: all;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+  svg {
+    transition: all 0.3s ease;
+  }
+
+  &.inZone {
+    transform: scale(1.2);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+  }
+}
+
+.linkedinLogo {
+  background: linear-gradient(135deg, #0077b5, #00a0dc);
+  color: white;
+}
+
+.githubLogo {
+  background: linear-gradient(135deg, #333, #666);
+  color: white;
+}
+
+// Container doit être en position relative pour les logos absolus
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Zone de détection
+.detectionZone {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  z-index: 5;
+
+  &.active {
+    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+
+    .zoneText {
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    .cornerTopLeft,
+    .cornerTopRight,
+    .cornerBottomLeft,
+    .cornerBottomRight {
+      &::before,
+      &::after {
+        background-color: #fff;
+      }
+    }
+  }
+
+  .zoneText {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+
+  // Coins de la zone
+  .cornerTopLeft,
+  .cornerTopRight,
+  .cornerBottomLeft,
+  .cornerBottomRight {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    &::before {
+      width: 100%;
+      height: 2px;
+    }
+
+    &::after {
+      width: 2px;
+      height: 100%;
+    }
+  }
+
+  .cornerTopLeft {
+    top: -2px;
+    left: -2px;
+
+    &::before {
+      top: 0;
+      left: 0;
+    }
+
+    &::after {
+      top: 0;
+      left: 0;
+    }
+  }
+
+  .cornerTopRight {
+    top: -2px;
+    right: -2px;
+
+    &::before {
+      top: 0;
+      right: 0;
+    }
+
+    &::after {
+      top: 0;
+      right: 0;
+    }
+  }
+
+  .cornerBottomLeft {
+    bottom: -2px;
+    left: -2px;
+
+    &::before {
+      bottom: 0;
+      left: 0;
+    }
+
+    &::after {
+      bottom: 0;
+      left: 0;
+    }
+  }
+
+  .cornerBottomRight {
+    bottom: -2px;
+    right: -2px;
+
+    &::before {
+      bottom: 0;
+      right: 0;
+    }
+
+    &::after {
+      bottom: 0;
+      right: 0;
+    }
+  }
+}
+
+// Animation pour mobile
+@media (max-width: 768px) {
+  .detectionZone {
+    bottom: 60px;
+
+    .zoneText {
+      font-size: 14px;
+    }
+  }
+}
+// Ajouter ces styles à votre fichier contact.module.scss existant
+
+.popupNotification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: white;
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+  max-width: 400px;
+  min-width: 320px;
+
+  @media (max-width: 768px) {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+    min-width: auto;
+  }
+}
+
+.notificationContent {
+  padding: 20px;
+
+  p {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    line-height: 1.4;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.notificationUrl {
+  font-size: 14px;
+  color: #aaa;
+  word-break: break-all;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.notificationActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.notificationButton {
+  flex: 1;
+  background: #0077b5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #005885;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.secondaryButton {
+  flex: 1;
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.interactionHint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+  z-index: 100;
+
+  @media (max-width: 768px) {
+    bottom: 60px;
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+// Amélioration pour les logos quand ils sont dans la zone
+.floatingLogo {
+  &.inZone {
+    filter: drop-shadow(0 0 10px currentColor);
+    transform: scale(1.1);
+  }
 }

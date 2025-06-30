@@ -57,14 +57,18 @@ function Portfolio() {
         >
           GitHub
         </a>
-        <a
-          href={projet.demoLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.demoLink}
-        >
-          Démo Live
-        </a>
+        {projet.name === 'Mon portfolio' ? (
+          ''
+        ) : (
+          <a
+            href={projet.demoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.demoLink}
+          >
+            Démo Live
+          </a>
+        )}
       </div>
     </div>
   ))
