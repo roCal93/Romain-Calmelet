@@ -1,32 +1,31 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import styles from './projectCarousel.module.scss'
 
+const SCROLL_SENSITIVITY = 2
+const SNAP_THRESHOLD = 50
+const VELOCITY_MULTIPLIER = 2
+
 /**
- * ProjectCarousel Component - A horizontal carousel with drag-and-drop,
- * wheel, keyboard navigation, position indicators and arrow navigation
- *
- * @param {Array} cards - Array of elements (React components) to display in the carousel
- * @param {Array} cardsTitle
+ * ProjectCarousel Component - A horizontal carousel with improved touch navigation
  */
 export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
-  // References and state
   const containerRef = useRef(null)
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
-  const dragStartX = useRef(0)
-  const scrollStartX = useRef(0)
-  const hasReachedEnd = useRef(false)
-  const hasReachedStart = useRef(false)
   const [selectedCard, setSelectedCard] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Nouveaux états pour les flèches
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(true)
 
+  // Variables pour le drag
+  const dragStartX = useRef(0)
+  const scrollStartX = useRef(0)
+  const lastMoveTime = useRef(Date.now())
+  const lastMoveX = useRef(0)
+  const velocity = useRef(0)
+
   /**
-   * Updates the index of the card currently in the center of the carousel
-   * Calculates which card is closest to the visible center
+   * Updates the focused card index
    */
   const updateFocusedIndex = useCallback(() => {
     const container = containerRef.current
@@ -49,17 +48,12 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     })
 
     setFocusedIndex(closestIndex)
-
-    // Mettre à jour la visibilité des flèches
     setShowLeftArrow(closestIndex > 0)
     setShowRightArrow(closestIndex < cards.length - 1)
   }, [cards.length])
 
   /**
-   * Scrolls the carousel to a specific card
-   * Centers the target card in the viewport
-   *
-   * @param {number} index - Index of the card to scroll to
+   * Scrolls to a specific card with smooth animation
    */
   const scrollToCard = useCallback(
     (index) => {
@@ -84,34 +78,97 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   )
 
   /**
-   * Navigation avec les flèches
+   * Navigation functions
    */
   const handlePrevious = useCallback(() => {
-    if (focusedIndex === 0) {
-      scrollToCard(cards.length - 1) // Boucle vers la fin
-    } else {
-      scrollToCard(focusedIndex - 1)
-    }
+    const newIndex = focusedIndex > 0 ? focusedIndex - 1 : cards.length - 1
+    scrollToCard(newIndex)
   }, [focusedIndex, cards.length, scrollToCard])
 
   const handleNext = useCallback(() => {
-    if (focusedIndex === cards.length - 1) {
-      scrollToCard(0) // Boucle vers le début
-    } else {
-      scrollToCard(focusedIndex + 1)
-    }
+    const newIndex = focusedIndex < cards.length - 1 ? focusedIndex + 1 : 0
+    scrollToCard(newIndex)
   }, [focusedIndex, cards.length, scrollToCard])
 
   /**
-   * Gère le clic sur une carte
-   * Ouvre la modal avec la carte sélectionnée
+   * Handle touch/mouse start
+   */
+  const handlePointerDown = (e) => {
+    setIsDragging(true)
+    dragStartX.current = e.clientX || e.touches?.[0]?.clientX
+    scrollStartX.current = containerRef.current.scrollLeft
+    lastMoveTime.current = Date.now()
+    lastMoveX.current = dragStartX.current
+    velocity.current = 0
+
+    // Prevent text selection
+    e.preventDefault()
+  }
+
+  /**
+   * Handle touch/mouse move with improved sensitivity
+   */
+  const handlePointerMove = (e) => {
+    if (!isDragging) return
+
+    e.preventDefault()
+    const currentX = e.clientX || e.touches?.[0]?.clientX
+    const deltaX = (dragStartX.current - currentX) * SCROLL_SENSITIVITY
+
+    // Calculate velocity for momentum
+    const currentTime = Date.now()
+    const timeDelta = currentTime - lastMoveTime.current
+    if (timeDelta > 0) {
+      velocity.current = (currentX - lastMoveX.current) / timeDelta
+    }
+
+    lastMoveTime.current = currentTime
+    lastMoveX.current = currentX
+
+    containerRef.current.scrollLeft = scrollStartX.current + deltaX
+  }
+
+  /**
+   * Handle touch/mouse end with snap and momentum
+   */
+  const handlePointerUp = (e) => {
+    if (!isDragging) return
+
+    setIsDragging(false)
+
+    const endX = e.clientX || e.changedTouches?.[0]?.clientX
+    const deltaX = dragStartX.current - endX
+
+    // If it's a tap, not a swipe
+    if (Math.abs(deltaX) < 5) return
+
+    // Determine if we should snap to next/previous card
+    if (Math.abs(deltaX) > SNAP_THRESHOLD || Math.abs(velocity.current) > 0.5) {
+      if (deltaX > 0 || velocity.current < -0.5) {
+        // Swipe left - go to next card
+        handleNext()
+      } else if (deltaX < 0 || velocity.current > 0.5) {
+        // Swipe right - go to previous card
+        handlePrevious()
+      }
+    } else {
+      // Snap to closest card
+      setTimeout(() => {
+        updateFocusedIndex()
+        scrollToCard(focusedIndex)
+      }, 100)
+    }
+  }
+
+  /**
+   * Handle card click
    */
   const handleCardClick = (index, e) => {
-    if (
-      Math.abs(dragStartX.current - (e.clientX || e.touches?.[0]?.clientX)) > 5
-    ) {
-      return
-    }
+    // Ensure it's not a drag
+    const deltaX = Math.abs(
+      dragStartX.current - (e.clientX || e.touches?.[0]?.clientX)
+    )
+    if (deltaX > 5) return
 
     setSelectedCard(index)
     setIsModalOpen(true)
@@ -119,71 +176,19 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   }
 
   /**
-   * Ferme le modal et réinitialise la carte
+   * Close modal
    */
   const closeModal = () => {
     setIsModalOpen(false)
     setTimeout(() => {
       setSelectedCard(null)
       document.body.style.overflow = 'unset'
+      containerRef.current?.focus()
     }, 300)
   }
 
   /**
-   * Effect to center margins on load
-   */
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const firstItem = container.querySelector(`.${styles.carouselItem}`)
-    if (firstItem) {
-      // Récupérer le gap calculé depuis les styles CSS
-      const computedStyle = window.getComputedStyle(container)
-      const gapValue = parseFloat(computedStyle.gap) || 16 // fallback à 16px si gap non défini
-
-      const margin =
-        (container.clientWidth - firstItem.offsetWidth) / 2 - gapValue / 2
-
-      const items = container.querySelectorAll(`.${styles.carouselItem}`)
-
-      items[0].style.marginLeft = `${Math.max(0, margin)}px`
-      items[items.length - 1].style.marginRight = `${Math.max(0, margin)}px`
-    }
-  }, [cards])
-
-  /**
-   * Effect to handle scroll event
-   */
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    let scrollTimeout
-    const handleScroll = () => {
-      clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(() => {
-        updateFocusedIndex()
-
-        const maxScroll = container.scrollWidth - container.clientWidth
-        const currentScroll = container.scrollLeft
-
-        if (currentScroll > 10 && currentScroll < maxScroll - 10) {
-          hasReachedEnd.current = false
-          hasReachedStart.current = false
-        }
-      }, 50)
-    }
-
-    container.addEventListener('scroll', handleScroll)
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-      clearTimeout(scrollTimeout)
-    }
-  }, [updateFocusedIndex])
-
-  /**
-   * Keyboard navigation handler
+   * Keyboard navigation
    */
   const handleKeyDown = useCallback(
     (e) => {
@@ -204,129 +209,83 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
           e.preventDefault()
           scrollToCard(cards.length - 1)
           break
+        case 'Escape':
+          if (isModalOpen) closeModal()
+          break
       }
     },
-    [handlePrevious, handleNext, cards.length, scrollToCard]
+    [handlePrevious, handleNext, cards.length, scrollToCard, isModalOpen]
   )
 
   /**
-   * Start of drag-and-drop (mouse or touch)
+   * Scroll event handler
    */
-  const handlePointerDown = (e) => {
-    setIsDragging(true)
-    dragStartX.current = e.clientX || e.touches?.[0]?.clientX
-    scrollStartX.current = containerRef.current.scrollLeft
-    hasReachedEnd.current = false
-    hasReachedStart.current = false
-  }
-
-  /**
-   * Movement during drag-and-drop
-   */
-  const handlePointerMove = (e) => {
-    if (!isDragging) return
-
-    const currentX = e.clientX || e.touches?.[0]?.clientX
-    const deltaX = dragStartX.current - currentX
+  useEffect(() => {
     const container = containerRef.current
-    const newScrollLeft = scrollStartX.current + deltaX
+    if (!container) return
 
-    const maxScroll = container.scrollWidth - container.clientWidth
-
-    if (newScrollLeft >= maxScroll) {
-      container.scrollLeft = maxScroll
-      hasReachedEnd.current = true
-    } else if (newScrollLeft <= 0) {
-      container.scrollLeft = 0
-      hasReachedStart.current = true
-    } else {
-      container.scrollLeft = newScrollLeft
+    let scrollTimeout
+    const handleScroll = () => {
+      if (!isDragging) {
+        clearTimeout(scrollTimeout)
+        scrollTimeout = setTimeout(updateFocusedIndex, 50)
+      }
     }
-  }
+
+    container.addEventListener('scroll', handleScroll)
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+      clearTimeout(scrollTimeout)
+    }
+  }, [updateFocusedIndex, isDragging])
 
   /**
-   * End of drag-and-drop
+   * Initial focus
    */
-  const handlePointerUp = (e) => {
-    if (isDragging) {
-      const endX = e.clientX || e.changedTouches?.[0]?.clientX
-      const deltaX = dragStartX.current - endX
-
-      if (Math.abs(deltaX) < 2) {
-        setIsDragging(false)
-        return
-      }
-
-      setIsDragging(false)
-
-      const velocity = Math.abs(deltaX) / 100
-      const swipeThreshold = 5
-      const velocityThreshold = 0.1
-
-      if (
-        hasReachedEnd.current &&
-        deltaX > swipeThreshold &&
-        velocity > velocityThreshold
-      ) {
-        scrollToCard(0)
-      } else if (
-        hasReachedStart.current &&
-        deltaX < -swipeThreshold &&
-        velocity > velocityThreshold
-      ) {
-        scrollToCard(cards.length - 1)
-      }
-
-      setTimeout(updateFocusedIndex, 100)
-    }
-  }
+  useEffect(() => {
+    containerRef.current?.focus()
+  }, [])
 
   /**
-   * Effect to handle mouse wheel
+   * Mouse wheel support
    */
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
     const handleWheel = (e) => {
-      if (e.deltaY !== 0) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault()
-
-        const maxScroll = container.scrollWidth - container.clientWidth
-        const currentScroll = container.scrollLeft
-
-        if (currentScroll >= maxScroll - 1 && e.deltaY > 0) {
-          scrollToCard(0)
-        } else if (currentScroll <= 1 && e.deltaY < 0) {
-          scrollToCard(cards.length - 1)
-        } else {
-          container.scrollLeft = currentScroll + e.deltaY * 120
-        }
+        container.scrollLeft += e.deltaY * 2
       }
     }
 
     container.addEventListener('wheel', handleWheel, { passive: false })
     return () => container.removeEventListener('wheel', handleWheel)
-  }, [cards.length, scrollToCard])
+  }, [])
 
   /**
-   * Effect to handle Escape key for modal
+   * Center first and last items on mount
    */
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isModalOpen) {
-        closeModal()
-      }
-    }
+    const container = containerRef.current
+    if (!container) return
 
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [isModalOpen])
+    const items = container.querySelectorAll(`.${styles.carouselItem}`)
+    if (items.length > 0) {
+      const itemWidth = items[0].offsetWidth
+      const containerWidth = container.clientWidth
+      const margin = (containerWidth - itemWidth) / 2
+
+      // Apply margins to first and last items
+      items[0].style.marginLeft = `${margin}px`
+      items[items.length - 1].style.marginRight = `${margin}px`
+    }
+  }, [cards])
 
   return (
     <>
       <div className={styles.carouselWrapper}>
-        {/* Main carousel container */}
         <div
           ref={containerRef}
           className={`${styles.carouselContainer} allowScroll`}
@@ -339,97 +298,78 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
           onTouchStart={handlePointerDown}
           onTouchMove={handlePointerMove}
           onTouchEnd={handlePointerUp}
-          style={{
-            cursor: isDragging ? 'grabbing' : 'grab',
-            userSelect: 'none',
-          }}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
-          {cardsTitle.map((cardsTitle, index) => (
+          {cardsTitle.map((title, index) => (
             <div
               key={index}
               className={styles.carouselItem}
               aria-selected={index === focusedIndex}
-              onClick={(e) => handleCardClick(index, e)}
+              onMouseUp={(e) => handleCardClick(index, e)}
+              onTouchEnd={(e) => handleCardClick(index, e)}
             >
-              {cardsTitle}
+              {title}
             </div>
           ))}
         </div>
 
-        {/* Indicateur avec flèches intégrées */}
         <div className={styles.navigationWrapper}>
-          {/* Flèche gauche */}
-          <button
-            className={`${styles.arrowButton} ${styles.arrowLeft} ${
-              !showLeftArrow ? styles.hidden : ''
-            }`}
-            onClick={handlePrevious}
-            aria-label="Projet précédent"
-            disabled={!showLeftArrow && !cards.length}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className={styles.navigationBar}>
+            <button
+              className={`${styles.arrowButton} ${styles.arrowLeft} ${
+                !showLeftArrow ? styles.hidden : ''
+              }`}
+              onClick={handlePrevious}
+              aria-label="Projet précédent"
             >
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 18L9 12L15 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
 
-          {/* Indicateur de position */}
-          <div className={styles.carouselIndicator}>
-            {cards.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.dot} ${
-                  index === focusedIndex ? styles.active : ''
-                }`}
-                onClick={() => scrollToCard(index)}
-                aria-label={`Go to project ${index + 1}`}
-              />
-            ))}
+            <div className={styles.carouselIndicator}>
+              {cards.map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.dot} ${
+                    index === focusedIndex ? styles.active : ''
+                  }`}
+                  onClick={() => scrollToCard(index)}
+                  aria-label={`Aller au projet ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              className={`${styles.arrowButton} ${styles.arrowRight} ${
+                !showRightArrow ? styles.hidden : ''
+              }`}
+              onClick={handleNext}
+              aria-label="Projet suivant"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 18L15 12L9 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
-
-          {/* Flèche droite */}
-          <button
-            className={`${styles.arrowButton} ${styles.arrowRight} ${
-              !showRightArrow ? styles.hidden : ''
-            }`}
-            onClick={handleNext}
-            aria-label="Projet suivant"
-            disabled={!showRightArrow && !cards.length}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9 18L15 12L9 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
       </div>
 
-      {/* Modal pour la carte agrandie */}
       {isModalOpen && (
         <div
-          className={`${styles.modal} ${isModalOpen ? styles.modalOpen : ''}`}
+          className={`${styles.modal} ${styles.modalOpen}`}
           onClick={closeModal}
         >
           <div
