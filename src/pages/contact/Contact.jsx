@@ -103,11 +103,11 @@ function Contact() {
     () => ({
       linkedin: {
         x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
-        y: isMobile ? window.innerHeight - 300 : window.innerHeight - 380,
+        y: isMobile ? window.innerHeight - 260 : window.innerHeight - 380,
       },
       github: {
         x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
-        y: isMobile ? window.innerHeight - 230 : window.innerHeight - 280,
+        y: isMobile ? window.innerHeight - 180 : window.innerHeight - 280,
       },
     }),
     [isMobile]
