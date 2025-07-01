@@ -17,6 +17,7 @@ function App() {
   const navigate = useNavigate()
   const containerRef = useRef(null)
   const isNavigatingRef = useRef(false)
+  const lastWheelTimeRef = useRef(0) // Pour le debounce du wheel
 
   const touchStartRef = useRef({ x: 0, y: 0 })
   const touchEndRef = useRef({ x: 0, y: 0 })
@@ -46,43 +47,48 @@ function App() {
       setDirection(direction)
       isNavigatingRef.current = true
 
-      // CORRECTION 1: Déclencher la navigation après avoir défini la direction
+      // Navigation immédiate avec requestAnimationFrame pour synchronisation
       requestAnimationFrame(() => {
         navigate(SECTIONS[nextIndex].path)
       })
 
-      // CORRECTION 2: Ajuster le timeout selon la durée de transition CSS
+      // Reset du flag après la durée de transition
       setTimeout(() => {
         isNavigatingRef.current = false
-      }, 600) // Correspond à la transition CSS de 0.6s
+      }, 700) // Légèrement plus long que la transition CSS
     },
     [getCurrentSectionIndex, navigate]
   )
 
-  // CORRECTION 3: Synchroniser avec le changement de route
+  // Synchronisation avec les changements de route
   useEffect(() => {
-    // Reset du flag de navigation quand la route change effectivement
     const timer = setTimeout(() => {
       isNavigatingRef.current = false
-    }, 650) // Légèrement plus long que la transition
+    }, 750)
 
     return () => clearTimeout(timer)
   }, [location.pathname])
 
   useEffect(() => {
     const handleWheel = (e) => {
-      // Vérifier si on est dans une zone qui doit pouvoir scroller
+      // Vérifier si on est dans une zone scrollable
       if (
         e.target.closest('.allowScroll') ||
         e.target.closest('.features') ||
-        e.target.closest('[class*="features"]')
-      )
+        e.target.closest('[class*="features"]') ||
+        e.target.closest('.scrollable')
+      ) {
         return
+      }
 
       e.preventDefault()
 
-      // CORRECTION 4: Debounce pour éviter les events multiples
-      if (isNavigatingRef.current) return
+      // Debounce pour éviter les events multiples
+      const now = Date.now()
+      if (now - lastWheelTimeRef.current < 100 || isNavigatingRef.current) {
+        return
+      }
+      lastWheelTimeRef.current = now
 
       const dir = e.deltaY > 0 ? 'down' : 'up'
       navigateToSection(dir)
@@ -99,8 +105,16 @@ function App() {
 
   useEffect(() => {
     const handleTouchStart = (e) => {
-      // CORRECTION 5: Vérifier qu'on n'est pas en train de naviguer
       if (isNavigatingRef.current) return
+
+      // Vérifier si le touch est dans une zone scrollable
+      if (
+        e.target.closest('.allowScroll') ||
+        e.target.closest('.features') ||
+        e.target.closest('.scrollable')
+      ) {
+        return
+      }
 
       touchStartRef.current = {
         x: e.touches[0].clientX,
@@ -110,11 +124,30 @@ function App() {
 
     const handleTouchMove = (e) => {
       if (isNavigatingRef.current) return
+
+      // Ne pas empêcher le scroll dans les zones autorisées
+      if (
+        e.target.closest('.allowScroll') ||
+        e.target.closest('.features') ||
+        e.target.closest('.scrollable')
+      ) {
+        return
+      }
+
       e.preventDefault()
     }
 
     const handleTouchEnd = (e) => {
       if (isNavigatingRef.current) return
+
+      // Vérifier les zones scrollables
+      if (
+        e.target.closest('.allowScroll') ||
+        e.target.closest('.features') ||
+        e.target.closest('.scrollable')
+      ) {
+        return
+      }
 
       touchEndRef.current = {
         x: e.changedTouches[0].clientX,
@@ -124,7 +157,8 @@ function App() {
       const deltaX = touchEndRef.current.x - touchStartRef.current.x
       const deltaY = touchEndRef.current.y - touchStartRef.current.y
 
-      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
+      // Seuil minimum pour éviter les micro-mouvements
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 80) {
         const dir = deltaY > 0 ? 'up' : 'down'
         navigateToSection(dir)
       }
@@ -154,12 +188,25 @@ function App() {
     const handleKeyDown = (e) => {
       if (isNavigatingRef.current) return
 
-      if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault()
         navigateToSection('down')
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault()
         navigateToSection('up')
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        if (getCurrentSectionIndex() !== 0) {
+          setDirection('up')
+          navigate(SECTIONS[0].path)
+        }
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        const lastIndex = SECTIONS.length - 1
+        if (getCurrentSectionIndex() !== lastIndex) {
+          setDirection('down')
+          navigate(SECTIONS[lastIndex].path)
+        }
       }
     }
 
@@ -168,7 +215,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [navigateToSection])
+  }, [navigateToSection, navigate, getCurrentSectionIndex])
 
   return (
     <NavigationContext.Provider value={{ direction }}>
@@ -186,12 +233,10 @@ function App() {
         <main
           style={{
             flex: 1,
-            minHeight: 0,
-            overflow: 'hidden', // CORRECTION 6: Changer 'auto' en 'hidden' pour éviter le scroll
+            overflow: 'hidden',
             transition: 'all 0.6s ease-in-out',
             display: 'flex',
             flexDirection: 'column',
-            // CORRECTION 7: S'assurer de la position relative pour les animations
             position: 'relative',
           }}
         >

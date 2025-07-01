@@ -1,156 +1,387 @@
-import { useEffect, useState, useContext, useRef, useCallback } from 'react'
+import {
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './contact.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 
+/**
+ * Fonction utilitaire pour limiter la fréquence d'appel d'une fonction
+ * @param {Function} func - Fonction à throttler
+ * @param {number} delay - Délai minimum entre les appels en ms
+ * @returns {Function} Fonction throttlée
+ */
+const throttle = (func, delay) => {
+  let lastCall = 0
+  return (...args) => {
+    const now = new Date().getTime()
+    if (now - lastCall < delay) return
+    lastCall = now
+    return func(...args)
+  }
+}
+
+/**
+ * Détecte si le navigateur est Safari
+ * @returns {boolean} True si Safari, false sinon
+ */
+const isSafari = () => {
+  const ua = navigator.userAgent.toLowerCase()
+  return ua.indexOf('safari') > -1 && ua.indexOf('chrome') === -1
+}
+
+/**
+ * Composant Contact avec interaction gamifiée
+ * Permet d'accéder aux profils LinkedIn et GitHub via deux modes :
+ * - Mode simple : clic direct sur les logos
+ * - Mode jeu : guider les logos vers une zone de drop
+ */
 function Contact() {
+  // ==================== ÉTATS ET CONTEXTE ====================
+
+  // État pour l'animation d'entrée de page
   const [isVisible, setIsVisible] = useState(false)
   const { direction } = useContext(NavigationContext)
+
+  // Références DOM
   const containerRef = useRef(null)
   const linkedinRef = useRef(null)
   const githubRef = useRef(null)
   const animationRef = useRef(null)
   const mouseRef = useRef({ x: 0, y: 0 })
 
-  // États pour gérer les popups bloqués
+  // États pour contrôler le jeu
+  const [gameStarted, setGameStarted] = useState(false)
+  const [userActivated, setUserActivated] = useState(false)
+
+  // États pour gérer les popups bloqués par le navigateur
   const [pendingUrl, setPendingUrl] = useState(null)
   const [showNotification, setShowNotification] = useState(false)
-  const [userHasInteracted, setUserHasInteracted] = useState(false)
+  const [notificationType, setNotificationType] = useState('error')
 
-  // Refs pour gérer les clics automatiques
+  // Références pour éviter les clics multiples
   const hasClickedRef = useRef({
     linkedin: false,
     github: false,
   })
 
-  // État pour montrer quand un logo est dans la zone
+  // Références pour suivre si chaque logo a été touché par la souris
+  const logoTouchedByMouseRef = useRef({
+    linkedin: false,
+    github: false,
+  })
+
+  // État pour indiquer quand un logo est dans la zone de drop
   const [logoInZone, setLogoInZone] = useState({
     linkedin: false,
     github: false,
   })
 
+  // ==================== CONFIGURATION RESPONSIVE ====================
+
   // Détection des différentes tailles d'écran
   const isMobile = useMediaQuery({ maxWidth: 768 })
   const isTablet = useMediaQuery({ minWidth: 769, maxWidth: 1024 })
 
-  // Facteur de vitesse selon la taille d'écran
+  // Facteurs de vitesse selon la taille d'écran
   const speedFactor = isMobile ? 0.8 : isTablet ? 0.9 : 1
-  const baseSpeed = 4 // Vitesse de base
+  const baseSpeed = 4
 
-  // Taille de la zone de détection
+  // Taille de la zone de détection selon l'écran
   const detectionZoneSize = isMobile ? 120 : 180
 
-  // États des logos
+  // ==================== POSITIONS STATIQUES ====================
+
+  // Positions initiales des logos (calculées une seule fois)
+  const staticPositions = useMemo(
+    () => ({
+      linkedin: {
+        x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
+        y: isMobile ? window.innerHeight - 300 : window.innerHeight - 380,
+      },
+      github: {
+        x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
+        y: isMobile ? window.innerHeight - 230 : window.innerHeight - 280,
+      },
+    }),
+    [isMobile]
+  )
+
+  // ==================== ÉTAT DES LOGOS ====================
+
+  // Configuration initiale des logos avec leurs propriétés
   const [logos, setLogos] = useState([
     {
       id: 'linkedin',
-      x: 50,
-      y: 50,
-      dx: baseSpeed * speedFactor,
-      dy: 1.5 * speedFactor,
+      x: staticPositions.linkedin.x,
+      y: staticPositions.linkedin.y,
+      dx: baseSpeed * speedFactor, // Vitesse horizontale
+      dy: 1.5 * speedFactor, // Vitesse verticale
       color: 'linkedin',
       size: isMobile ? 40 : 60,
       baseSpeed: baseSpeed * speedFactor,
-      url: 'https://www.linkedin.com/in/votre-profil', // Remplacez par votre URL
+      url: 'https://www.linkedin.com/in/romain-calmelet',
     },
     {
       id: 'github',
-      x: 200,
-      y: 150,
-      dx: -baseSpeed * speedFactor,
-      dy: -2.2 * speedFactor,
+      x: staticPositions.github.x,
+      y: staticPositions.github.y,
+      dx: -baseSpeed * speedFactor, // Vitesse horizontale négative
+      dy: -2.2 * speedFactor, // Vitesse verticale négative
       color: 'github',
       size: isMobile ? 40 : 60,
       baseSpeed: baseSpeed * speedFactor,
-      url: 'https://github.com/votre-username', // Remplacez par votre URL
+      url: 'https://github.com/RoCal93',
     },
   ])
 
-  // Détecter la première interaction de l'utilisateur
-  useEffect(() => {
-    const handleFirstInteraction = () => {
-      setUserHasInteracted(true)
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
+  // ==================== GESTIONNAIRES D'ÉVÉNEMENTS ====================
 
-    document.addEventListener('click', handleFirstInteraction)
-    document.addEventListener('touchstart', handleFirstInteraction)
+  /**
+   * Démarre le mode jeu et repositionne les logos aléatoirement
+   */
+  const startGame = useCallback(() => {
+    setGameStarted(true)
+    setUserActivated(true)
 
-    return () => {
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
+    // Stocker le timestamp pour valider l'activation utilisateur
+    window.userActivationTime = Date.now()
+
+    // Repositionner les logos à des positions aléatoires
+    setLogos((prevLogos) =>
+      prevLogos.map((logo) => ({
+        ...logo,
+        x: Math.random() * (window.innerWidth - logo.size),
+        y: Math.random() * (window.innerHeight - logo.size - 200), // Éviter la zone du bas
+      }))
+    )
   }, [])
 
-  // Fonction améliorée pour ouvrir les liens
-  const triggerLinkClick = useCallback((url, logoId) => {
-    console.log(`Tentative d'ouverture de ${logoId}: ${url}`)
+  /**
+   * Tente d'ouvrir un lien en gérant les popups bloqués
+   * @param {string} url - URL à ouvrir
+   * @param {string} logoId - Identifiant du logo
+   */
+  const triggerLinkClick = useCallback(
+    (url, logoId) => {
+      console.log(`Tentative d'ouverture de ${logoId}: ${url}`)
 
-    // Essayer d'ouvrir dans un nouvel onglet
-    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+      const timeSinceActivation = Date.now() - (window.userActivationTime || 0)
+      const isRecentlyActivated = timeSinceActivation < 30000 // 30 secondes
 
-    // Vérifier si le popup a été bloqué
-    if (
-      !newWindow ||
-      newWindow.closed ||
-      typeof newWindow.closed === 'undefined'
-    ) {
-      console.warn('Popup bloqué, affichage de la notification')
+      if (userActivated && isRecentlyActivated) {
+        // Gestion spécifique pour Safari
+        if (isSafari()) {
+          window.open(url, '_blank', 'noopener,noreferrer')
+          // Afficher une notification sur Safari (popups souvent bloqués)
+          setPendingUrl(url)
+          setNotificationType('error')
+          setShowNotification(true)
+        } else {
+          // Ouverture normale pour les autres navigateurs
+          window.open(url, '_blank', 'noopener,noreferrer')
+        }
+      } else {
+        // Activation utilisateur expirée ou inexistante
+        setPendingUrl(url)
+        setNotificationType('error')
+        setShowNotification(true)
+      }
+    },
+    [userActivated]
+  )
 
-      // Afficher la notification avec le lien en attente
+  /**
+   * Gère les clics directs sur les logos en mode statique
+   * @param {string} url - URL à ouvrir
+   * @param {string} logoId - Identifiant du logo
+   */
+  const handleStaticLogoClick = useCallback((url, logoId) => {
+    console.log(`Clic direct sur ${logoId}: ${url}`)
+
+    if (isSafari()) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+      // Notification pour Safari
       setPendingUrl(url)
+      setNotificationType('error')
       setShowNotification(true)
+    } else {
+      // Ouverture directe pour les autres navigateurs
+      window.open(url, '_blank', 'noopener,noreferrer')
     }
   }, [])
 
-  // Gestionnaire pour le clic sur la notification
-  const handleNotificationClick = useCallback(() => {
-    if (pendingUrl) {
-      // Deuxième tentative avec l'action directe de l'utilisateur
-      const newWindow = window.open(pendingUrl, '_blank', 'noopener,noreferrer')
+  /**
+   * Gère la navigation au clavier (accessibilité)
+   * @param {KeyboardEvent} e - Événement clavier
+   * @param {Object} logo - Objet logo
+   */
+  const handleKeyDown = useCallback(
+    (e, logo) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        if (!gameStarted) {
+          handleStaticLogoClick(logo.url, logo.id)
+        }
+      }
+    },
+    [gameStarted, handleStaticLogoClick]
+  )
 
-      // Si ça échoue encore, on redirige dans le même onglet
-      if (!newWindow || newWindow.closed) {
+  /**
+   * Gère le clic sur la notification de popup bloqué
+   */
+  const handleNotificationClick = useCallback(() => {
+    if (pendingUrl && notificationType === 'error') {
+      try {
+        window.open(pendingUrl, '_blank', 'noopener,noreferrer')
+        setShowNotification(false)
+        setPendingUrl(null)
+      } catch (error) {
+        console.error('Erreur lors de la seconde tentative:', error)
+        // Fallback : demander confirmation pour ouverture dans la même fenêtre
         if (
           window.confirm(
-            "Impossible d'ouvrir dans un nouvel onglet. Ouvrir dans la fenêtre actuelle ?"
+            "Impossible d'ouvrir le lien. Ouvrir dans la fenêtre actuelle ?"
           )
         ) {
           window.location.href = pendingUrl
         }
       }
-
-      setShowNotification(false)
-      setPendingUrl(null)
     }
-  }, [pendingUrl])
+  }, [pendingUrl, notificationType])
 
-  // Fermer la notification
+  /**
+   * Ferme la notification
+   */
   const closeNotification = useCallback(() => {
     setShowNotification(false)
     setPendingUrl(null)
   }, [])
 
-  // Mise à jour de la position de la souris
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const container = containerRef.current
-      if (!container) return
+  // ==================== EFFETS ====================
 
-      const rect = container.getBoundingClientRect()
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+  /**
+   * Test de détection des popups bloqués au montage du composant
+   */
+  useEffect(() => {
+    const testPopupBlocker = () => {
+      const testWindow = window.open(
+        '',
+        '',
+        'width=1,height=1,top=-100,left=-100'
+      )
+      if (
+        !testWindow ||
+        testWindow.closed ||
+        typeof testWindow.closed == 'undefined'
+      ) {
+        console.log('Popups bloqués détectés')
+        return true
+      }
+      testWindow.close()
+      return false
+    }
+
+    if (testPopupBlocker()) {
+      console.log('Note: Les popups semblent être bloqués sur ce navigateur')
+    }
+  }, [])
+
+  /**
+   * Gestion du redimensionnement de fenêtre
+   * Recalcule les positions statiques des logos
+   */
+  useEffect(() => {
+    const handleResize = () => {
+      const newStaticPositions = {
+        linkedin: {
+          x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
+          y: isMobile ? window.innerHeight - 360 : window.innerHeight - 380,
+        },
+        github: {
+          x: isMobile ? window.innerWidth - 90 : window.innerWidth - 110,
+          y: isMobile ? window.innerHeight - 260 : window.innerHeight - 280,
+        },
+      }
+
+      // Mettre à jour les positions seulement si le jeu n'a pas commencé
+      if (!gameStarted) {
+        setLogos((prevLogos) =>
+          prevLogos.map((logo) => ({
+            ...logo,
+            x: newStaticPositions[logo.id].x,
+            y: newStaticPositions[logo.id].y,
+          }))
+        )
       }
     }
 
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [gameStarted, isMobile])
+
+  /**
+   * Gestionnaire de mouvement de souris avec throttle pour les performances
+   */
+  const handleMouseMove = useMemo(
+    () =>
+      throttle((e) => {
+        const container = containerRef.current
+        if (!container) return
+
+        const rect = container.getBoundingClientRect()
+        mouseRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        }
+      }, 16), // ~60fps
+    []
+  )
+
+  /**
+   * Écoute des mouvements de souris en mode jeu
+   */
+  useEffect(() => {
+    if (!gameStarted) return
+
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+  }, [gameStarted, handleMouseMove])
 
-  // Mise à jour de la vitesse quand la taille d'écran change
+  /**
+   * Support du touch pour les appareils mobiles
+   */
+  useEffect(() => {
+    if (!gameStarted || !isMobile) return
+
+    const container = containerRef.current
+    if (!container) return
+
+    const handleTouchMove = (e) => {
+      e.preventDefault()
+      const touch = e.touches[0]
+      const rect = container.getBoundingClientRect()
+
+      mouseRef.current = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      }
+    }
+
+    container.addEventListener('touchmove', handleTouchMove, { passive: false })
+    return () => container.removeEventListener('touchmove', handleTouchMove)
+  }, [gameStarted, isMobile])
+
+  /**
+   * Mise à jour des propriétés des logos lors du changement de taille d'écran
+   */
   useEffect(() => {
     setLogos((prevLogos) =>
       prevLogos.map((logo) => ({
@@ -169,28 +400,39 @@ function Contact() {
     )
   }, [isMobile, isTablet, speedFactor])
 
+  /**
+   * Animation d'entrée de page
+   */
   useEffect(() => {
     setIsVisible(true)
     return () => setIsVisible(false)
   }, [])
 
-  // Animation principale
+  /**
+   * BOUCLE D'ANIMATION PRINCIPALE
+   * Gère le mouvement des logos, les collisions et les interactions
+   */
   useEffect(() => {
-    // Fonction pour vérifier si un logo est dans la zone de détection
+    if (!gameStarted) return
+
+    /**
+     * Vérifie si un logo est dans la zone de détection
+     * @param {Object} logo - Objet logo
+     * @param {number} containerWidth - Largeur du conteneur
+     * @param {number} containerHeight - Hauteur du conteneur
+     * @returns {Object} Informations sur la zone
+     */
     const checkLogoInDetectionZone = (
       logo,
       containerWidth,
       containerHeight
     ) => {
-      // Position du centre de la zone de détection
       const zoneX = containerWidth / 2 - detectionZoneSize / 2
-      const zoneY = containerHeight - detectionZoneSize - 80 // 80px du bas
+      const zoneY = containerHeight - detectionZoneSize - 80
 
-      // Centre du logo
       const logoCenterX = logo.x + logo.size / 2
       const logoCenterY = logo.y + logo.size / 2
 
-      // Vérifier si le centre du logo est dans la zone
       const isInZone =
         logoCenterX >= zoneX &&
         logoCenterX <= zoneX + detectionZoneSize &&
@@ -200,6 +442,10 @@ function Contact() {
       return { isInZone, zoneX, zoneY }
     }
 
+    /**
+     * Fonction d'animation principale
+     * Exécutée à chaque frame pour mettre à jour les positions des logos
+     */
     const animate = () => {
       setLogos((prevLogos) => {
         const container = containerRef.current
@@ -209,7 +455,6 @@ function Contact() {
         const containerWidth = containerRect.width
         const containerHeight = containerRect.height
 
-        // Objet temporaire pour stocker l'état des logos dans la zone
         const tempLogoInZone = { linkedin: false, github: false }
 
         const updatedLogos = prevLogos.map((logo, index) => {
@@ -218,7 +463,7 @@ function Contact() {
           let newDx = logo.dx
           let newDy = logo.dy
 
-          // Vérifier si le logo est dans la zone de détection
+          // Vérification de la zone de détection
           const { isInZone } = checkLogoInDetectionZone(
             { ...logo, x: newX, y: newY },
             containerWidth,
@@ -227,51 +472,44 @@ function Contact() {
 
           tempLogoInZone[logo.id] = isInZone
 
+          // Déclenchement du clic si le logo est dans la zone et a été touché
           if (isInZone) {
-            if (!hasClickedRef.current[logo.id]) {
-              // Marquer comme cliqué immédiatement pour éviter les multiples déclenchements
+            if (
+              !hasClickedRef.current[logo.id] &&
+              logoTouchedByMouseRef.current[logo.id]
+            ) {
               hasClickedRef.current[logo.id] = true
-
-              // Ajouter un délai avant de déclencher le clic
-              setTimeout(() => {
-                triggerLinkClick(logo.url, logo.id)
-              }, 100) // 100ms de délai
+              triggerLinkClick(logo.url, logo.id)
             }
           } else {
-            // Réinitialiser le flag quand le logo sort de la zone
             hasClickedRef.current[logo.id] = false
           }
 
-          // Vérification de collision avec la souris
+          // INTERACTION AVEC LA SOURIS
           const mouseX = mouseRef.current.x
           const mouseY = mouseRef.current.y
-
-          // Centre du logo
           const logoCenterX = logo.x + logo.size / 2
           const logoCenterY = logo.y + logo.size / 2
 
-          // Distance entre la souris et le centre du logo
           const distanceToMouse = Math.sqrt(
             Math.pow(mouseX - logoCenterX, 2) +
               Math.pow(mouseY - logoCenterY, 2)
           )
 
-          // Zone de détection (rayon du logo + marge)
-          const detectionRadius = logo.size / 2 + 30 // 30px de marge
+          const detectionRadius = logo.size / 2 + 30
 
-          // Si la souris est proche du logo
           if (distanceToMouse < detectionRadius && distanceToMouse > 0) {
-            // Calculer l'angle entre la souris et le centre du logo
-            const angle = Math.atan2(logoCenterY - mouseY, logoCenterX - mouseX)
+            // Marquer le logo comme touché par la souris
+            logoTouchedByMouseRef.current[logo.id] = true
 
-            // Force de répulsion inversement proportionnelle à la distance
+            // Calcul de la force de répulsion
+            const angle = Math.atan2(logoCenterY - mouseY, logoCenterX - mouseX)
             const repulsionForce = (1 - distanceToMouse / detectionRadius) * 3
 
-            // Ajouter la force de répulsion à la vitesse existante
             newDx += Math.cos(angle) * repulsionForce
             newDy += Math.sin(angle) * repulsionForce
 
-            // Limiter la vitesse maximale pour éviter des mouvements trop rapides
+            // Limitation de la vitesse maximale
             const maxSpeed = logo.baseSpeed * 2
             const currentSpeed = Math.sqrt(newDx * newDx + newDy * newDy)
 
@@ -280,33 +518,33 @@ function Contact() {
               newDy = (newDy / currentSpeed) * maxSpeed
             }
           } else {
-            // Ramener progressivement à la vitesse de base si on est loin de la souris
+            // Régulation de la vitesse quand pas d'interaction
             const currentSpeed = Math.sqrt(newDx * newDx + newDy * newDy)
 
             if (currentSpeed > logo.baseSpeed) {
-              // Réduire progressivement la vitesse
               const speedReduction = 0.98
               newDx *= speedReduction
               newDy *= speedReduction
             } else if (currentSpeed < logo.baseSpeed * 0.5) {
-              // Augmenter la vitesse si elle est trop faible
               const speedIncrease = 1.1
               newDx *= speedIncrease
               newDy *= speedIncrease
             }
           }
 
-          // Rebond sur les bords (avec conservation de la vitesse)
+          // GESTION DES REBONDS SUR LES BORDS
           if (newX <= 0 || newX >= containerWidth - logo.size) {
             newDx = -newDx
             newX = Math.max(0, Math.min(containerWidth - logo.size, newX))
+            logoTouchedByMouseRef.current[logo.id] = false
           }
           if (newY <= 0 || newY >= containerHeight - logo.size) {
             newDy = -newDy
             newY = Math.max(0, Math.min(containerHeight - logo.size, newY))
+            logoTouchedByMouseRef.current[logo.id] = false
           }
 
-          // Vérification des collisions avec les autres logos
+          // GESTION DES COLLISIONS ENTRE LOGOS
           const otherLogos = prevLogos.filter((_, i) => i !== index)
           otherLogos.forEach((otherLogo) => {
             const centerX1 = newX + logo.size / 2
@@ -322,12 +560,13 @@ function Contact() {
             const collisionDistance = logo.size / 2 + otherLogo.size / 2
 
             if (distance < collisionDistance) {
-              // Échange des vitesses pour un rebond plus réaliste
+              // Inversion et amortissement de la vitesse
               const tempDx = newDx
               const tempDy = newDy
-              newDx = -tempDx * 0.9 // Légère perte d'énergie
+              newDx = -tempDx * 0.9
               newDy = -tempDy * 0.9
 
+              // Séparation des logos qui se chevauchent
               const angle = Math.atan2(centerY1 - centerY2, centerX1 - centerX2)
               const separationDistance = collisionDistance + 2
 
@@ -337,6 +576,7 @@ function Contact() {
               newX = newCenterX - logo.size / 2
               newY = newCenterY - logo.size / 2
 
+              // Vérification des limites après séparation
               newX = Math.max(0, Math.min(containerWidth - logo.size, newX))
               newY = Math.max(0, Math.min(containerHeight - logo.size, newY))
             }
@@ -351,23 +591,27 @@ function Contact() {
           }
         })
 
-        // Mettre à jour l'état des logos dans la zone
+        // Mise à jour de l'état des logos dans la zone
         setLogoInZone(tempLogoInZone)
-
         return updatedLogos
       })
 
+      // Programmer la prochaine frame
       animationRef.current = requestAnimationFrame(animate)
     }
 
+    // Démarrer l'animation
     animationRef.current = requestAnimationFrame(animate)
 
+    // Nettoyage à la désactivation
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [detectionZoneSize, triggerLinkClick])
+  }, [gameStarted, detectionZoneSize, triggerLinkClick])
+
+  // ==================== RENDU ====================
 
   return (
     <div
@@ -382,40 +626,75 @@ function Contact() {
       <div className={styles.container} ref={containerRef}>
         <ArrowUp />
 
-        {/* Zone de détection */}
-        <div
-          className={`${styles.detectionZone} ${
-            logoInZone.linkedin || logoInZone.github ? styles.active : ''
-          }`}
-          style={{
-            width: `${detectionZoneSize}px`,
-            height: `${detectionZoneSize}px`,
-          }}
-        >
-          <span className={styles.zoneText}>Drop Zone</span>
-          <div className={styles.cornerTopLeft}></div>
-          <div className={styles.cornerTopRight}></div>
-          <div className={styles.cornerBottomLeft}></div>
-          <div className={styles.cornerBottomRight}></div>
-        </div>
+        {/* ÉCRAN DE DÉMARRAGE */}
+        {!gameStarted && (
+          <div className={styles.startScreen}>
+            <div className={styles.startContent}>
+              <h2>Contact Interactif</h2>
+              <p>Deux modes pour accéder à mes profils :</p>
+              <ul>
+                <li>
+                  <strong>Mode simple :</strong> Cliquez directement sur les
+                  logos en bas à droite
+                </li>
+                <li>
+                  <strong>Mode jeu :</strong> Guidez les logos vers la zone de
+                  drop avec votre souris !
+                </li>
+              </ul>
+              <div className={styles.startButtons}>
+                <button onClick={startGame} className={styles.startButton}>
+                  🎮 Commencer le jeu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Logos animés avec collision */}
+        {/* ZONE DE DÉTECTION (visible seulement en mode jeu) */}
+        {gameStarted && (
+          <div
+            className={`${styles.detectionZone} ${
+              logoInZone.linkedin || logoInZone.github ? styles.active : ''
+            }`}
+            style={{
+              width: `${detectionZoneSize}px`,
+              height: `${detectionZoneSize}px`,
+            }}
+          >
+            <span className={styles.zoneText}>Drop Zone</span>
+          </div>
+        )}
+
+        {/* LOGOS FLOTTANTS */}
         <div className={styles.floatingLogos}>
           {logos.map((logo) => (
             <div
               key={logo.id}
               ref={logo.id === 'linkedin' ? linkedinRef : githubRef}
               className={`${styles.floatingLogo} ${styles[`${logo.id}Logo`]} ${
-                logoInZone[logo.id] ? styles.inZone : ''
-              }`}
+                gameStarted && logoInZone[logo.id] ? styles.inZone : ''
+              } ${
+                gameStarted && logoTouchedByMouseRef.current[logo.id]
+                  ? styles.touched
+                  : ''
+              } ${!gameStarted ? styles.static : ''}`}
               style={{
                 left: `${logo.x}px`,
                 top: `${logo.y}px`,
                 width: `${logo.size}px`,
                 height: `${logo.size}px`,
-                transition: 'none',
+                transition: gameStarted ? 'none' : 'all 0.3s ease',
               }}
+              onClick={() =>
+                !gameStarted && handleStaticLogoClick(logo.url, logo.id)
+              }
+              onKeyDown={(e) => handleKeyDown(e, logo)}
+              tabIndex={!gameStarted ? 0 : -1}
+              role="button"
+              aria-label={`Ouvrir le profil ${logo.id}`}
             >
+              {/* LOGO LINKEDIN */}
               {logo.id === 'linkedin' ? (
                 <svg
                   width={isMobile ? '20' : '30'}
@@ -426,6 +705,7 @@ function Contact() {
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                 </svg>
               ) : (
+                /* LOGO GITHUB */
                 <svg
                   width={isMobile ? '20' : '30'}
                   height={isMobile ? '20' : '30'}
@@ -439,26 +719,44 @@ function Contact() {
           ))}
         </div>
 
-        {/* Notification pour les popups bloqués */}
+        {/* MESSAGE D'AIDE (visible seulement en mode jeu) */}
+        {gameStarted && (
+          <div className={styles.interactionHint}>
+            <p>
+              Approchez votre souris des logos, puis poussez-les dans la zone
+              pour ouvrir les liens
+            </p>
+          </div>
+        )}
+
+        {/* NOTIFICATION POUR LES POPUPS BLOQUÉS */}
         {showNotification && (
-          <div className={styles.popupNotification}>
+          <div
+            className={`${styles.popupNotification} ${styles[notificationType]}`}
+          >
             <div className={styles.notificationContent}>
-              <p>Le lien a été bloqué par votre navigateur.</p>
-              <p className={styles.notificationUrl}>{pendingUrl}</p>
-              <div className={styles.notificationActions}>
-                <button
-                  onClick={handleNotificationClick}
-                  className={styles.notificationButton}
-                >
-                  Ouvrir le lien
-                </button>
-                <button
-                  onClick={closeNotification}
-                  className={styles.secondaryButton}
-                >
-                  Annuler
-                </button>
-              </div>
+              {notificationType === 'error' ? (
+                <>
+                  <p>Votre navigateur a bloqué l'ouverture du lien.</p>
+                  <p className={styles.notificationUrl}>{pendingUrl}</p>
+                  <div className={styles.notificationActions}>
+                    <button
+                      onClick={handleNotificationClick}
+                      className={styles.notificationButton}
+                    >
+                      Ouvrir
+                    </button>
+                    <button
+                      onClick={closeNotification}
+                      className={styles.secondaryButton}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className={styles.successMessage}>{pendingUrl}</p>
+              )}
             </div>
             <button
               onClick={closeNotification}
@@ -467,13 +765,6 @@ function Contact() {
             >
               ✕
             </button>
-          </div>
-        )}
-
-        {/* Message d'aide si l'utilisateur n'a pas encore interagi */}
-        {!userHasInteracted && (
-          <div className={styles.interactionHint}>
-            <p>Cliquez n'importe où pour activer les liens</p>
           </div>
         )}
       </div>

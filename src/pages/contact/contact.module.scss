@@ -29,6 +29,32 @@
   &.inZone {
     transform: scale(1.2);
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+
+  // NOUVEAU: Amélioration pour l'accessibilité - focus visible
+  &:focus {
+    outline: 2px solid #4ecdc4;
+    outline-offset: 4px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  // NOUVEAU: Style pour le mode statique
+  &.static {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  // NOUVEAU: Animation quand touché
+  &.touched {
+    animation: pulse 0.3s ease;
   }
 }
 
@@ -51,6 +77,87 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 2rem;
+}
+
+// NOUVEAU: Styles pour l'écran de démarrage
+.startScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+}
+
+.startContent {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  text-align: center;
+  color: white;
+
+  h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin: 20px 0 30px 0;
+
+    li {
+      margin-bottom: 15px;
+      padding-left: 25px;
+      position: relative;
+
+      &:before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: #4ecdc4;
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+.startButton {
+  padding: 15px 30px;
+  background: #4ecdc4;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #45b7b0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+  }
+}
+
+// NOUVEAU: Styles pour les boutons
+.startButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
 }
 
 // Zone de détection
@@ -78,16 +185,6 @@
       color: #fff;
       transform: scale(1.1);
     }
-
-    .cornerTopLeft,
-    .cornerTopRight,
-    .cornerBottomLeft,
-    .cornerBottomRight {
-      &::before,
-      &::after {
-        background-color: #fff;
-      }
-    }
   }
 
   .zoneText {
@@ -99,108 +196,9 @@
     transition: all 0.3s ease;
     user-select: none;
   }
-
-  // Coins de la zone
-  .cornerTopLeft,
-  .cornerTopRight,
-  .cornerBottomLeft,
-  .cornerBottomRight {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      background-color: rgba(255, 255, 255, 0.6);
-      transition: all 0.3s ease;
-    }
-
-    &::before {
-      width: 100%;
-      height: 2px;
-    }
-
-    &::after {
-      width: 2px;
-      height: 100%;
-    }
-  }
-
-  .cornerTopLeft {
-    top: -2px;
-    left: -2px;
-
-    &::before {
-      top: 0;
-      left: 0;
-    }
-
-    &::after {
-      top: 0;
-      left: 0;
-    }
-  }
-
-  .cornerTopRight {
-    top: -2px;
-    right: -2px;
-
-    &::before {
-      top: 0;
-      right: 0;
-    }
-
-    &::after {
-      top: 0;
-      right: 0;
-    }
-  }
-
-  .cornerBottomLeft {
-    bottom: -2px;
-    left: -2px;
-
-    &::before {
-      bottom: 0;
-      left: 0;
-    }
-
-    &::after {
-      bottom: 0;
-      left: 0;
-    }
-  }
-
-  .cornerBottomRight {
-    bottom: -2px;
-    right: -2px;
-
-    &::before {
-      bottom: 0;
-      right: 0;
-    }
-
-    &::after {
-      bottom: 0;
-      right: 0;
-    }
-  }
 }
 
-// Animation pour mobile
-@media (max-width: 768px) {
-  .detectionZone {
-    bottom: 60px;
-
-    .zoneText {
-      font-size: 14px;
-    }
-  }
-}
-// Ajouter ces styles à votre fichier contact.module.scss existant
-
+// MODIFICATION: Amélioration de la notification
 .popupNotification {
   position: fixed;
   top: 20px;
@@ -211,9 +209,18 @@
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  animation: slideIn 0.3s ease-out;
   max-width: 400px;
   min-width: 320px;
+  animation: slideInBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // NOUVEAU: Styles pour succès et erreur
+  &.success {
+    background: #4caf50;
+  }
+
+  &.error {
+    background: #333;
+  }
 
   @media (max-width: 768px) {
     right: 10px;
@@ -221,6 +228,14 @@
     max-width: calc(100% - 20px);
     min-width: auto;
   }
+}
+
+// NOUVEAU: Message de succès
+.successMessage {
+  font-size: 16px;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
 }
 
 .notificationContent {
@@ -339,6 +354,31 @@
   }
 }
 
+// NOUVEAU: Animation slideInBounce
+@keyframes slideInBounce {
+  0% {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-10px) scale(1.02);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+// NOUVEAU: Animation fadeIn
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -360,10 +400,259 @@
   }
 }
 
-// Amélioration pour les logos quand ils sont dans la zone
-.floatingLogo {
-  &.inZone {
-    filter: drop-shadow(0 0 10px currentColor);
-    transform: scale(1.1);
+// AMÉLIORATION: Responsive amélioré
+@media (max-width: 768px) {
+  .detectionZone {
+    bottom: 60px;
+
+    .zoneText {
+      font-size: 14px;
+    }
+  }
+
+  // NOUVEAU: Responsive pour l'écran de démarrage
+  .startContent {
+    padding: 20px;
+    margin: 20px;
+
+    h2 {
+      font-size: 24px;
+    }
+
+    p,
+    li {
+      font-size: 14px;
+    }
+  }
+
+  .startButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .startButton {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+
+  .interactionHint {
+    display: none;
+  }
+}
+
+// NOUVEAU: Support pour tablettes
+@media (min-width: 769px) and (max-width: 1024px) {
+  .startContent {
+    padding: 30px;
+
+    h2 {
+      font-size: 28px;
+    }
+
+    p,
+    li {
+      font-size: 16px;
+    }
+  }
+
+  .detectionZone {
+    bottom: 70px;
+
+    .zoneText {
+      font-size: 16px;
+    }
+  }
+}
+
+// NOUVEAU: Support pour le mode sombre/clair du système
+@media (prefers-color-scheme: light) {
+  .floatingLogo {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .detectionZone {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.05);
+
+    .zoneText {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    &.active {
+      border-color: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+
+      .zoneText {
+        color: #333;
+      }
+    }
+  }
+
+  .startScreen {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .startContent {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #333;
+
+    h2,
+    h3 {
+      color: #0077b5;
+    }
+
+    ul li:before {
+      color: #0077b5;
+    }
+  }
+
+  .interactionHint {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .popupNotification {
+    &.error {
+      background: #fff;
+      color: #333;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .notificationUrl {
+      background: rgba(0, 0, 0, 0.05);
+      color: #666;
+    }
+
+    .closeButton {
+      color: #333;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    .secondaryButton {
+      border-color: rgba(0, 0, 0, 0.2);
+      color: #333;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+}
+
+// NOUVEAU: Support pour les écrans haute résolution
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+
+  .startContent {
+    max-width: 800px;
+
+    h2 {
+      font-size: 40px;
+    }
+
+    p,
+    li {
+      font-size: 20px;
+    }
+  }
+
+  .detectionZone {
+    .zoneText {
+      font-size: 22px;
+    }
+  }
+}
+
+// NOUVEAU: Animations supplémentaires pour les interactions
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(10px);
+  }
+}
+
+// NOUVEAU: Classes utilitaires pour les animations
+.animate-bounce {
+  animation: bounceIn 0.6s ease;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease;
+}
+
+// NOUVEAU: Support pour la réduction de mouvement
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .floatingLogo {
+    &.touched {
+      animation: none;
+    }
+  }
+
+  .interactionHint {
+    animation: none;
+    opacity: 1;
+  }
+
+  .popupNotification {
+    animation: none;
+  }
+}
+
+// NOUVEAU: Support pour l'impression (au cas où)
+@media print {
+  .floatingLogos,
+  .detectionZone,
+  .interactionHint,
+  .popupNotification,
+  .startScreen {
+    display: none !important;
   }
 }
