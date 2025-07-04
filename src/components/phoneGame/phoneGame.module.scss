@@ -1,0 +1,298 @@
+/* ===== STYLES DE BASE ===== */
+.container {
+  width: 100%;
+  margin: 2rem;
+}
+
+/* ===== ÉCRAN DE DÉMARRAGE ===== */
+.startScreen {
+  text-align: center;
+
+  .title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .description,
+  .hint,
+  .warning {
+    margin-bottom: 10px;
+  }
+
+  .startButton {
+    padding: 10px 20px;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f0f0f0;
+    }
+  }
+}
+
+/* ===== ZONE DE JEU ===== */
+.gameArea {
+  text-align: center;
+}
+
+.header {
+  .gameTitle {
+    font-size: 24px;
+    margin: 0;
+  }
+}
+
+/* ===== SLOTS (EMPLACEMENTS) ===== */
+.slotsContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &:nth-child(1) {
+    width: 180px;
+    height: 300px;
+  }
+
+  &:nth-child(2) {
+    width: 180px;
+    height: 300px;
+    margin-left: -15px;
+  }
+
+  &:nth-child(3) {
+    width: 300px;
+    height: 300px;
+    margin-left: -15px;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #cfa76c;
+    border-radius: 50%;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @media (max-width: 600px) {
+    &:nth-child(1) {
+      width: 70px;
+      height: 70px;
+    }
+
+    &:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      margin-left: 0;
+      margin-top: -20px;
+    }
+
+    &:nth-child(3) {
+      width: 90px;
+      height: 90px;
+      margin-left: 0;
+      margin-top: -25px;
+    }
+
+    &::before {
+      width: 15px;
+      height: 15px;
+    }
+  }
+}
+
+.emptySlot {
+  text-align: center;
+  position: relative;
+
+  .slotHint {
+    position: absolute;
+    font-size: 14px;
+    transform: translate(-50%, 70%);
+  }
+}
+
+/* ===== BARRE DE STATUT ===== */
+.statusBar {
+  font-weight: bold;
+  transition: color 0.3s ease;
+
+  &.success {
+    color: #0f0;
+  }
+
+  &.error {
+    color: red;
+  }
+}
+
+/* ===== CONTENEUR DES IMAGES DISPONIBLES ===== */
+
+.imagesList {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
+
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+  }
+}
+
+.imageItem {
+  cursor: grab;
+  transition: opacity 0.3s ease;
+
+  &:active {
+    cursor: grabbing;
+
+    .imageIcon {
+      animation-play-state: paused;
+    }
+  }
+
+  &.placed {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+/* ===== TAILLES SPÉCIFIQUES PAR ROUE ===== */
+/* Dans les slots */
+.slotImage {
+  object-fit: contain;
+  position: relative;
+  display: block;
+
+  &.wheel1 {
+    width: 230px;
+    height: 230px;
+    animation: rotateClockwise 5s linear infinite;
+    transform-origin: center center;
+
+    @media (max-width: 600px) {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  &.wheel2 {
+    width: 241px;
+    height: 241px;
+    animation: rotateCounterClockwise 5.29s linear infinite;
+    transform-origin: center center;
+
+    @media (max-width: 600px) {
+      width: 45px;
+      height: 45px;
+    }
+  }
+
+  &.wheel3 {
+    width: 300px;
+    height: 300px;
+    animation: rotateCounterClockwise 6.76s linear infinite;
+    transform-origin: center center;
+
+    @media (max-width: 600px) {
+      width: 60px;
+      height: 60px;
+    }
+  }
+}
+
+/* Dans la liste */
+.imageIcon {
+  object-fit: contain;
+
+  &.wheel1 {
+    width: 50px;
+    height: 50px;
+    animation: rotateClockwise 5s linear infinite;
+    @media (max-width: 600px) {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  &.wheel2 {
+    width: 100px;
+    height: 100px;
+    animation: rotateCounterClockwise 5.29s linear infinite;
+    @media (max-width: 600px) {
+      width: 45px;
+      height: 45px;
+    }
+  }
+
+  &.wheel3 {
+    width: 150px;
+    height: 150px;
+    animation: rotateCounterClockwise 6.76s linear infinite;
+
+    @media (max-width: 600px) {
+      width: 60px;
+      height: 60px;
+    }
+  }
+}
+
+/* ===== BOUTON RETOUR ===== */
+.backButton {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+
+  &:hover {
+    background: #f0f0f0;
+    transform: translateX(-3px);
+  }
+
+  @media (max-width: 600px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* ===== ANIMATIONS DE ROTATION ===== */
+@keyframes rotateClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateCounterClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
