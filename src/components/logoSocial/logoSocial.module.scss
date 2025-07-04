@@ -1,0 +1,59 @@
+.staticLogo {
+  transition: all 0.3s ease;
+  opacity: 0.7;
+  animation: fadeInLogo 0.5s ease-out;
+
+  @media (max-width: 767px) {
+    opacity: 0.8;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  &:focus {
+    outline: none;
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #007bff;
+    outline-offset: 2px;
+  }
+
+  &:nth-child(1) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+}
+
+.logoSvg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: filter 0.3s ease;
+
+  &:hover {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+}
+
+@keyframes fadeInLogo {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 0.7;
+    transform: translateX(0);
+  }
+}

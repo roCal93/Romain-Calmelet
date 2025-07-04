@@ -24,6 +24,10 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   const lastMoveX = useRef(0)
   const velocity = useRef(0)
 
+  // Nouvelles variables pour détecter tap vs swipe
+  const dragStartTime = useRef(0)
+  const hasMoved = useRef(false)
+
   /**
    * Updates the focused card index
    */
@@ -101,8 +105,14 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
     lastMoveX.current = dragStartX.current
     velocity.current = 0
 
-    // Prevent text selection
-    e.preventDefault()
+    // Nouvelles variables pour détecter le tap vs swipe
+    dragStartTime.current = Date.now()
+    hasMoved.current = false
+
+    // Prevent text selection seulement si possible
+    if (e.cancelable) {
+      e.preventDefault()
+    }
   }
 
   /**
@@ -111,9 +121,16 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   const handlePointerMove = (e) => {
     if (!isDragging) return
 
-    e.preventDefault()
+    // Essayer preventDefault seulement si l'événement le permet
+    if (e.cancelable) {
+      e.preventDefault()
+    }
+
     const currentX = e.clientX || e.touches?.[0]?.clientX
     const deltaX = (dragStartX.current - currentX) * SCROLL_SENSITIVITY
+
+    // Marquer qu'il y a eu un mouvement
+    hasMoved.current = true
 
     // Calculate velocity for momentum
     const currentTime = Date.now()
@@ -161,14 +178,25 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   }
 
   /**
-   * Handle card click
+   * Handle card click - version améliorée pour détecter tap vs swipe
    */
   const handleCardClick = (index, e) => {
-    // Ensure it's not a drag
+    const currentTime = Date.now()
+    const timeDelta = currentTime - dragStartTime.current
+
     const deltaX = Math.abs(
-      dragStartX.current - (e.clientX || e.touches?.[0]?.clientX)
+      dragStartX.current - (e.clientX || e.changedTouches?.[0]?.clientX || 0)
     )
-    if (deltaX > 5) return
+
+    // Conditions strictes pour détecter un vrai tap :
+    // 1. Pas de mouvement détecté (hasMoved = false)
+    // 2. Distance faible (deltaX < 10)
+    // 3. Durée courte (< 300ms)
+    // 4. Pas en cours de drag
+    const isRealTap =
+      !hasMoved.current && deltaX < 10 && timeDelta < 300 && !isDragging
+
+    if (!isRealTap) return
 
     setSelectedCard(index)
     setIsModalOpen(true)
@@ -247,6 +275,94 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
   }, [])
 
   /**
+   * Touch event handlers with proper passive event handling
+   */
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleTouchStart = (e) => {
+      setIsDragging(true)
+      dragStartX.current = e.touches?.[0]?.clientX
+      scrollStartX.current = container.scrollLeft
+      lastMoveTime.current = Date.now()
+      lastMoveX.current = dragStartX.current
+      velocity.current = 0
+
+      dragStartTime.current = Date.now()
+      hasMoved.current = false
+    }
+
+    const handleTouchMove = (e) => {
+      if (!isDragging) return
+
+      e.preventDefault()
+      const currentX = e.touches?.[0]?.clientX
+      const deltaX = (dragStartX.current - currentX) * SCROLL_SENSITIVITY
+
+      hasMoved.current = true
+
+      const currentTime = Date.now()
+      const timeDelta = currentTime - lastMoveTime.current
+      if (timeDelta > 0) {
+        velocity.current = (currentX - lastMoveX.current) / timeDelta
+      }
+
+      lastMoveTime.current = currentTime
+      lastMoveX.current = currentX
+
+      container.scrollLeft = scrollStartX.current + deltaX
+    }
+
+    const handleTouchEnd = (e) => {
+      if (!isDragging) return
+
+      setIsDragging(false)
+
+      const endX = e.changedTouches?.[0]?.clientX
+      const deltaX = dragStartX.current - endX
+
+      if (Math.abs(deltaX) < 5) return
+
+      if (
+        Math.abs(deltaX) > SNAP_THRESHOLD ||
+        Math.abs(velocity.current) > 0.5
+      ) {
+        if (deltaX > 0 || velocity.current < -0.5) {
+          handleNext()
+        } else if (deltaX < 0 || velocity.current > 0.5) {
+          handlePrevious()
+        }
+      } else {
+        setTimeout(() => {
+          updateFocusedIndex()
+          scrollToCard(focusedIndex)
+        }, 100)
+      }
+    }
+
+    // Ajouter les événements tactiles avec les bonnes options
+    container.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    })
+    container.addEventListener('touchmove', handleTouchMove, { passive: false })
+    container.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart)
+      container.removeEventListener('touchmove', handleTouchMove)
+      container.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [
+    isDragging,
+    handleNext,
+    handlePrevious,
+    updateFocusedIndex,
+    scrollToCard,
+    focusedIndex,
+  ])
+
+  /**
    * Mouse wheel support
    */
   useEffect(() => {
@@ -295,9 +411,6 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerUp}
           onMouseLeave={handlePointerUp}
-          onTouchStart={handlePointerDown}
-          onTouchMove={handlePointerMove}
-          onTouchEnd={handlePointerUp}
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
           {cardsTitle.map((title, index) => (
@@ -305,8 +418,7 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
               key={index}
               className={styles.carouselItem}
               aria-selected={index === focusedIndex}
-              onMouseUp={(e) => handleCardClick(index, e)}
-              onTouchEnd={(e) => handleCardClick(index, e)}
+              onClick={(e) => handleCardClick(index, e)}
             >
               {title}
             </div>
@@ -369,7 +481,7 @@ export default function ProjectCarousel({ cards = [], cardsTitle = [] }) {
 
       {isModalOpen && (
         <div
-          className={`${styles.modal} ${styles.modalOpen}`}
+          className={`${styles.modal} ${styles.modalOpen} allowScroll`}
           onClick={closeModal}
         >
           <div
