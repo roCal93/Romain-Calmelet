@@ -7,16 +7,21 @@
   padding: 0 1rem;
   max-width: 90%;
   min-width: 80%;
-
   @media (max-width: 767px) {
-    padding: 1rem;
-    max-width: 95%;
+    padding: 0;
+    width: 100%;
+  }
+  @media (max-width: 1000px) {
+    top: 45%;
   }
 
   h2 {
     font-size: clamp(1.5rem, 4vw, 2rem);
     color: #333;
     margin: 0 0 2rem 0;
+    @media (max-width: 767px) {
+      margin-bottom: 1rem;
+    }
   }
 
   p {
@@ -30,9 +35,9 @@
     text-align: center;
     margin-bottom: 2rem;
     max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-
+    @media (max-width: 767px) {
+      margin: 0;
+    }
     li {
       margin-bottom: 0.5rem;
       color: #555;
@@ -46,13 +51,14 @@
 
 .gameButtons {
   display: flex;
-  gap: 2rem;
+  gap: 0rem;
   flex-direction: column;
   align-items: center;
 
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: center;
+    gap: 2rem;
   }
 }
 
@@ -72,13 +78,13 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 
   @media (min-width: 768px) {
-    width: 45%;
     max-width: none;
   }
 
   @media (max-width: 767px) {
-    padding: 1rem;
-    min-height: 280px;
+    width: 85%;
+    height: 150px;
+    padding: 0.5rem;
   }
 
   &:hover {

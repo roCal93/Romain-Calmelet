@@ -6,7 +6,7 @@ import bigWheel from '../../assets/img/imgPhoneGame/roueGrande.png'
 import PhoneMessage from '../phoneMessage/PhoneMessage'
 
 // Constantes
-const PHONE_NUMBER = '06 12 34 56 78'
+const PHONE_NUMBER = '07 45 22 96 97'
 const RESET_DELAY = 2000
 const CORRECT_SEQUENCE = [2, 1, 3]
 
@@ -178,6 +178,9 @@ function PhoneGame({ backButton }) {
             })}
           </div>
         </div>
+      </div>
+      <div className={styles.interactionHint}>
+        <p>Glissez-déposez les roues dans les emplacements</p>
       </div>
     </div>
   )

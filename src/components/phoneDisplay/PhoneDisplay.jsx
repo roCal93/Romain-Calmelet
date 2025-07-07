@@ -14,8 +14,14 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
       <div className={styles.phoneModal}>
         <div className={styles.phoneContent}>
           <h3> Mes coordonnées</h3>
-          <p className={styles.phoneNumber}>📞 07 45 22 96 97</p>
-          <p className={styles.phoneNumber}>✉️ romaincalmelet@email.com</p>
+          <p className={styles.phoneNumber}>
+            📞
+            <br /> 07 45 22 96 97
+          </p>
+          <p className={styles.phoneNumber}>
+            ✉️
+            <br /> romaincalmelet@gmail.com
+          </p>
           <button
             onClick={() => setShowPhoneNumber(false)}
             className={styles.closeButton}

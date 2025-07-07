@@ -256,6 +256,30 @@
   }
 }
 
+.interactionHint {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+  z-index: 100;
+
+  @media (max-width: 768px) {
+    bottom: 60px;
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
 /* ===== BOUTON RETOUR ===== */
 .backButton {
   padding: 8px 16px;

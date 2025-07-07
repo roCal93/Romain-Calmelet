@@ -38,15 +38,15 @@ function Contact() {
   const staticPositions = useMemo(
     () => ({
       linkedin: {
-        x: isMobile ? windowSize.width - 50 : windowSize.width - 110,
+        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
         y: isMobile ? windowSize.height - 340 : windowSize.height - 460,
       },
       github: {
-        x: isMobile ? windowSize.width - 50 : windowSize.width - 110,
+        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
         y: isMobile ? windowSize.height - 260 : windowSize.height - 360,
       },
       phone: {
-        x: isMobile ? windowSize.width - 50 : windowSize.width - 110,
+        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
         y: isMobile ? windowSize.height - 180 : windowSize.height - 260,
       },
     }),
