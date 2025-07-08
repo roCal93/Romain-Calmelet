@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import styles from './menuMobile.module.scss'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
+
+// Constantes pour la navigation
+const NAVIGATION_ITEMS = [
+  { path: '/Romain-Calmelet/presentation', label: 'PRESENTATION' },
+  { path: '/Romain-Calmelet/portfolio', label: 'PORTFOLIO' },
+  { path: '/Romain-Calmelet/contact', label: 'CONTACT' },
+]
 
 const MenuMobile = ({ onMenuStateChange }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -9,85 +16,139 @@ const MenuMobile = ({ onMenuStateChange }) => {
   const navigate = useNavigate()
   const isNavigatingRef = useRef(false)
 
-  const toggleMenu = () => {
-    const newState = !isOpen
-    console.log('Toggle menu:', newState)
-    setIsOpen(newState)
-    // Informe le parent de l'état du menu
-    if (onMenuStateChange) {
-      onMenuStateChange(newState)
-    }
-  }
+  const toggleMenu = useCallback(() => {
+    setIsOpen((prevState) => {
+      const newState = !prevState
+      onMenuStateChange?.(newState)
+      return newState
+    })
+  }, [onMenuStateChange])
 
-  const handleLinkClick = (path) => {
-    console.log('Link clicked:', path)
+  const closeMenu = useCallback(() => {
+    setIsOpen(false)
+    onMenuStateChange?.(false)
+  }, [onMenuStateChange])
 
-    // Marquer qu'on est en train de naviguer
-    isNavigatingRef.current = true
+  const handleLinkClick = useCallback(
+    (path) => {
+      try {
+        isNavigatingRef.current = true
+        navigate(path)
 
-    // Navigation d'abord
-    navigate(path)
-    console.log('Navigation called')
-
-    // Fermeture du menu après navigation
-    setTimeout(() => {
-      console.log('Closing menu')
-      setIsOpen(false)
-      isNavigatingRef.current = false
-      // Informe le parent que le menu est fermé
-      if (onMenuStateChange) {
-        onMenuStateChange(false)
+        // Utiliser requestAnimationFrame pour une meilleure performance
+        requestAnimationFrame(() => {
+          closeMenu()
+          isNavigatingRef.current = false
+        })
+      } catch (error) {
+        console.error('Navigation error:', error)
+        isNavigatingRef.current = false
       }
-    }, 100)
-  }
+    },
+    [navigate, closeMenu]
+  )
 
+  // Gestion du focus lors de l'ouverture/fermeture
   useEffect(() => {
+    if (isOpen) {
+      // Focus sur le premier lien du menu après l'animation
+      const timeoutId = setTimeout(() => {
+        const firstLink = menuRef.current?.querySelector(
+          'button[role="menuitem"]'
+        )
+        firstLink?.focus()
+      }, 100)
+      return () => clearTimeout(timeoutId)
+    } else {
+      // Retour du focus sur le bouton burger si le menu était ouvert
+      if (document.activeElement?.closest(`.${styles.menuPanel}`)) {
+        buttonRef.current?.focus()
+      }
+    }
+  }, [isOpen])
+
+  // Gestion des événements clavier et clics externes
+  // Gestion des événements clavier et clics externes
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (event) => {
+      const focusableElements = menuRef.current?.querySelectorAll(
+        'button[role="menuitem"]'
+      )
+      const firstElement = focusableElements?.[0]
+      const lastElement = focusableElements?.[focusableElements.length - 1]
+
+      switch (event.key) {
+        case 'Escape': {
+          event.preventDefault()
+          closeMenu()
+          buttonRef.current?.focus()
+          break
+        }
+        case 'Tab': {
+          // Trap focus dans le menu
+          if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault()
+            lastElement?.focus()
+          } else if (
+            !event.shiftKey &&
+            document.activeElement === lastElement
+          ) {
+            event.preventDefault()
+            firstElement?.focus()
+          }
+          break
+        }
+        case 'ArrowDown': {
+          event.preventDefault()
+          const currentIndex = Array.from(focusableElements).indexOf(
+            document.activeElement
+          )
+          const nextElement =
+            focusableElements[currentIndex + 1] || firstElement
+          nextElement?.focus()
+          break
+        }
+        case 'ArrowUp': {
+          event.preventDefault()
+          const currIndex = Array.from(focusableElements).indexOf(
+            document.activeElement
+          )
+          const prevElement = focusableElements[currIndex - 1] || lastElement
+          prevElement?.focus()
+          break
+        }
+        default:
+          break
+      }
+    }
+
     const handleClickOutside = (event) => {
-      // Ne pas fermer le menu si on est en train de naviguer
       if (isNavigatingRef.current) return
 
       if (
-        isOpen &&
         menuRef.current &&
         !menuRef.current.contains(event.target) &&
         buttonRef.current &&
         !buttonRef.current.contains(event.target)
       ) {
-        console.log('Click outside detected')
-        setIsOpen(false)
-        // Informe le parent que le menu est fermé
-        if (onMenuStateChange) {
-          onMenuStateChange(false)
-        }
+        closeMenu()
       }
     }
 
-    const handleKeyDown = (event) => {
-      if (isOpen && event.key === 'Escape') {
-        console.log('Escape key pressed')
-        setIsOpen(false)
-        // Informe le parent que le menu est fermé
-        if (onMenuStateChange) {
-          onMenuStateChange(false)
-        }
-      }
-    }
+    // Délai pour éviter que le clic d'ouverture ferme immédiatement
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+    }, 100)
 
-    // Seulement ajouter les listeners si le menu est ouvert
-    if (isOpen) {
-      // Délai pour éviter que le clic qui ouvre le menu déclenche immédiatement la fermeture
-      const timeoutId = setTimeout(() => {
-        document.addEventListener('mousedown', handleClickOutside)
-        document.addEventListener('keydown', handleKeyDown)
-      }, 100)
-
-      return () => {
-        clearTimeout(timeoutId)
-        document.removeEventListener('mousedown', handleClickOutside)
-        document.removeEventListener('keydown', handleKeyDown)
-      }
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, onMenuStateChange])
+  }, [isOpen, closeMenu])
 
   return (
     <div className={styles.burgerMenu}>
@@ -96,49 +157,48 @@ const MenuMobile = ({ onMenuStateChange }) => {
         className={`${styles.burgerButton} ${isOpen ? styles.open : ''}`}
         onClick={toggleMenu}
         type="button"
-        aria-label="Toggle menu"
+        aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu"
+        aria-haspopup="true"
       >
-        <div className={styles.bar}></div>
-        <div className={styles.bar}></div>
-        <div className={styles.bar}></div>
+        <span className={styles.bar} aria-hidden="true"></span>
+        <span className={styles.bar} aria-hidden="true"></span>
+        <span className={styles.bar} aria-hidden="true"></span>
       </button>
 
-      <div
+      <nav
         ref={menuRef}
+        id="mobile-menu"
         className={`${styles.menuPanel} ${isOpen ? styles.open : ''}`}
+        role="navigation"
+        aria-label="Menu principal"
       >
-        <ul>
-          <li>
-            <button
-              className={styles.link}
-              onClick={() => handleLinkClick('/Romain-Calmelet/presentation')}
-              type="button"
-            >
-              PRESENTATION
-            </button>
-          </li>
-
-          <li>
-            <button
-              className={styles.link}
-              onClick={() => handleLinkClick('/Romain-Calmelet/portfolio')}
-              type="button"
-            >
-              PORTFOLIO
-            </button>
-          </li>
-
-          <li>
-            <button
-              className={styles.link}
-              onClick={() => handleLinkClick('/Romain-Calmelet/contact')}
-              type="button"
-            >
-              CONTACT
-            </button>
-          </li>
+        <ul role="menu">
+          {NAVIGATION_ITEMS.map((item) => (
+            <li key={item.path} role="none">
+              <button
+                className={styles.link}
+                onClick={() => handleLinkClick(item.path)}
+                type="button"
+                role="menuitem"
+                aria-label={`Aller à ${item.label.toLowerCase()}`}
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
         </ul>
-      </div>
+      </nav>
+
+      {/* Backdrop pour mobile */}
+      {isOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
+      )}
     </div>
   )
 }

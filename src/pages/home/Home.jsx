@@ -10,8 +10,12 @@ function Home() {
   const { direction } = useContext(NavigationContext)
 
   useEffect(() => {
-    setIsVisible(true)
-    return () => setIsVisible(false)
+    // Déclencher l'animation après le montage
+    const timer = setTimeout(() => {
+      setIsVisible(true)
+    }, 10) // Petit délai pour assurer le rendu initial
+
+    return () => clearTimeout(timer)
   }, [])
 
   return (

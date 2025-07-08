@@ -4,6 +4,7 @@ import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
 import AutoCarousel from '../../components/autoCarousel/AutoCarousel'
+import FallbackPortrait from '../../components/fallbackPortrait/FallbackPortrait'
 import portraitDesktop from '../../assets/img/portraitRC/portraitDesktop.webp'
 import portraitTablet from '../../assets/img/portraitRC/portraitTablet.webp'
 import portraitMobile from '../../assets/img/portraitRC/portraitMobile.webp'
@@ -11,13 +12,29 @@ import BackgroundPresentation from '../../components/backgroundPresentation/Back
 
 function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
+  const [imageErrorMobile, setImageErrorMobile] = useState(false)
+  const [imageErrorDesktop, setImageErrorDesktop] = useState(false)
   const { direction, resetNavigation } = useContext(NavigationContext)
 
   useEffect(() => {
-    resetNavigation?.() // Forcer le reset
+    resetNavigation?.()
     setIsVisible(true)
-    return () => setIsVisible(false)
+
+    return () => {
+      setIsVisible(false)
+    }
   }, [resetNavigation])
+
+  // Gestionnaires d'erreur séparés pour mobile et desktop
+  const handleMobileImageError = () => {
+    setImageErrorMobile(true)
+    console.error("Erreur lors du chargement de l'image portrait mobile")
+  }
+
+  const handleDesktopImageError = () => {
+    setImageErrorDesktop(true)
+    console.error("Erreur lors du chargement de l'image portrait desktop")
+  }
 
   return (
     <div
@@ -30,17 +47,48 @@ function Presentation() {
       }`}
     >
       <BackgroundPresentation />
-      <div className={styles.container}>
-        <ArrowUp />
-        <div className={styles.aboutMe}>
+
+      <main className={styles.container} role="main">
+        <div className={styles.navUp}>
+          <ArrowUp aria-label="Naviguer vers la section précédente" />
+        </div>
+
+        <article className={styles.aboutMe} aria-labelledby="about-title">
           <div className={styles.text}>
-            <h1>Quelques mots sur moi </h1>
-            <section className={styles.contentSection}>
-              <picture className={styles.floatingImage}>
-                <source srcSet={portraitMobile} media="(max-width: 480px)" />
-                <source srcSet={portraitTablet} media="(max-width: 768px)" />
-                <img src={portraitDesktop} alt="Portrait de Romain Calmelet" />
-              </picture>
+            <header>
+              <h1 id="about-title">Quelques mots sur moi</h1>
+            </header>
+
+            <section
+              className={styles.contentSection}
+              aria-label="Présentation personnelle"
+            >
+              {/* Image flottante pour mobile */}
+              <div className={styles.floatingImage}>
+                {imageErrorMobile ? (
+                  <FallbackPortrait className={styles.fallbackMobile} />
+                ) : (
+                  <picture>
+                    <source
+                      srcSet={portraitMobile}
+                      media="(max-width: 480px)"
+                      type="image/webp"
+                    />
+                    <source
+                      srcSet={portraitTablet}
+                      media="(max-width: 768px)"
+                      type="image/webp"
+                    />
+                    <img
+                      src={portraitDesktop}
+                      alt="Portrait de Romain Calmelet"
+                      loading="lazy"
+                      onError={handleMobileImageError}
+                    />
+                  </picture>
+                )}
+              </div>
+
               <div className={styles.paragraphs}>
                 <p>
                   Après dix années passées dans l'horlogerie, où précision,
@@ -62,21 +110,37 @@ function Presentation() {
                 </p>
               </div>
             </section>
+
             <AutoCarousel />
           </div>
-          <picture className={styles.desktopImage}>
-            <source srcSet={portraitDesktop} media="(min-width: 769px)" />
-            <img
-              className={styles.img}
-              src={portraitDesktop}
-              alt="Portrait de Romain Calmelet"
-            />
-          </picture>
-        </div>
-        <div className={styles.nav}>
-          <ArrowDown />
-        </div>
-      </div>
+
+          {/* Image pour desktop - Plus de retardement */}
+          <aside className={styles.desktopImage} aria-label="Portrait">
+            {imageErrorDesktop ? (
+              <FallbackPortrait className={styles.fallbackDesktop} />
+            ) : (
+              <picture>
+                <source
+                  srcSet={portraitDesktop}
+                  media="(min-width: 769px)"
+                  type="image/webp"
+                />
+                <img
+                  className={styles.img}
+                  src={portraitDesktop}
+                  alt="Portrait de Romain Calmelet"
+                  loading="lazy"
+                  onError={handleDesktopImageError}
+                />
+              </picture>
+            )}
+          </aside>
+        </article>
+
+        <nav className={styles.navDown} aria-label="Navigation entre sections">
+          <ArrowDown aria-label="Naviguer vers la section suivante" />
+        </nav>
+      </main>
     </div>
   )
 }

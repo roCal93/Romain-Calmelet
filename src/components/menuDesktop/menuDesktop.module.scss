@@ -3,30 +3,84 @@
   align-items: center;
   gap: 1.5rem;
   padding: 1rem;
+  list-style: none;
+  margin: 0;
 
   li {
     opacity: 0;
     transform: translateX(30px);
     animation: fadeInFromRight 0.7s ease forwards;
-
-    &:nth-child(1) {
-      animation-delay: 0.9s;
-    }
-    &:nth-child(2) {
-      animation-delay: 0.8s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.7s;
-    }
+    animation-delay: var(--animation-delay, 0.7s);
   }
 
   .link {
     display: block;
+    position: relative;
     transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.5rem 0;
 
     &:hover {
       transform: scale(1.07);
       color: rgb(116, 108, 108);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #007bff;
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    // Indicateur de lien actif
+    &.active {
+      color: rgb(116, 108, 108);
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: currentColor;
+        transform: scaleX(1);
+        transition: transform 0.3s ease;
+      }
+    }
+
+    // Animation de soulignement au hover
+    &:not(.active)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: currentColor;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    &:not(.active):hover::after {
+      transform: scaleX(1);
+    }
+  }
+
+  // Respect des préférences d'accessibilité
+  @media (prefers-reduced-motion: reduce) {
+    li {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .link {
+      transition: none;
+
+      &::after {
+        transition: none;
+      }
     }
   }
 }

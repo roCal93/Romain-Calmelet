@@ -32,8 +32,6 @@ body {
 
 /* Structure de l'application */
 .app-container {
-  height: 100vh;
-  width: 100vw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -150,4 +148,22 @@ table {
   max-width: 100%;
   table-layout: fixed;
   word-wrap: break-word;
+}
+
+@media (min-width: 769px) {
+  .main-content::-webkit-scrollbar,
+  .page-container.scrollable::-webkit-scrollbar {
+    width: 6px; /* Plus fin */
+  }
+
+  .main-content::-webkit-scrollbar-thumb,
+  .page-container.scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15); /* Plus transparent */
+    border-radius: 3px;
+  }
+
+  .main-content,
+  .page-container.scrollable {
+    overflow-y: scroll !important;
+  }
 }

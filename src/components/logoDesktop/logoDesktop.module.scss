@@ -7,7 +7,14 @@
   justify-content: flex-start;
   overflow: hidden;
   cursor: pointer;
+  position: relative; // Ajout pour le positionnement du focus
 
+  // Indicateur de focus visible
+  &:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
   .cWithR {
     height: 70px;
     width: 100%;
@@ -128,5 +135,34 @@
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// Support pour prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+  .bigC,
+  .smallR,
+  .letter {
+    animation: none !important;
+  }
+
+  .cWithR {
+    transition: none !important;
+  }
+
+  // État final des animations pour que le logo reste lisible
+  .bigC {
+    transform: translate(-50%, -50%) rotate(360deg) !important;
+    opacity: 1 !important;
+  }
+
+  .smallR {
+    transform: translate(790%, -50%) scale(1.2) !important;
+    font-weight: 400 !important;
+  }
+
+  .letter {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
   }
 }

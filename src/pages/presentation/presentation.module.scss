@@ -1,157 +1,446 @@
+// Container principal
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: calc(100vh - 80px);
-  padding: 1rem 0;
+  min-height: calc(100vh - 132px);
   position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out forwards;
 
   @media (max-width: 768px) {
-    min-height: calc(100dvh - 60px);
+    min-height: calc(100dvh - 96px);
+  }
+}
+
+// Navigation
+.navUp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: bounceInDown 1s ease-out 0.8s forwards;
+
+  @media (max-width: 768px) {
     padding: 0.5rem 0;
   }
 
-  .aboutMe {
-    display: flex;
-    justify-content: space-between;
+  &:hover {
+    transform: translateY(2px);
+    transition: transform 0.2s ease-out;
+  }
+}
+
+.navDown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 1rem 0;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: bounceInUp 1s ease-out 0.8s forwards;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-out;
+  }
+}
+
+// Section principale
+.aboutMe {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5rem;
+  width: 100%;
+  flex: 1;
+  gap: 2rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideInFromTop 0.8s ease-out 0.4s forwards;
+
+  @media (max-width: 1024px) {
+    padding: 0 3rem;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
     align-items: center;
-    padding: 0 5rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+// Contenu texte
+.text {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  justify-content: center;
+  gap: 1rem;
+
+  @media (max-width: 1024px) {
+    width: 55%;
+  }
+
+  @media (max-width: 768px) {
     width: 100%;
-    flex: 1;
-    gap: 2rem;
+    justify-content: flex-start;
+  }
+
+  h1 {
+    margin: 0 0 0.5rem 0;
+    flex-shrink: 0;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #333;
+    background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    @media (max-width: 880px) {
+      font-size: 25px;
+    }
 
     @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      flex: 1;
+      font-size: 20px;
+      margin-bottom: 1rem;
     }
+  }
+}
 
-    .text {
-      width: 50%;
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-      justify-content: center;
-      gap: 1rem;
+// Section de contenu avec image flottante
+.contentSection {
+  position: relative;
 
-      @media (max-width: 768px) {
-        width: 100%;
-        justify-content: flex-start;
-      }
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
 
-      h1 {
-        margin: 0 0 0.5rem 0;
-        flex-shrink: 0;
+.floatingImage {
+  will-change: transform;
+  transition: transform 0.3s ease;
 
-        @media (max-width: 880px) {
-          font-size: 25px;
-        }
-        @media (max-width: 768px) {
-          font-size: 20px;
-          margin-bottom: 1rem;
-        }
-      }
+  // Caché sur desktop
+  @media (min-width: 769px) {
+    display: none;
+  }
 
-      .contentSection {
-        position: relative;
+  @media (max-width: 768px) {
+    display: block;
+    float: right;
+    width: 50%;
+    margin: 0 0 1rem 1rem;
+    shape-outside: circle(50%);
 
-        @media (max-width: 768px) {
-          margin-bottom: 0.5rem;
-        }
-
-        .floatingImage {
-          display: none;
-
-          @media (max-width: 768px) {
-            display: block;
-            float: right;
-            margin: 0 0 0.5rem 0.5rem;
-            width: 50%;
-            max-width: 300px;
-
-            img {
-              width: 100%;
-              height: auto;
-              border-radius: 50%;
-            }
-          }
-
-          @media (max-width: 480px) {
-            width: 45%;
-            max-width: 180px;
-            margin: 0 0 0.3rem 0.3rem;
-          }
-        }
-
-        .paragraphs {
-          @media (max-width: 768px) {
-            overflow: hidden;
-          }
-        }
-
-        p {
-          margin: 0.5rem 0;
-          font-size: 18px;
-          text-align: left;
-
-          @media (max-width: 1350px) {
-            font-size: 16px;
-          }
-          @media (max-width: 1200px) {
-            font-size: 14px;
-            font-weight: 500;
-          }
-
-          @media (max-width: 768px) {
-            font-size: 16px;
-            line-height: 1.4;
-            margin: 0.3rem 0;
-          }
-          @media (max-width: 480px) {
-            font-size: 14px;
-            line-height: 1.3;
-          }
-        }
-      }
+    img,
+    picture {
+      width: 100%;
+      height: auto;
+      border-radius: 50%; // Image ronde pour mieux s'intégrer
+      object-fit: cover;
+      aspect-ratio: 1; // Force un ratio carré
     }
+  }
 
-    .desktopImage {
-      width: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 0;
+  @media (max-width: 480px) {
+    width: 50%;
+    margin: 0 0 1rem 1rem;
+  }
 
-      @media (max-width: 768px) {
-        display: none;
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.paragraphs {
+  @media (max-width: 768px) {
+    text-align: justify;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+
+      // Meilleure gestion du texte autour de l'image
+      &:first-of-type {
+        min-height: 100px; // Assure que le premier paragraphe entoure l'image
       }
 
-      img {
-        max-width: 100%;
-        max-height: 60vh;
-        height: auto;
-        box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.8);
-        transform-origin: 50% 50%;
-        object-fit: contain;
+      &:last-child {
+        margin-bottom: 0;
       }
     }
   }
 
-  .nav {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding: 1rem 0;
-
-    @media (max-width: 768px) {
-      padding: 0.5rem 0;
+  @media (max-width: 480px) {
+    p {
+      font-size: 1rem; // Texte légèrement plus petit sur mobile
     }
+  }
+}
+
+// Image desktop
+.desktopImage {
+  width: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+
+  @media (max-width: 1024px) {
+    width: 40%;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  picture {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  img {
+    width: 100%; // Change de max-width à width
+    height: auto;
+    max-height: 60vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); // Ombre plus douce
+    object-fit: cover; // Change de contain à cover
+    border-radius: 8px; // Ajoute des coins arrondis
+    will-change: transform;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease-in;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+// Styles Fallback améliorés
+.fallbackMobile {
+  width: 100%;
+  height: 100%;
+  max-width: 150px;
+  max-height: 150px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.fallbackDesktop {
+  width: 100%;
+  max-width: 400px;
+  max-height: 60vh;
+  aspect-ratio: 3/4; // Ratio portrait
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.6s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  }
+}
+
+// Amélioration des performances avec lazy loading
+img {
+  animation: fadeIn 0.5s ease-in;
+}
+
+// Ajout de breakpoints intermédiaires
+@media (max-width: 1200px) and (min-width: 769px) {
+  .aboutMe {
+    padding: 0 4rem;
+  }
+}
+
+@media (max-width: 600px) and (min-width: 481px) {
+  .floatingImage {
+    width: 38%;
+    max-width: 140px;
+  }
+}
+
+// Support pour les écrans haute densité
+@media (-webkit-min-device-pixel-ratio: 2),
+  (min-resolution: 192dpi),
+  (min-resolution: 2dppx) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+// Animations (conservées sans changement)
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+  80% {
+    transform: translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+  80% {
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Accessibilité améliorée
+.navUp > *:focus-visible,
+.navDown > *:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+// Performance
+.floatingImage,
+.desktopImage img,
+.fallbackMobile,
+.fallbackDesktop {
+  will-change: transform;
+  backface-visibility: hidden; // Améliore les performances
+  -webkit-backface-visibility: hidden;
+}
+
+// Animations responsives
+@media (max-width: 768px) {
+  .container {
+    .navUp {
+      animation: bounceInDown 0.8s ease-out 0.5s forwards;
+    }
+
+    .aboutMe {
+      animation: slideInFromTop 0.6s ease-out 0.3s forwards;
+    }
+
+    .navDown {
+      animation: bounceInUp 0.8s ease-out 0.5s forwards;
+    }
+  }
+}
+
+// Préférences de mouvement réduit
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .navUp,
+  .aboutMe,
+  .navDown,
+  img {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+// Print
+@media print {
+  .navUp,
+  .navDown {
+    display: none;
+  }
+
+  .container {
+    min-height: auto;
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .aboutMe {
+    padding: 0;
+    animation: none;
+    opacity: 1;
+    transform: none;
+    flex-direction: row; // Force la mise en page horizontale
+
+    .desktopImage {
+      display: flex; // Affiche l'image desktop en impression
+
+      img {
+        box-shadow: none;
+        max-width: 300px;
+      }
+    }
+  }
+
+  .floatingImage {
+    display: none; // Cache l'image flottante en impression
   }
 }

@@ -7,6 +7,7 @@
   transition: transform 0.2s ease;
   overflow: hidden;
   cursor: pointer;
+
   &:hover {
     transform: scale(1.01);
   }
@@ -45,7 +46,7 @@
   }
 }
 
-// Animation pour la rotation du C toutes les 5s en 0,5s
+// Animation pour la rotation du C
 @keyframes rotateC {
   0% {
     transform: translate(-50%, -50%) rotate(0deg);
@@ -57,6 +58,7 @@
   }
   100% {
     transform: translate(-50%, -50%) rotate(360deg);
+    opacity: 1; // Maintenir l'opacité à 1
   }
 }
 
@@ -81,5 +83,24 @@
   }
   100% {
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+// Support pour prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+  .bigC,
+  .smallR {
+    animation: none !important;
+  }
+
+  .logo {
+    &:hover {
+      transform: none !important;
+    }
+  }
+
+  // État stable pour les animations désactivées
+  .bigC {
+    opacity: 1 !important;
   }
 }

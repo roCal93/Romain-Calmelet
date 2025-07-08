@@ -1,27 +1,33 @@
 import styles from './menuDesktop.module.scss'
-import { Link } from 'react-router'
+import { NavLink } from 'react-router-dom'
+
+const menuItems = [
+  { path: 'presentation', label: 'PRÉSENTATION' },
+  { path: 'portfolio', label: 'PORTFOLIO' },
+  { path: 'contact', label: 'CONTACT' },
+]
 
 const MenuDesktop = () => {
   return (
-    <div>
+    <nav aria-label="Menu principal">
       <ul className={styles.menu}>
-        <li>
-          <Link to="presentation" className={styles.link}>
-            PRESENTATION
-          </Link>
-        </li>
-        <li>
-          <Link to="portfolio" className={styles.link}>
-            PORTFOLIO
-          </Link>
-        </li>
-        <li>
-          <Link to="contact" className={styles.link}>
-            CONTACT
-          </Link>
-        </li>
+        {menuItems.map((item, index) => (
+          <li
+            key={item.path}
+            style={{ '--animation-delay': `${0.9 - index * 0.1}s` }}
+          >
+            <NavLink
+              to={item.path}
+              className={({ isActive }) =>
+                `${styles.link} ${isActive ? styles.active : ''}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          </li>
+        ))}
       </ul>
-    </div>
+    </nav>
   )
 }
 

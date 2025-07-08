@@ -12,7 +12,15 @@
     background: none;
     cursor: pointer;
     padding: 0;
-    z-index: 1001; // S'assurer que le bouton reste au-dessus du menu
+    z-index: 1001;
+    position: relative;
+
+    // Focus visible
+    &:focus-visible {
+      outline: 2px solid #007bff;
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
 
     .bar {
       height: 4px;
@@ -25,44 +33,52 @@
   }
 }
 
-// Animations hover du burger
-.burgerButton:hover .bar:nth-child(1) {
-  transition-delay: 0s;
-  background-color: rgb(116, 108, 108);
-}
-.burgerButton:hover .bar:nth-child(2) {
-  transition-delay: 0.1s;
-  background-color: rgb(116, 108, 108);
-}
-.burgerButton:hover .bar:nth-child(3) {
-  transition-delay: 0.2s;
-  background-color: rgb(116, 108, 108);
-}
+// Animations hover du burger avec délais
+.burgerButton {
+  &:hover .bar {
+    &:nth-child(1) {
+      transition-delay: 0s;
+      background-color: rgb(116, 108, 108);
+    }
+    &:nth-child(2) {
+      transition-delay: 0.1s;
+      background-color: rgb(116, 108, 108);
+    }
+    &:nth-child(3) {
+      transition-delay: 0.2s;
+      background-color: rgb(116, 108, 108);
+    }
+  }
 
-.burgerButton:not(:hover) .bar:nth-child(1) {
-  transition-delay: 0.2s;
-  background-color: #000000;
-}
-.burgerButton:not(:hover) .bar:nth-child(2) {
-  transition-delay: 0.1s;
-  background-color: #000000;
-}
-.burgerButton:not(:hover) .bar:nth-child(3) {
-  transition-delay: 0s;
-  background-color: #000000;
+  &:not(:hover) .bar {
+    &:nth-child(1) {
+      transition-delay: 0.2s;
+      background-color: #000000;
+    }
+    &:nth-child(2) {
+      transition-delay: 0.1s;
+      background-color: #000000;
+    }
+    &:nth-child(3) {
+      transition-delay: 0s;
+      background-color: #000000;
+    }
+  }
 }
 
 // Animation du burger vers X
-.burgerButton.open .bar:nth-child(1) {
-  transform: translateY(12px) rotate(45deg);
-}
-
-.burgerButton.open .bar:nth-child(2) {
-  opacity: 0;
-}
-
-.burgerButton.open .bar:nth-child(3) {
-  transform: translateY(-12px) rotate(-45deg);
+.burgerButton.open {
+  .bar {
+    &:nth-child(1) {
+      transform: translateY(12px) rotate(45deg);
+    }
+    &:nth-child(2) {
+      opacity: 0;
+    }
+    &:nth-child(3) {
+      transform: translateY(-12px) rotate(-45deg);
+    }
+  }
 }
 
 .menuPanel {
@@ -116,6 +132,12 @@
         font-weight: 500;
         transition: all 0.2s ease;
 
+        // Focus visible
+        &:focus-visible {
+          outline: 2px solid #007bff;
+          outline-offset: -2px;
+        }
+
         &:hover {
           color: rgb(116, 108, 108);
           transform: scale(1.05);
@@ -143,16 +165,69 @@
     transform: translateX(0);
 
     // Animation décalée pour chaque item
-    &:nth-child(1) {
-      transition-delay: 0.1s;
+    @for $i from 1 through 3 {
+      &:nth-child(#{$i}) {
+        transition-delay: #{0.1 * $i}s;
+      }
     }
+  }
+}
 
-    &:nth-child(2) {
-      transition-delay: 0.2s;
+// Backdrop
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Support pour prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .menuPanel,
+  .menuPanel li,
+  .link,
+  .backdrop {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  // États finaux pour l'accessibilité
+  .burgerButton.open {
+    .bar {
+      &:nth-child(1) {
+        transform: translateY(12px) rotate(45deg) !important;
+      }
+      &:nth-child(2) {
+        opacity: 0 !important;
+      }
+      &:nth-child(3) {
+        transform: translateY(-12px) rotate(-45deg) !important;
+      }
     }
+  }
 
-    &:nth-child(3) {
-      transition-delay: 0.3s;
+  .menuPanel.open {
+    opacity: 1 !important;
+    transform: translateX(0) translateY(0) !important;
+
+    li {
+      opacity: 1 !important;
+      transform: translateX(0) !important;
     }
   }
 }
@@ -167,5 +242,19 @@
       width: 10rem;
       font-size: 1rem;
     }
+  }
+}
+
+// Pour les écrans tactiles, augmenter les zones de tap
+@media (hover: none) and (pointer: coarse) {
+  .burgerButton {
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+  }
+
+  .link {
+    min-height: 44px;
+    padding: 14px 16px;
   }
 }

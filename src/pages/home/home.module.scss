@@ -1,18 +1,31 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-rows: 1fr auto;
   align-items: center;
   width: 100%;
+  min-height: calc(100vh - 132px);
   padding: 2rem 1rem;
-  min-height: calc(100vh - 132px); // 80px pour le header approximativement
   gap: 2rem;
+  position: relative;
+  overflow-x: hidden;
+  // Animation d'entrée pour le conteneur
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out forwards;
 
   @media (max-width: 768px) {
-    min-height: calc(
-      100dvh - 96px
-    ); // Ajustez selon la hauteur de votre header mobile
+    min-height: calc(100dvh - 96px);
     padding: 1rem;
+    gap: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .intro {
@@ -21,55 +34,113 @@
     align-items: flex-start;
     text-align: left;
     gap: 3rem;
-    width: 60%;
-    flex: 1;
-    justify-content: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    justify-self: center;
 
     @media (max-width: 768px) {
       align-items: center;
       text-align: center;
       gap: 2rem;
-      width: 90%;
+      width: 100%;
     }
 
     h2 {
-      font-size: clamp(50px, 10vw, 100px);
+      font-size: clamp(3rem, 10vw, 6.25rem);
+      font-weight: 700;
+      line-height: 1.1;
       margin: 0;
+      color: #333;
+      background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      // Animation d'apparition
+      opacity: 0;
+      transform: translateY(30px);
+      animation: slideInFromTop 0.8s ease-out 0.2s forwards;
+
+      @media (max-width: 768px) {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+      }
     }
 
-    p {
-      font-size: clamp(24px, 5vw, 45px);
-      margin: 0;
+    // Animation pour le TextIntro
+    > :last-child {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideInFromTop 0.8s ease-out 0.4s forwards;
     }
 
+    @keyframes slideInFromTop {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    // Styles pour le texte alternatif (si c'est dans TextIntro)
     .alternatingText {
       position: relative;
       display: inline-block;
       min-width: 200px;
-      height: 1.2em; // Fixe la hauteur pour éviter les sauts
-    }
+      height: 1.2em;
+      overflow: hidden;
 
-    .alternatingText span {
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      animation: textFade 4s infinite;
-      font-weight: bold;
-    }
-
-    .alternatingText span:nth-child(2) {
-      animation-delay: 2s;
-    }
-
-    @keyframes textFade {
-      0%,
-      45% {
-        opacity: 1;
+      @media (max-width: 768px) {
+        min-width: 150px;
       }
-      50%,
-      100% {
+
+      span {
+        position: absolute;
+        left: 0;
+        top: 0;
         opacity: 0;
+        font-weight: 600;
+        color: #667eea;
+        animation: textFade 4s ease-in-out infinite;
+        transition: all 0.3s ease-in-out;
+
+        &:nth-child(2) {
+          animation-delay: 2s;
+        }
+
+        &:nth-child(3) {
+          animation-delay: 4s;
+        }
+      }
+
+      @keyframes textFade {
+        0%,
+        30% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        35%,
+        65% {
+          opacity: 0;
+          transform: translateY(-10px) scale(0.95);
+        }
+        70%,
+        100% {
+          opacity: 0;
+          transform: translateY(10px) scale(0.95);
+        }
+      }
+    }
+
+    // Styles pour les paragraphes
+    p {
+      font-size: clamp(1.25rem, 4vw, 2rem);
+      line-height: 1.6;
+      margin: 0;
+      color: #666;
+      max-width: 600px;
+
+      @media (max-width: 768px) {
+        font-size: clamp(1.125rem, 3vw, 1.5rem);
+        line-height: 1.5;
       }
     }
   }
@@ -78,7 +149,96 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
     padding-bottom: 2rem;
+    justify-self: center;
+
+    @media (max-width: 768px) {
+      padding-bottom: 1rem;
+    }
+
+    // Animation pour la flèche
+    > * {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: bounceInUp 1s ease-out 0.8s forwards;
+
+      // Effet hover
+      &:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease-out;
+      }
+    }
+
+    @keyframes bounceInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-10px);
+      }
+      80% {
+        transform: translateY(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   }
+}
+
+// Animations responsives améliorées
+@media (max-width: 768px) {
+  .container {
+    .intro {
+      h2 {
+        animation: slideInFromTop 0.6s ease-out 0.1s forwards;
+      }
+
+      > :last-child {
+        animation: slideInFromTop 0.6s ease-out 0.3s forwards;
+      }
+    }
+
+    .nav > * {
+      animation: bounceInUp 0.8s ease-out 0.5s forwards;
+    }
+  }
+}
+
+// Animation pour les états de chargement
+.container.loading {
+  .intro > *,
+  .nav > * {
+    animation-play-state: paused;
+  }
+}
+
+// Animation pour les préférences de mouvement réduit
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .container .intro h2,
+  .container .intro > :last-child,
+  .container .nav > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .alternatingText span {
+    animation: none;
+    opacity: 1;
+    position: static;
+  }
+}
+
+// Effet de focus pour l'accessibilité
+.nav > *:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 4px;
+  border-radius: 4px;
 }
