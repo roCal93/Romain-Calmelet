@@ -5,22 +5,12 @@
   box-sizing: border-box;
 }
 
-/* Style pour le conteneur principal */
-#root {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
 html {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  overflow-x: hidden;
-  /* IMPORTANT : Empêche le dépassement en hauteur */
   height: 100%;
   margin: 0;
   padding: 0;
@@ -29,111 +19,47 @@ html {
 body {
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-  /* CHANGEMENT : Utiliser 100% au lieu de 100vh pour éviter les problèmes sur mobile */
   height: 100%;
   width: 100%;
-  min-width: 0;
-  touch-action: pan-x pan-y;
-  /* IMPORTANT : Empêche le body de dépasser */
-  max-height: 100vh;
+  overflow: hidden; /* Important : empêche le scroll sur body */
 }
 
-.sr-only {
-  border: 0 !important;
-  clip: rect(1px, 1px, 1px, 1px) !important;
-  -webkit-clip-path: inset(50%) !important;
-  clip-path: inset(50%) !important;
-  height: 1px !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  position: absolute !important;
-  width: 1px !important;
-  white-space: nowrap !important;
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-input {
-  border: solid 1px black;
-  border-radius: 3px;
-  appearance: auto;
-  max-width: 100%;
+/* Structure de l'application */
+.app-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-h1 {
-  display: block;
-  font-size: 2em;
-  margin-block-start: 0.67em;
-  margin-block-end: 0.67em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-  unicode-bidi: isolate;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  scroll-behavior: smooth;
 }
 
-h3 {
-  display: block;
-  font-size: 1.17em;
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
-  unicode-bidi: isolate;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-p {
-  display: block;
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  unicode-bidi: isolate;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Styles pour la navigation fluide */
+/* Container de page avec scroll conditionnel */
 .page-container {
-  /* CHANGEMENT : Utiliser height: 100% au lieu de 100vh */
-  height: 100%;
+  min-height: 100%;
   width: 100%;
-  max-width: 100vw;
-  /* IMPORTANT : Limiter la hauteur maximale */
-  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
-  /* AJOUT : Permettre le scroll si nécessaire dans le conteneur */
-  overflow-y: auto;
-}
+  position: relative;
 
-/* Styles pour les images et médias */
-img,
-video,
-iframe {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Styles pour les tableaux */
-table {
-  width: 100%;
-  max-width: 100%;
-  table-layout: fixed;
-  word-wrap: break-word;
+  /* Le contenu détermine si le scroll est nécessaire */
+  &.scrollable {
+    overflow-y: auto;
+  }
 }
 
 /* Optimisations mobiles */
@@ -146,30 +72,25 @@ table {
     min-width: 320px;
   }
 
-  .page-container {
-    padding: 0 1rem;
+  .app-container {
+    height: 100dvh; /* Utilise dvh pour mobile */
   }
 }
 
-/* AJOUT : Fix pour les problèmes de hauteur sur iOS */
+/* Fix pour iOS */
 @supports (-webkit-touch-callout: none) {
-  body {
-    height: -webkit-fill-available;
-  }
-
-  #root {
+  .app-container {
     height: -webkit-fill-available;
   }
 }
 
-/* Animation vers le bas */
+/* Animations de transition */
 .page-enter-down {
   opacity: 0.5;
   transform: translateY(15%);
   animation: enterDown 0.8s ease-in-out forwards;
 }
 
-/* Animation vers le haut */
 .page-enter-up {
   opacity: 0.5;
   transform: translateY(-15%);
@@ -188,4 +109,45 @@ table {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Classes utilitaires */
+.sr-only {
+  border: 0 !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  -webkit-clip-path: inset(50%) !important;
+  clip-path: inset(50%) !important;
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important;
+  white-space: nowrap !important;
+}
+
+/* Styles de base pour les éléments */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  word-wrap: break-word;
 }

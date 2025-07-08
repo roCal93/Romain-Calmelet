@@ -2,47 +2,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
-  height: 100%;
+  min-height: calc(100vh - 80px);
+  padding: 1rem 0;
   position: relative;
-  @media (max-width: 1024px) {
-    padding-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    min-height: calc(100dvh - 60px);
+    padding: 0.5rem 0;
   }
-  @media (max-width: 480px) {
-    justify-content: flex-start;
-  }
+
   .aboutMe {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 5rem;
     width: 100%;
-    min-height: 0;
+    flex: 1;
     gap: 2rem;
 
     @media (max-width: 768px) {
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 0.5rem;
-      padding: 0.5rem 0;
+      padding: 0.5rem 1rem;
+      flex: 1;
     }
 
     .text {
       width: 50%;
-      margin-top: 2rem;
       display: flex;
       flex-direction: column;
       text-align: left;
-      justify-content: flex-start;
-      min-height: 0;
+      justify-content: center;
+      gap: 1rem;
 
       @media (max-width: 768px) {
         width: 100%;
-        margin-top: 0;
         justify-content: flex-start;
-        overflow: hidden;
       }
 
       h1 {
@@ -58,12 +57,10 @@
         }
       }
 
-      section {
+      .contentSection {
         position: relative;
 
         @media (max-width: 768px) {
-          min-height: 0;
-          overflow: hidden;
           margin-bottom: 0.5rem;
         }
 
@@ -85,14 +82,20 @@
           }
 
           @media (max-width: 480px) {
-            width: 50%;
+            width: 45%;
             max-width: 180px;
             margin: 0 0 0.3rem 0.3rem;
           }
         }
 
+        .paragraphs {
+          @media (max-width: 768px) {
+            overflow: hidden;
+          }
+        }
+
         p {
-          margin: 0.5rem 0 0 0;
+          margin: 0.5rem 0;
           font-size: 18px;
           text-align: left;
 
@@ -107,7 +110,7 @@
           @media (max-width: 768px) {
             font-size: 16px;
             line-height: 1.4;
-            margin: 0.3rem 0 0 0;
+            margin: 0.3rem 0;
           }
           @media (max-width: 480px) {
             font-size: 14px;
@@ -121,8 +124,7 @@
       width: 50%;
       display: flex;
       align-items: center;
-      justify-content: right;
-
+      justify-content: center;
       padding: 2rem 0;
 
       @media (max-width: 768px) {
@@ -146,10 +148,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding-bottom: 1rem;
+    padding: 1rem 0;
 
     @media (max-width: 768px) {
-      padding: 0.3rem 0;
+      padding: 0.5rem 0;
     }
   }
 }

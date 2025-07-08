@@ -1,13 +1,18 @@
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  height: 80%;
   width: 100%;
-  margin: 1rem 1rem 1rem 1rem;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 132px); // 80px pour le header approximativement
+  gap: 2rem;
+
   @media (max-width: 768px) {
-    height: 75vh;
+    min-height: calc(
+      100dvh - 96px
+    ); // Ajustez selon la hauteur de votre header mobile
+    padding: 1rem;
   }
 
   .intro {
@@ -17,30 +22,31 @@
     text-align: left;
     gap: 3rem;
     width: 60%;
-    height: 60%;
-    padding-top: 1rem;
+    flex: 1;
+    justify-content: center;
+
     @media (max-width: 768px) {
       align-items: center;
       text-align: center;
       gap: 2rem;
+      width: 90%;
     }
+
     h2 {
-      font-size: 100px;
-      @media (max-width: 768px) {
-        font-size: 50px;
-      }
-    }
-    p {
-      font-size: 45px;
+      font-size: clamp(50px, 10vw, 100px);
       margin: 0;
-      @media (max-width: 768px) {
-        font-size: 30px;
-      }
     }
+
+    p {
+      font-size: clamp(24px, 5vw, 45px);
+      margin: 0;
+    }
+
     .alternatingText {
       position: relative;
       display: inline-block;
       min-width: 200px;
+      height: 1.2em; // Fixe la hauteur pour éviter les sauts
     }
 
     .alternatingText span {
@@ -67,13 +73,12 @@
       }
     }
   }
+
   .nav {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    @media (max-width: 768px) {
-      gap: 0;
-    }
+    padding-bottom: 2rem;
   }
 }

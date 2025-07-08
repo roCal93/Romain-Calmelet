@@ -15,28 +15,26 @@ function Home() {
   }, [])
 
   return (
-    <>
-      <div
-        className={`page-container ${
-          isVisible
-            ? direction === 'down'
-              ? 'page-enter-down'
-              : 'page-enter-up'
-            : ''
-        }`}
-      >
-        <GeometricBackgroundHome />
-        <div className={styles.container}>
-          <div className={styles.intro}>
-            <h2>Salut !</h2>
-            <TextIntro />
-          </div>
-          <div className={styles.nav}>
-            <ArrowDown />
-          </div>
+    <div
+      className={`page-container ${
+        isVisible
+          ? direction === 'down'
+            ? 'page-enter-down'
+            : 'page-enter-up'
+          : ''
+      }`}
+    >
+      <GeometricBackgroundHome />
+      <div className={styles.container}>
+        <div className={styles.intro}>
+          <h2>Salut !</h2>
+          <TextIntro />
+        </div>
+        <div className={styles.nav}>
+          <ArrowDown />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

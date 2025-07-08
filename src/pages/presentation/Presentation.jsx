@@ -11,12 +11,13 @@ import BackgroundPresentation from '../../components/backgroundPresentation/Back
 
 function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
-  const { direction } = useContext(NavigationContext)
+  const { direction, resetNavigation } = useContext(NavigationContext)
 
   useEffect(() => {
+    resetNavigation?.() // Forcer le reset
     setIsVisible(true)
     return () => setIsVisible(false)
-  }, [])
+  }, [resetNavigation])
 
   return (
     <div
@@ -34,30 +35,32 @@ function Presentation() {
         <div className={styles.aboutMe}>
           <div className={styles.text}>
             <h1>Quelques mots sur moi </h1>
-            <section>
+            <section className={styles.contentSection}>
               <picture className={styles.floatingImage}>
                 <source srcSet={portraitMobile} media="(max-width: 480px)" />
                 <source srcSet={portraitTablet} media="(max-width: 768px)" />
                 <img src={portraitDesktop} alt="Portrait de Romain Calmelet" />
               </picture>
-              <p>
-                Après dix années passées dans l'horlogerie, où précision,
-                rigueur et sens du détail faisaient partie de mon quotidien,
-                j'ai décidé de relever un nouveau défi&nbsp;:
-                le&nbsp;développement&nbsp;web.
-              </p>
-              <p>
-                Ce domaine me passionne par la diversité de ses tâches et
-                l'infinité de ses possibilités. On peut établir de nombreux
-                parallèles entre la mécanique horlogère et celle du code, et je
-                prends plaisir chaque jour à imaginer et inventer de nouveaux
-                mécanismes virtuels.
-              </p>
-              <p>
-                Je suis plus motivé que jamais à évoluer dans cet univers, et à
-                y apporter ma sensibilité artisanale acquise au long de mon
-                parcours.
-              </p>
+              <div className={styles.paragraphs}>
+                <p>
+                  Après dix années passées dans l'horlogerie, où précision,
+                  rigueur et sens du détail faisaient partie de mon quotidien,
+                  j'ai décidé de relever un nouveau défi&nbsp;:
+                  le&nbsp;développement&nbsp;web.
+                </p>
+                <p>
+                  Ce domaine me passionne par la diversité de ses tâches et
+                  l'infinité de ses possibilités. On peut établir de nombreux
+                  parallèles entre la mécanique horlogère et celle du code, et
+                  je prends plaisir chaque jour à imaginer et inventer de
+                  nouveaux mécanismes virtuels.
+                </p>
+                <p>
+                  Je suis plus motivé que jamais à évoluer dans cet univers, et
+                  à y apporter ma sensibilité artisanale acquise au long de mon
+                  parcours.
+                </p>
+              </div>
             </section>
             <AutoCarousel />
           </div>

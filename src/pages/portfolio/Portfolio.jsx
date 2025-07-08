@@ -37,8 +37,8 @@ function Portfolio() {
         ))}
       </div>
 
-      {/* Fonctionnalités */}
-      <div className={styles.features}>
+      {/* Fonctionnalités - Ajout de la classe allowScroll */}
+      <div className={`${styles.features} allowScroll`}>
         <h4>Fonctionnalités principales:</h4>
         <ul>
           {projet.features.map((feature, index) => (
@@ -72,6 +72,7 @@ function Portfolio() {
       </div>
     </div>
   ))
+
   useEffect(() => {
     setIsVisible(true)
     return () => setIsVisible(false)
@@ -91,12 +92,16 @@ function Portfolio() {
         <div className={styles.title}>
           <div className={styles.text}>
             <h1>Mes réalisations</h1>
-            <p>Voici les différents projets que j’ai accomplis</p>
+            <p>Voici les différents projets que j'ai accomplis</p>
           </div>
           <ArrowUp className={styles.arrowUp} />
         </div>
-        <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
-        <ArrowDown />
+        <div className={`${styles.carouselWrapper} scrollable`}>
+          <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
+        </div>
+        <div className={styles.nav}>
+          <ArrowDown />
+        </div>
       </div>
     </div>
   )

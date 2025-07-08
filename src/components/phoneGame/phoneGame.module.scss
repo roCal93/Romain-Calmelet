@@ -1,7 +1,11 @@
 /* ===== STYLES DE BASE ===== */
 .container {
-  width: 100%;
-  margin: 2rem;
+  margin-top: 4rem;
+  height: 80vh;
+  &.dragging {
+    touch-action: none;
+    overflow: hidden;
+  }
 }
 
 /* ===== ÉCRAN DE DÉMARRAGE ===== */
@@ -36,6 +40,7 @@
 /* ===== ZONE DE JEU ===== */
 .gameArea {
   text-align: center;
+  height: 80vh;
 }
 
 .header {
@@ -50,10 +55,6 @@
   display: flex;
   justify-content: center;
   margin-bottom: 0.5rem;
-
-  @media (max-width: 600px) {
-    flex-direction: column;
-  }
 }
 
 .slot {
@@ -94,22 +95,20 @@
 
   @media (max-width: 600px) {
     &:nth-child(1) {
-      width: 70px;
-      height: 70px;
+      width: 150px;
+      height: 200px;
     }
 
     &:nth-child(2) {
-      width: 80px;
-      height: 80px;
-      margin-left: 0;
-      margin-top: -20px;
+      width: 150px;
+      height: 200px;
+      margin-left: -15px;
     }
 
     &:nth-child(3) {
-      width: 90px;
-      height: 90px;
-      margin-left: 0;
-      margin-top: -25px;
+      width: 200px;
+      height: 200px;
+      margin-left: -15px;
     }
 
     &::before {
@@ -161,6 +160,9 @@
 .imageItem {
   cursor: grab;
   transition: opacity 0.3s ease;
+  touch-action: none; // Désactive le comportement tactile par défaut
+  -webkit-user-drag: element; // Pour Safari
+  cursor: grab;
 
   &:active {
     cursor: grabbing;
@@ -203,7 +205,7 @@
 
     @media (max-width: 600px) {
       width: 45px;
-      height: 45px;
+      height: 100px;
     }
   }
 
@@ -214,8 +216,8 @@
     transform-origin: center center;
 
     @media (max-width: 600px) {
-      width: 60px;
-      height: 60px;
+      width: 130px;
+      height: 130px;
     }
   }
 }
@@ -300,6 +302,101 @@
     padding: 6px 12px;
     font-size: 12px;
   }
+}
+
+// Styles supplémentaires à ajouter à votre phoneGame.module.scss
+
+// Améliorer les zones de touch sur mobile
+.imageItem {
+  touch-action: none; // Désactiver le comportement tactile par défaut
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  // Augmenter la zone de touch sur mobile
+  @media (max-width: 768px) {
+    min-height: 60px;
+    min-width: 60px;
+    padding: 8px;
+    margin: 4px;
+  }
+}
+
+.slot {
+  touch-action: none; // Désactiver le comportement tactile par défaut
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  transition: background-color 0.2s ease, border 0.2s ease;
+
+  // Augmenter la zone de touch sur mobile
+  @media (max-width: 768px) {
+    min-height: 80px;
+    min-width: 80px;
+  }
+}
+
+// Styles pour l'élément fantôme pendant le drag
+#dragGhost {
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+
+  .imageIcon {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  }
+}
+
+// Optimisations pour les petits écrans
+@media (max-width: 768px) {
+  .gameContainer {
+    padding: 10px;
+  }
+
+  .slotsContainer {
+    gap: 15px;
+
+    @media (max-width: 480px) {
+      gap: 10px;
+    }
+  }
+
+  .imagesList {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    @media (max-width: 480px) {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  .interactionHint {
+    font-size: 14px;
+    padding: 10px;
+    text-align: center;
+  }
+}
+
+// Styles pour le feedback visuel pendant le drag
+.imageItem.dragging {
+  opacity: 0.3;
+  transform: scale(0.95);
+}
+
+.slot.dragOver {
+  background-color: rgba(0, 123, 255, 0.1);
+  border: 2px dashed #007bff;
+}
+
+// Améliorer les performances sur mobile
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ===== ANIMATIONS DE ROTATION ===== */

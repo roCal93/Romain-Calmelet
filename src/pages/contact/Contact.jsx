@@ -39,15 +39,15 @@ function Contact() {
     () => ({
       linkedin: {
         x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 340 : windowSize.height - 460,
+        y: isMobile ? windowSize.height - 380 : windowSize.height - 460,
       },
       github: {
         x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 260 : windowSize.height - 360,
+        y: isMobile ? windowSize.height - 300 : windowSize.height - 360,
       },
       phone: {
         x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 180 : windowSize.height - 260,
+        y: isMobile ? windowSize.height - 220 : windowSize.height - 260,
       },
     }),
     [isMobile, windowSize.width, windowSize.height]
