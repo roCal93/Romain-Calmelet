@@ -3,9 +3,28 @@
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0);
   padding: 2rem 0;
+  position: relative;
+
+  // Masque les débordements sur mobile
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+
   @media (max-width: 1300px) {
     padding: 1rem 0;
   }
+
   @media (max-width: 380px) {
     padding: 0.5rem 0;
   }
@@ -13,9 +32,15 @@
 
 .carouselTrack {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--gap, 1.5rem);
   width: max-content;
-  animation: scroll 20s linear infinite;
+  animation: scroll var(--speed, 20s) linear infinite;
+  will-change: transform;
+
+  // Améliore les performances sur mobile
+  @media (max-width: 768px) {
+    animation-duration: calc(var(--speed, 20s) * 1.5);
+  }
 }
 
 .slide {
@@ -26,25 +51,55 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Animation subtile au chargement - DÉPLACÉE ICI
+  animation: fadeIn 0.5s ease-out backwards;
+  animation-delay: calc(var(--index, 0) * 0.05s);
+
   @media (max-width: 1300px) {
     width: 3rem;
     height: 3rem;
   }
-}
 
-.slide:hover {
-  transform: scale(1.6);
-  z-index: 10;
-  @media (max-width: 480px) {
-    transform: scale(1.2);
+  &:hover {
+    transform: scale(1.6);
+    z-index: 10;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    @media (max-width: 480px) {
+      transform: scale(1.2);
+    }
   }
 }
 
 .slide img {
-  width: 95%;
-  height: 95%;
+  width: 90%;
+  height: 90%;
   object-fit: contain;
+  user-select: none;
+
+  // Améliore le rendu des images
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+// Animation fadeIn définie à part
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes scroll {
@@ -53,5 +108,33 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+// Respect de la préférence de mouvement réduit
+@media (prefers-reduced-motion: reduce) {
+  .carouselTrack {
+    animation: none;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+
+    // Affiche une scrollbar stylisée
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 2px;
+    }
+  }
+
+  .slide:hover {
+    transform: scale(1.1);
   }
 }

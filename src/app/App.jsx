@@ -18,14 +18,18 @@ function App() {
   const navigate = useNavigate()
 
   // Références pour la gestion de la navigation
-  const mainRef = useRef(null) // Référence vers le conteneur principal
-  const isNavigatingRef = useRef(false) // Flag pour éviter les navigations multiples
-  const lastWheelTimeRef = useRef(0) // Timestamp du dernier événement wheel
-  const touchStartRef = useRef({ x: 0, y: 0 }) // Position de début du touch
-  const touchEndRef = useRef({ x: 0, y: 0 }) // Position de fin du touch
-  const timeoutRef = useRef(null) // Référence du timeout de navigation
+  const mainRef = useRef(null)
+  const isNavigatingRef = useRef(false)
+  const lastWheelTimeRef = useRef(0)
+  const touchStartRef = useRef({ x: 0, y: 0 })
+  const touchEndRef = useRef({ x: 0, y: 0 })
+  const timeoutRef = useRef(null)
 
-  // État pour la direction de navigation (utilisé pour les animations)
+  // NOUVELLE RÉFÉRENCE: Compteur de tentatives de scroll aux extrémités
+  const scrollAttemptRef = useRef({ top: 0, bottom: 0 })
+  const resetScrollAttemptTimeoutRef = useRef(null)
+
+  // État pour la direction de navigation
   const [direction, setDirection] = useState('down')
 
   /**
@@ -43,52 +47,54 @@ function App() {
   }, [])
 
   /**
+   * Réinitialise les tentatives de scroll
+   */
+  const resetScrollAttempts = useCallback(() => {
+    scrollAttemptRef.current = { top: 0, bottom: 0 }
+  }, [])
+
+  /**
    * Navigue vers la section suivante ou précédente
    * @param {string} direction - 'up' ou 'down'
    */
   const navigateToSection = useCallback(
     (direction) => {
-      // Évite les navigations multiples simultanées
       if (isNavigatingRef.current) return
 
       const currentIndex = getCurrentSectionIndex()
       if (currentIndex === -1) return
 
-      // Calcule l'index de la section suivante
       let nextIndex
       if (direction === 'down' && currentIndex < SECTIONS.length - 1) {
         nextIndex = currentIndex + 1
       } else if (direction === 'up' && currentIndex > 0) {
         nextIndex = currentIndex - 1
       } else {
-        return // Pas de section suivante disponible
+        return
       }
 
-      // Active le flag de navigation et met à jour la direction
       setDirection(direction)
       isNavigatingRef.current = true
 
-      // Nettoie le timeout précédent si existant
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
 
-      // Effectue la navigation
       navigate(SECTIONS[nextIndex].path)
 
-      // Réinitialise le flag après un délai pour permettre les transitions
+      // Réinitialise les tentatives de scroll après navigation
+      resetScrollAttempts()
+
       timeoutRef.current = setTimeout(() => {
         isNavigatingRef.current = false
         timeoutRef.current = null
       }, 800)
     },
-    [getCurrentSectionIndex, navigate]
+    [getCurrentSectionIndex, navigate, resetScrollAttempts]
   )
 
   /**
    * Vérifie si l'élément cible est dans une zone scrollable
-   * @param {Element} target - L'élément cible
-   * @returns {boolean}
    */
   const isScrollableArea = (target) => {
     return target.closest('.allowScroll, .features, .scrollable')
@@ -96,22 +102,20 @@ function App() {
 
   /**
    * Obtient les informations de scroll d'un élément
-   * @param {Element} element - L'élément à analyser
-   * @returns {Object} Informations de scroll
    */
   const getScrollInfo = (element) => {
     const scrollTop = element.scrollTop
     const scrollHeight = element.scrollHeight
     const clientHeight = element.clientHeight
-    const epsilon = 5 // Marge d'erreur pour les calculs de position
+    const epsilon = 5
 
     return {
       scrollTop,
       scrollHeight,
       clientHeight,
-      canScroll: scrollHeight - clientHeight > epsilon, // Peut-on scroller ?
-      atBottom: scrollTop + clientHeight >= scrollHeight - epsilon, // En bas ?
-      atTop: scrollTop <= epsilon, // En haut ?
+      canScroll: scrollHeight - clientHeight > epsilon,
+      atBottom: scrollTop + clientHeight >= scrollHeight - epsilon,
+      atTop: scrollTop <= epsilon,
     }
   }
 
@@ -119,41 +123,38 @@ function App() {
    * Réinitialise l'état de navigation à chaque changement de route
    */
   useEffect(() => {
-    // Remet le scroll en haut de la nouvelle page
     if (mainRef.current) {
       mainRef.current.scrollTop = 0
     }
 
-    // Nettoie le timeout en cours
+    // Réinitialise les tentatives de scroll lors du changement de page
+    resetScrollAttempts()
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
 
-    // Réinitialise le flag de navigation après un court délai
     const resetTimer = setTimeout(() => {
       isNavigatingRef.current = false
     }, 200)
 
     return () => clearTimeout(resetTimer)
-  }, [location.pathname])
+  }, [location.pathname, resetScrollAttempts])
 
   /**
-   * Gestion de la navigation par molette de souris
+   * Gestion de la navigation par molette de souris avec sécurité
    */
   useEffect(() => {
     const handleWheel = (e) => {
-      // Bloque si navigation en cours
       if (isNavigatingRef.current) {
         e.preventDefault()
         return
       }
 
       const el = mainRef.current
-      // Ignore si pas d'élément ou si dans une zone scrollable
       if (!el || isScrollableArea(e.target)) return
 
-      // Throttling pour éviter les événements trop fréquents
       const now = Date.now()
       if (now - lastWheelTimeRef.current < 50) {
         e.preventDefault()
@@ -162,47 +163,87 @@ function App() {
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
-      // Si pas de scroll possible, navigation directe
+      // Si pas de scroll possible, navigation avec sécurité
       if (!canScroll) {
         e.preventDefault()
         lastWheelTimeRef.current = now
-        navigateToSection(e.deltaY > 0 ? 'down' : 'up')
+
+        const direction = e.deltaY > 0 ? 'down' : 'up'
+        const attemptKey = e.deltaY > 0 ? 'bottom' : 'top'
+
+        // Incrémente le compteur de tentatives
+        scrollAttemptRef.current[attemptKey]++
+
+        // Si c'est la deuxième tentative ou plus, navigue
+        if (scrollAttemptRef.current[attemptKey] >= 2) {
+          navigateToSection(direction)
+        }
+
+        // Réinitialise les tentatives après un délai
+        if (resetScrollAttemptTimeoutRef.current) {
+          clearTimeout(resetScrollAttemptTimeoutRef.current)
+        }
+        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
+          resetScrollAttempts()
+        }, 1000) // Reset après 1 seconde d'inactivité
+
         return
       }
 
-      // Si scroll possible mais aux extrémités, navigation vers section suivante
+      // Si scroll possible mais aux extrémités, navigation avec sécurité
       if ((e.deltaY > 0 && atBottom) || (e.deltaY < 0 && atTop)) {
         e.preventDefault()
         lastWheelTimeRef.current = now
-        navigateToSection(e.deltaY > 0 ? 'down' : 'up')
+
+        const direction = e.deltaY > 0 ? 'down' : 'up'
+        const attemptKey = e.deltaY > 0 ? 'bottom' : 'top'
+
+        // Incrémente le compteur de tentatives
+        scrollAttemptRef.current[attemptKey]++
+
+        // Si c'est la deuxième tentative ou plus, navigue
+        if (scrollAttemptRef.current[attemptKey] >= 2) {
+          navigateToSection(direction)
+        }
+
+        // Réinitialise les tentatives après un délai
+        if (resetScrollAttemptTimeoutRef.current) {
+          clearTimeout(resetScrollAttemptTimeoutRef.current)
+        }
+        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
+          resetScrollAttempts()
+        }, 1000) // Reset après 1 seconde d'inactivité
+      } else {
+        // Si on scroll dans le contenu, réinitialise les tentatives
+        resetScrollAttempts()
       }
     }
 
     const el = mainRef.current
     if (!el) return
 
-    // Ajoute l'événement après un délai pour éviter les conflits
     const timer = setTimeout(() => {
       el.addEventListener('wheel', handleWheel, { passive: false })
     }, 200)
 
     return () => {
       clearTimeout(timer)
+      if (resetScrollAttemptTimeoutRef.current) {
+        clearTimeout(resetScrollAttemptTimeoutRef.current)
+      }
       if (el) {
         el.removeEventListener('wheel', handleWheel)
       }
     }
-  }, [navigateToSection, location.pathname])
+  }, [navigateToSection, location.pathname, resetScrollAttempts])
 
   /**
-   * Gestion de la navigation tactile (touch)
+   * Gestion de la navigation tactile avec sécurité
    */
   useEffect(() => {
     const handleTouchStart = (e) => {
-      // Ignore si dans une zone scrollable
       if (isScrollableArea(e.target)) return
 
-      // Enregistre la position de début
       touchStartRef.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
@@ -210,20 +251,16 @@ function App() {
     }
 
     const handleTouchEnd = (e) => {
-      // Bloque si navigation en cours ou dans une zone scrollable
       if (isNavigatingRef.current || isScrollableArea(e.target)) return
 
-      // Enregistre la position de fin
       touchEndRef.current = {
         x: e.changedTouches[0].clientX,
         y: e.changedTouches[0].clientY,
       }
 
-      // Calcule la différence de position
       const deltaX = touchEndRef.current.x - touchStartRef.current.x
       const deltaY = touchEndRef.current.y - touchStartRef.current.y
 
-      // Vérifie si c'est un swipe vertical suffisant
       if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) <= 50) return
 
       const el = mainRef.current
@@ -231,11 +268,27 @@ function App() {
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
-      // Logique similaire à la molette
-      if (!canScroll) {
-        navigateToSection(deltaY < 0 ? 'down' : 'up')
-      } else if ((deltaY < 0 && atBottom) || (deltaY > 0 && atTop)) {
-        navigateToSection(deltaY < 0 ? 'down' : 'up')
+      const direction = deltaY < 0 ? 'down' : 'up'
+      const attemptKey = deltaY < 0 ? 'bottom' : 'top'
+
+      if (!canScroll || (deltaY < 0 && atBottom) || (deltaY > 0 && atTop)) {
+        // Incrémente le compteur de tentatives
+        scrollAttemptRef.current[attemptKey]++
+
+        // Si c'est la deuxième tentative ou plus, navigue
+        if (scrollAttemptRef.current[attemptKey] >= 2) {
+          navigateToSection(direction)
+        }
+
+        // Réinitialise les tentatives après un délai
+        if (resetScrollAttemptTimeoutRef.current) {
+          clearTimeout(resetScrollAttemptTimeoutRef.current)
+        }
+        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
+          resetScrollAttempts()
+        }, 1000)
+      } else {
+        resetScrollAttempts()
       }
     }
 
@@ -251,14 +304,13 @@ function App() {
         el.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [navigateToSection, location.pathname])
+  }, [navigateToSection, location.pathname, resetScrollAttempts])
 
   /**
-   * Gestion de la navigation par clavier
+   * Gestion de la navigation par clavier (sans sécurité pour une navigation directe)
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Bloque si navigation en cours
       if (isNavigatingRef.current) return
 
       const currentIndex = getCurrentSectionIndex()
@@ -275,7 +327,6 @@ function App() {
           navigateToSection('up')
           break
         case 'Home':
-          // Va directement à la première section
           e.preventDefault()
           if (currentIndex !== 0) {
             setDirection('up')
@@ -283,7 +334,6 @@ function App() {
           }
           break
         case 'End': {
-          // Va directement à la dernière section
           e.preventDefault()
           const lastIndex = SECTIONS.length - 1
           if (currentIndex !== lastIndex) {
@@ -302,9 +352,9 @@ function App() {
   return (
     <NavigationContext.Provider
       value={{
-        direction, // Direction de navigation pour les animations
-        containerRef: mainRef, // Référence du conteneur pour les composants enfants
-        resetNavigation, // Fonction pour réinitialiser la navigation
+        direction,
+        containerRef: mainRef,
+        resetNavigation,
       }}
     >
       <div className="app-container">

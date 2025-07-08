@@ -1,14 +1,18 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, lazy, Suspense } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
-import AutoCarousel from '../../components/autoCarousel/AutoCarousel'
 import FallbackPortrait from '../../components/fallbackPortrait/FallbackPortrait'
 import portraitDesktop from '../../assets/img/portraitRC/portraitDesktop.webp'
 import portraitTablet from '../../assets/img/portraitRC/portraitTablet.webp'
 import portraitMobile from '../../assets/img/portraitRC/portraitMobile.webp'
 import BackgroundPresentation from '../../components/backgroundPresentation/BackgroundPresentation'
+
+// Lazy loading pour AutoCarousel
+const AutoCarousel = lazy(() =>
+  import('../../components/autoCarousel/AutoCarousel')
+)
 
 function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
@@ -63,29 +67,17 @@ function Presentation() {
               className={styles.contentSection}
               aria-label="Présentation personnelle"
             >
-              {/* Image flottante pour mobile */}
+              {/* Image flottante pour mobile - Simplifiée */}
               <div className={styles.floatingImage}>
                 {imageErrorMobile ? (
                   <FallbackPortrait className={styles.fallbackMobile} />
                 ) : (
-                  <picture>
-                    <source
-                      srcSet={portraitMobile}
-                      media="(max-width: 480px)"
-                      type="image/webp"
-                    />
-                    <source
-                      srcSet={portraitTablet}
-                      media="(max-width: 768px)"
-                      type="image/webp"
-                    />
-                    <img
-                      src={portraitDesktop}
-                      alt="Portrait de Romain Calmelet"
-                      loading="lazy"
-                      onError={handleMobileImageError}
-                    />
-                  </picture>
+                  <img
+                    src={portraitMobile}
+                    alt="Portrait de Romain Calmelet"
+                    loading="lazy"
+                    onError={handleMobileImageError}
+                  />
                 )}
               </div>
 
@@ -111,10 +103,18 @@ function Presentation() {
               </div>
             </section>
 
-            <AutoCarousel />
+            <Suspense
+              fallback={
+                <div className={styles.carouselLoader}>
+                  <span>Chargement...</span>
+                </div>
+              }
+            >
+              <AutoCarousel />
+            </Suspense>
           </div>
 
-          {/* Image pour desktop - Plus de retardement */}
+          {/* Image pour desktop - Avec sources multiples */}
           <aside className={styles.desktopImage} aria-label="Portrait">
             {imageErrorDesktop ? (
               <FallbackPortrait className={styles.fallbackDesktop} />
@@ -122,12 +122,17 @@ function Presentation() {
               <picture>
                 <source
                   srcSet={portraitDesktop}
+                  media="(min-width: 1200px)"
+                  type="image/webp"
+                />
+                <source
+                  srcSet={portraitTablet}
                   media="(min-width: 769px)"
                   type="image/webp"
                 />
                 <img
                   className={styles.img}
-                  src={portraitDesktop}
+                  src={portraitTablet}
                   alt="Portrait de Romain Calmelet"
                   loading="lazy"
                   onError={handleDesktopImageError}

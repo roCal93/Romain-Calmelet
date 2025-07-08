@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import styles from './autoCarousel.module.scss'
 import reactPng from '../../assets/img/logoTech/react.png'
 import html5Png from '../../assets/img/logoTech/html5.png'
@@ -12,36 +13,56 @@ import scrumPng from '../../assets/img/logoTech/scrum.png'
 import seoPng from '../../assets/img/logoTech/seo.png'
 import swaggerPng from '../../assets/img/logoTech/Swagger.png'
 
-function AutoCarousel() {
-  const images = [
-    html5Png,
-    css3Png,
-    sassPng,
-    jsPng,
-    reactPng,
-    reduxPng,
-    gitPng,
-    gitHubPng,
-    vsCodePng,
-    scrumPng,
-    seoPng,
-    swaggerPng,
-  ]
+const techLogos = [
+  { src: html5Png, name: 'HTML5' },
+  { src: css3Png, name: 'CSS3' },
+  { src: sassPng, name: 'Sass' },
+  { src: jsPng, name: 'JavaScript' },
+  { src: reactPng, name: 'React' },
+  { src: reduxPng, name: 'Redux' },
+  { src: gitPng, name: 'Git' },
+  { src: gitHubPng, name: 'GitHub' },
+  { src: vsCodePng, name: 'VS Code' },
+  { src: scrumPng, name: 'Scrum' },
+  { src: seoPng, name: 'SEO' },
+  { src: swaggerPng, name: 'Swagger' },
+]
+
+function AutoCarousel({
+  speed = 20,
+  gap = 1.5,
+  pauseOnHover = true,
+  className = '',
+}) {
+  const duplicatedLogos = useMemo(() => [...techLogos, ...techLogos], [])
 
   return (
-    <div className={styles.container}>
-      <div className={styles.carouselTrack}>
-        {/* Premier set d'images */}
-        {images.map((image, index) => (
-          <div key={`first-${index}`} className={styles.slide}>
-            <img src={image} alt={`Slide ${index + 1}`} />
-          </div>
-        ))}
-
-        {/* Duplication pour l'effet infini */}
-        {images.map((image, index) => (
-          <div key={`second-${index}`} className={styles.slide}>
-            <img src={image} alt={`Slide ${index + 1}`} />
+    <div
+      className={`${styles.container} ${className}`}
+      role="region"
+      aria-label="Technologies carousel"
+      data-pause-on-hover={pauseOnHover}
+    >
+      <div
+        className={styles.carouselTrack}
+        style={{
+          '--speed': `${speed}s`,
+          '--gap': `${gap}rem`,
+          '--item-count': techLogos.length,
+        }}
+      >
+        {duplicatedLogos.map((tech, index) => (
+          <div
+            key={`${tech.name}-${index}`}
+            className={styles.slide}
+            aria-label={tech.name}
+          >
+            <img
+              src={tech.src}
+              alt={`${tech.name} logo`}
+              loading="lazy"
+              draggable="false"
+            />
           </div>
         ))}
       </div>

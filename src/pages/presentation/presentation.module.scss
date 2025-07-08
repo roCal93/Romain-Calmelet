@@ -13,6 +13,20 @@
 
   @media (max-width: 768px) {
     min-height: calc(100dvh - 96px);
+
+    // Indicateur de scroll sur mobile
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 3px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 2px;
+      animation: pulse 2s ease-in-out infinite;
+    }
   }
 }
 
@@ -149,16 +163,18 @@
     display: block;
     float: right;
     width: 50%;
+    max-width: 350px;
     margin: 0 0 1rem 1rem;
     shape-outside: circle(50%);
+    animation: float 6s ease-in-out infinite;
 
     img,
     picture {
       width: 100%;
       height: auto;
-      border-radius: 50%; // Image ronde pour mieux s'intégrer
+      border-radius: 50%;
       object-fit: cover;
-      aspect-ratio: 1; // Force un ratio carré
+      aspect-ratio: 1;
     }
   }
 
@@ -173,6 +189,12 @@
 }
 
 .paragraphs {
+  p {
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    line-height: 1.7;
+    color: #333;
+  }
+
   @media (max-width: 768px) {
     text-align: justify;
     -webkit-hyphens: auto;
@@ -180,11 +202,9 @@
 
     p {
       margin-bottom: 1rem;
-      line-height: 1.6;
 
-      // Meilleure gestion du texte autour de l'image
       &:first-of-type {
-        min-height: 100px; // Assure que le premier paragraphe entoure l'image
+        min-height: 100px;
       }
 
       &:last-child {
@@ -195,7 +215,7 @@
 
   @media (max-width: 480px) {
     p {
-      font-size: 1rem; // Texte légèrement plus petit sur mobile
+      font-size: clamp(0.875rem, 2vw, 1rem);
     }
   }
 }
@@ -223,12 +243,12 @@
   }
 
   img {
-    width: 100%; // Change de max-width à width
+    width: 100%;
     height: auto;
     max-height: 60vh;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); // Ombre plus douce
-    object-fit: cover; // Change de contain à cover
-    border-radius: 8px; // Ajoute des coins arrondis
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+    border-radius: 8px;
     will-change: transform;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: fadeIn 0.5s ease-in;
@@ -237,6 +257,21 @@
       transform: scale(1.02);
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     }
+  }
+}
+
+// Styles pour le loader du carousel
+.carouselLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  color: #666;
+  font-size: 0.9rem;
+
+  span {
+    opacity: 0.7;
+    animation: pulse 1.5s ease-in-out infinite;
   }
 }
 
@@ -256,7 +291,7 @@
   width: 100%;
   max-width: 400px;
   max-height: 60vh;
-  aspect-ratio: 3/4; // Ratio portrait
+  aspect-ratio: 3/4;
   background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -269,22 +304,10 @@
   }
 }
 
-// Amélioration des performances avec lazy loading
-img {
-  animation: fadeIn 0.5s ease-in;
-}
-
 // Ajout de breakpoints intermédiaires
 @media (max-width: 1200px) and (min-width: 769px) {
   .aboutMe {
     padding: 0 4rem;
-  }
-}
-
-@media (max-width: 600px) and (min-width: 481px) {
-  .floatingImage {
-    width: 38%;
-    max-width: 140px;
   }
 }
 
@@ -298,7 +321,7 @@ img {
   }
 }
 
-// Animations (conservées sans changement)
+// Animations
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -360,6 +383,27 @@ img {
   }
 }
 
+// Nouvelles animations ajoutées
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
 // Accessibilité améliorée
 .navUp > *:focus-visible,
 .navDown > *:focus-visible {
@@ -374,7 +418,7 @@ img {
 .fallbackMobile,
 .fallbackDesktop {
   will-change: transform;
-  backface-visibility: hidden; // Améliore les performances
+  backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
@@ -401,11 +445,19 @@ img {
   .navUp,
   .aboutMe,
   .navDown,
-  img {
+  img,
+  .floatingImage,
+  .carouselLoader span {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+
+  // Désactive l'indicateur de scroll animé
+  .container::after {
+    animation: none !important;
+    opacity: 0.4;
   }
 }
 
@@ -421,6 +473,11 @@ img {
     animation: none;
     opacity: 1;
     transform: none;
+
+    // Cache l'indicateur de scroll
+    &::after {
+      display: none;
+    }
   }
 
   .aboutMe {
@@ -428,10 +485,10 @@ img {
     animation: none;
     opacity: 1;
     transform: none;
-    flex-direction: row; // Force la mise en page horizontale
+    flex-direction: row;
 
     .desktopImage {
-      display: flex; // Affiche l'image desktop en impression
+      display: flex;
 
       img {
         box-shadow: none;
@@ -441,6 +498,16 @@ img {
   }
 
   .floatingImage {
-    display: none; // Cache l'image flottante en impression
+    display: none;
+  }
+
+  .paragraphs p {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  .carouselLoader {
+    display: none;
   }
 }
