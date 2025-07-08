@@ -261,7 +261,7 @@ function App() {
       const deltaX = touchEndRef.current.x - touchStartRef.current.x
       const deltaY = touchEndRef.current.y - touchStartRef.current.y
 
-      if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) <= 50) return
+      if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) <= 30) return
 
       const el = mainRef.current
       if (!el) return
