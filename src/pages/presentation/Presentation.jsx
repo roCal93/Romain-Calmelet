@@ -127,7 +127,7 @@ function Presentation() {
                 />
                 <source
                   srcSet={portraitTablet}
-                  media="(min-width: 769px)"
+                  media="(min-width: 768px)"
                   type="image/webp"
                 />
                 <img

@@ -1,82 +1,35 @@
 import { useEffect, useState, useContext } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './portfolio.module.scss'
-import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
-import { projects } from '../../assets/data/projects'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
+import BackgroundPortfolio from '../../components/backgroundPortfolio/BackgroundPortfolio'
+import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
+import ProjectCard from '../../components/projectCard/ProjectCard'
+import { projects } from '../../assets/data/projects'
 
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
-  const { direction } = useContext(NavigationContext)
-
-  // Transformer les projets en cards pour le carousel
-  const cardsTitle = projects.map((projet) => (
-    <div key={projet.id} className={styles.projectCardFront}>
-      <div className={styles.imageContainer}>
-        <img src={projet.image} alt={projet.description} />
-        <h2 className={styles.cardTitle}>{projet.name}</h2>
-      </div>
-    </div>
-  ))
-
-  const cards = projects.map((projet) => (
-    <div key={projet.id} className={styles.projectCard}>
-      {/* Header section avec logo et description */}
-      <div className={styles.projectCardHeader}>
-        <img src={projet.logo} alt={projet.name} />
-        <p>{projet.description}</p>
-      </div>
-
-      {/* Technologies */}
-      <div className={styles.technologies}>
-        {projet.technologies.map((tech, index) => (
-          <span key={index} className={styles.techBadge}>
-            {tech}
-          </span>
-        ))}
-      </div>
-
-      {/* Fonctionnalités - Ajout de la classe allowScroll */}
-      <div className={`${styles.features} allowScroll`}>
-        <h4>Fonctionnalités principales:</h4>
-        <ul>
-          {projet.features.map((feature, index) => (
-            <li key={index}>{feature}</li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Liens */}
-      <div className={styles.links}>
-        <a
-          href={projet.githubLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.githubLink}
-        >
-          GitHub
-        </a>
-        {projet.name === 'Mon portfolio' ? (
-          ''
-        ) : (
-          <a
-            href={projet.demoLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.demoLink}
-          >
-            Démo Live
-          </a>
-        )}
-      </div>
-    </div>
-  ))
+  const [isMouseInCarousel, setIsMouseInCarousel] = useState(false)
+  const { direction, resetNavigation } = useContext(NavigationContext)
 
   useEffect(() => {
+    resetNavigation?.()
     setIsVisible(true)
-    return () => setIsVisible(false)
-  }, [])
+
+    return () => {
+      setIsVisible(false)
+    }
+  }, [resetNavigation])
+
+  // Transformer les projets en cards pour le carousel
+  const cardsTitle = projects.map((project) => (
+    <ProjectCard key={project.id} project={project} variant="front" />
+  ))
+
+  const cards = projects.map((project) => (
+    <ProjectCard key={project.id} project={project} variant="detailed" />
+  ))
 
   return (
     <div
@@ -88,21 +41,45 @@ function Portfolio() {
           : ''
       }`}
     >
-      <div className={styles.container}>
-        <div className={styles.title}>
-          <div className={styles.text}>
-            <h1>Mes réalisations</h1>
-            <p>Voici les différents projets que j'ai accomplis</p>
-          </div>
-          <ArrowUp className={styles.arrowUp} />
+      <BackgroundPortfolio />
+
+      <main className={styles.container} role="main">
+        <div className={styles.navUp}>
+          <ArrowUp aria-label="Naviguer vers la section précédente" />
         </div>
-        <div className={`${styles.carouselWrapper} scrollable`}>
-          <ProjectCarousel cards={cards} cardsTitle={cardsTitle} loop={true} />
-        </div>
-        <div className={styles.nav}>
-          <ArrowDown />
-        </div>
-      </div>
+
+        <article
+          className={styles.portfolioContent}
+          aria-labelledby="portfolio-title"
+        >
+          <header className={styles.title}>
+            <div className={styles.text}>
+              <h1 id="portfolio-title">Mes réalisations</h1>
+              <p>Voici les différents projets que j'ai accomplis</p>
+            </div>
+          </header>
+
+          <section
+            className={`${styles.carouselWrapper} ${
+              isMouseInCarousel ? 'allowScroll' : ''
+            }`}
+            onMouseEnter={() => setIsMouseInCarousel(true)}
+            onMouseLeave={() => setIsMouseInCarousel(false)}
+            aria-label="Carrousel de projets"
+          >
+            <ProjectCarousel
+              cards={cards}
+              cardsTitle={cardsTitle}
+              loop={true}
+              autoFocus={false}
+            />
+          </section>
+        </article>
+
+        <nav className={styles.navDown} aria-label="Navigation entre sections">
+          <ArrowDown aria-label="Naviguer vers la section suivante" />
+        </nav>
+      </main>
     </div>
   )
 }

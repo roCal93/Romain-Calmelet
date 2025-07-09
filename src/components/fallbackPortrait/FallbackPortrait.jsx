@@ -41,9 +41,6 @@ const FallbackPortrait = ({ className }) => (
         RC
       </text>
     </svg>
-
-    {/* Animation de chargement optionnelle */}
-    <div className={styles.loadingRing}></div>
   </div>
 )
 

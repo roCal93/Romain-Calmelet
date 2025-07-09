@@ -7,9 +7,14 @@
   transition: transform 0.2s ease;
   overflow: hidden;
   cursor: pointer;
+  &:focus {
+    outline: 2px solid #e74c3c;
+    outline-offset: 1px;
+    border-radius: 4px;
+  }
 
   &:hover {
-    transform: scale(1.01);
+    transform: scale(1.02);
   }
 
   .cWithR {
@@ -24,7 +29,7 @@
       font-weight: 400;
       font-family: 'Raleway', sans-serif;
       font-optical-sizing: auto;
-      color: black;
+      color: #e74d3cc1;
       position: absolute;
       top: 50%;
       left: 30%;
@@ -36,7 +41,7 @@
       font-size: 40px;
       font-family: 'Raleway', sans-serif;
       font-weight: 500;
-      color: black;
+      color: #e74d3cc1;
       position: absolute;
       top: 50%;
       left: 32%;

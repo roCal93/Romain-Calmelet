@@ -17,7 +17,7 @@
 
     // Focus visible
     &:focus-visible {
-      outline: 2px solid #007bff;
+      outline: 2px solid #e74c3c;
       outline-offset: 4px;
       border-radius: 4px;
     }
@@ -25,7 +25,7 @@
     .bar {
       height: 4px;
       width: 100%;
-      background-color: #000000;
+      background-color: #e74d3c87;
       border-radius: 4px;
       transition: all 0.3s ease;
       transform-origin: center;
@@ -38,30 +38,30 @@
   &:hover .bar {
     &:nth-child(1) {
       transition-delay: 0s;
-      background-color: rgb(116, 108, 108);
+      background-color: #e74d3c;
     }
     &:nth-child(2) {
       transition-delay: 0.1s;
-      background-color: rgb(116, 108, 108);
+      background-color: #e74d3c;
     }
     &:nth-child(3) {
       transition-delay: 0.2s;
-      background-color: rgb(116, 108, 108);
+      background-color: #e74d3c;
     }
   }
 
   &:not(:hover) .bar {
     &:nth-child(1) {
       transition-delay: 0.2s;
-      background-color: #000000;
+      background-color: #e74d3c87;
     }
     &:nth-child(2) {
       transition-delay: 0.1s;
-      background-color: #000000;
+      background-color: #e74d3c87;
     }
     &:nth-child(3) {
       transition-delay: 0s;
-      background-color: #000000;
+      background-color: #e74d3c87;
     }
   }
 }
@@ -121,11 +121,15 @@
       .link {
         width: 10rem;
         font-size: 1.1rem;
-        color: #000000;
+        color: #333;
+        background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         padding: 12px 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         border: none;
-        background: white;
+
         cursor: pointer;
         border-radius: 4px;
         text-align: center;
@@ -134,18 +138,16 @@
 
         // Focus visible
         &:focus-visible {
-          outline: 2px solid #007bff;
+          outline: 2px solid #e74c3c;
           outline-offset: -2px;
         }
 
         &:hover {
-          color: rgb(116, 108, 108);
           transform: scale(1.05);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         &:active {
-          color: rgb(116, 108, 108);
           transform: scale(0.98);
         }
       }

@@ -13,6 +13,29 @@ const SECTIONS = [
   { path: '/Romain-Calmelet/contact', id: 'contact' },
 ]
 
+// ==================== PARAMÈTRES DE SENSIBILITÉ ====================
+const SENSITIVITY_CONFIG = {
+  // Molette de souris
+  wheel: {
+    debounceTime: 50, // Délai minimum entre les événements wheel (ms)
+    deltaThreshold: 50, // Quantité de scroll nécessaire pour navigation (plus bas = plus sensible)
+    resetTimeout: 1500, // Temps avant réinitialisation de l'état (ms)
+  },
+
+  // Navigation tactile
+  touch: {
+    minSwipeDistance: 30, // Distance minimale pour détecter un swipe (px)
+    resetTimeout: 2000, // Temps avant réinitialisation de l'état (ms)
+  },
+
+  // Détection de scroll
+  scroll: {
+    epsilon: 5, // Marge d'erreur pour détecter les extrémités (px)
+    navigationCooldown: 800, // Délai de blocage après navigation (ms)
+    initDelay: 200, // Délai d'initialisation des événements (ms)
+  },
+}
+
 function App() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -25,9 +48,10 @@ function App() {
   const touchEndRef = useRef({ x: 0, y: 0 })
   const timeoutRef = useRef(null)
 
-  // NOUVELLE RÉFÉRENCE: Compteur de tentatives de scroll aux extrémités
-  const scrollAttemptRef = useRef({ top: 0, bottom: 0 })
-  const resetScrollAttemptTimeoutRef = useRef(null)
+  // NOUVELLES RÉFÉRENCES: Gestion du scroll aux extrémités
+  const scrollEndReachedRef = useRef(false)
+  const scrollEndTimeoutRef = useRef(null)
+  const wheelDeltaAccumulatorRef = useRef(0)
 
   // État pour la direction de navigation
   const [direction, setDirection] = useState('down')
@@ -47,10 +71,11 @@ function App() {
   }, [])
 
   /**
-   * Réinitialise les tentatives de scroll
+   * Réinitialise l'état de fin de scroll
    */
-  const resetScrollAttempts = useCallback(() => {
-    scrollAttemptRef.current = { top: 0, bottom: 0 }
+  const resetScrollEndState = useCallback(() => {
+    scrollEndReachedRef.current = false
+    wheelDeltaAccumulatorRef.current = 0
   }, [])
 
   /**
@@ -82,15 +107,15 @@ function App() {
 
       navigate(SECTIONS[nextIndex].path)
 
-      // Réinitialise les tentatives de scroll après navigation
-      resetScrollAttempts()
+      // Réinitialise l'état de fin de scroll après navigation
+      resetScrollEndState()
 
       timeoutRef.current = setTimeout(() => {
         isNavigatingRef.current = false
         timeoutRef.current = null
-      }, 800)
+      }, SENSITIVITY_CONFIG.scroll.navigationCooldown)
     },
-    [getCurrentSectionIndex, navigate, resetScrollAttempts]
+    [getCurrentSectionIndex, navigate, resetScrollEndState]
   )
 
   /**
@@ -107,7 +132,7 @@ function App() {
     const scrollTop = element.scrollTop
     const scrollHeight = element.scrollHeight
     const clientHeight = element.clientHeight
-    const epsilon = 5
+    const epsilon = SENSITIVITY_CONFIG.scroll.epsilon
 
     return {
       scrollTop,
@@ -127,23 +152,28 @@ function App() {
       mainRef.current.scrollTop = 0
     }
 
-    // Réinitialise les tentatives de scroll lors du changement de page
-    resetScrollAttempts()
+    // Réinitialise l'état de fin de scroll lors du changement de page
+    resetScrollEndState()
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
 
+    if (scrollEndTimeoutRef.current) {
+      clearTimeout(scrollEndTimeoutRef.current)
+      scrollEndTimeoutRef.current = null
+    }
+
     const resetTimer = setTimeout(() => {
       isNavigatingRef.current = false
-    }, 200)
+    }, SENSITIVITY_CONFIG.scroll.initDelay)
 
     return () => clearTimeout(resetTimer)
-  }, [location.pathname, resetScrollAttempts])
+  }, [location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation par molette de souris avec sécurité
+   * Gestion de la navigation par molette de souris avec scroll fluide
    */
   useEffect(() => {
     const handleWheel = (e) => {
@@ -156,66 +186,73 @@ function App() {
       if (!el || isScrollableArea(e.target)) return
 
       const now = Date.now()
-      if (now - lastWheelTimeRef.current < 50) {
+      if (
+        now - lastWheelTimeRef.current <
+        SENSITIVITY_CONFIG.wheel.debounceTime
+      ) {
         e.preventDefault()
         return
       }
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
-      // Si pas de scroll possible, navigation avec sécurité
+      // Si pas de scroll possible, navigation directe
       if (!canScroll) {
         e.preventDefault()
         lastWheelTimeRef.current = now
-
         const direction = e.deltaY > 0 ? 'down' : 'up'
-        const attemptKey = e.deltaY > 0 ? 'bottom' : 'top'
-
-        // Incrémente le compteur de tentatives
-        scrollAttemptRef.current[attemptKey]++
-
-        // Si c'est la deuxième tentative ou plus, navigue
-        if (scrollAttemptRef.current[attemptKey] >= 2) {
-          navigateToSection(direction)
-        }
-
-        // Réinitialise les tentatives après un délai
-        if (resetScrollAttemptTimeoutRef.current) {
-          clearTimeout(resetScrollAttemptTimeoutRef.current)
-        }
-        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
-          resetScrollAttempts()
-        }, 1000) // Reset après 1 seconde d'inactivité
-
+        navigateToSection(direction)
         return
       }
 
-      // Si scroll possible mais aux extrémités, navigation avec sécurité
+      // Si on peut scroller et qu'on n'est pas aux extrémités, permettre le scroll normal
+      if (!atBottom && !atTop) {
+        // Réinitialise l'état si on scroll dans le contenu
+        resetScrollEndState()
+        return
+      }
+
+      // Si on est aux extrémités
       if ((e.deltaY > 0 && atBottom) || (e.deltaY < 0 && atTop)) {
         e.preventDefault()
         lastWheelTimeRef.current = now
 
         const direction = e.deltaY > 0 ? 'down' : 'up'
-        const attemptKey = e.deltaY > 0 ? 'bottom' : 'top'
 
-        // Incrémente le compteur de tentatives
-        scrollAttemptRef.current[attemptKey]++
+        // Si on n'a pas encore atteint la fin, marquer comme atteint
+        if (!scrollEndReachedRef.current) {
+          scrollEndReachedRef.current = true
+          wheelDeltaAccumulatorRef.current = 0
 
-        // Si c'est la deuxième tentative ou plus, navigue
-        if (scrollAttemptRef.current[attemptKey] >= 2) {
+          // Réinitialise après un délai si pas d'autre scroll
+          if (scrollEndTimeoutRef.current) {
+            clearTimeout(scrollEndTimeoutRef.current)
+          }
+          scrollEndTimeoutRef.current = setTimeout(() => {
+            resetScrollEndState()
+          }, SENSITIVITY_CONFIG.wheel.resetTimeout)
+
+          return
+        }
+
+        // Si on a déjà atteint la fin, accumuler le delta
+        wheelDeltaAccumulatorRef.current += Math.abs(e.deltaY)
+
+        // Navigue si assez de delta accumulé (équivalent à un scroll supplémentaire)
+        if (
+          wheelDeltaAccumulatorRef.current >=
+          SENSITIVITY_CONFIG.wheel.deltaThreshold
+        ) {
           navigateToSection(direction)
         }
 
-        // Réinitialise les tentatives après un délai
-        if (resetScrollAttemptTimeoutRef.current) {
-          clearTimeout(resetScrollAttemptTimeoutRef.current)
+        // Réinitialise le timeout
+        if (scrollEndTimeoutRef.current) {
+          clearTimeout(scrollEndTimeoutRef.current)
         }
-        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
-          resetScrollAttempts()
-        }, 1000) // Reset après 1 seconde d'inactivité
-      } else {
-        // Si on scroll dans le contenu, réinitialise les tentatives
-        resetScrollAttempts()
+        scrollEndTimeoutRef.current = setTimeout(() => {
+          resetScrollEndState()
+        }, SENSITIVITY_CONFIG.wheel.resetTimeout)
       }
     }
 
@@ -224,21 +261,21 @@ function App() {
 
     const timer = setTimeout(() => {
       el.addEventListener('wheel', handleWheel, { passive: false })
-    }, 200)
+    }, SENSITIVITY_CONFIG.scroll.initDelay)
 
     return () => {
       clearTimeout(timer)
-      if (resetScrollAttemptTimeoutRef.current) {
-        clearTimeout(resetScrollAttemptTimeoutRef.current)
+      if (scrollEndTimeoutRef.current) {
+        clearTimeout(scrollEndTimeoutRef.current)
       }
       if (el) {
         el.removeEventListener('wheel', handleWheel)
       }
     }
-  }, [navigateToSection, location.pathname, resetScrollAttempts])
+  }, [navigateToSection, location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation tactile avec sécurité
+   * Gestion de la navigation tactile avec scroll fluide
    */
   useEffect(() => {
     const handleTouchStart = (e) => {
@@ -261,34 +298,53 @@ function App() {
       const deltaX = touchEndRef.current.x - touchStartRef.current.x
       const deltaY = touchEndRef.current.y - touchStartRef.current.y
 
-      if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) <= 30) return
+      if (
+        Math.abs(deltaY) <= Math.abs(deltaX) ||
+        Math.abs(deltaY) <= SENSITIVITY_CONFIG.touch.minSwipeDistance
+      )
+        return
 
       const el = mainRef.current
       if (!el) return
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
+      // Si pas de scroll possible, navigation directe
+      if (!canScroll) {
+        const direction = deltaY < 0 ? 'down' : 'up'
+        navigateToSection(direction)
+        return
+      }
+
+      // Si on peut scroller et qu'on n'est pas aux extrémités, permettre le scroll normal
+      if (!atBottom && !atTop) {
+        resetScrollEndState()
+        return
+      }
+
+      // Si on est aux extrémités
       const direction = deltaY < 0 ? 'down' : 'up'
-      const attemptKey = deltaY < 0 ? 'bottom' : 'top'
 
-      if (!canScroll || (deltaY < 0 && atBottom) || (deltaY > 0 && atTop)) {
-        // Incrémente le compteur de tentatives
-        scrollAttemptRef.current[attemptKey]++
+      if ((deltaY < 0 && atBottom) || (deltaY > 0 && atTop)) {
+        // Si on n'a pas encore atteint la fin, marquer comme atteint
+        if (!scrollEndReachedRef.current) {
+          scrollEndReachedRef.current = true
 
-        // Si c'est la deuxième tentative ou plus, navigue
-        if (scrollAttemptRef.current[attemptKey] >= 2) {
-          navigateToSection(direction)
+          // Réinitialise après un délai si pas d'autre geste
+          if (scrollEndTimeoutRef.current) {
+            clearTimeout(scrollEndTimeoutRef.current)
+          }
+          scrollEndTimeoutRef.current = setTimeout(() => {
+            resetScrollEndState()
+          }, SENSITIVITY_CONFIG.touch.resetTimeout)
+
+          return
         }
 
-        // Réinitialise les tentatives après un délai
-        if (resetScrollAttemptTimeoutRef.current) {
-          clearTimeout(resetScrollAttemptTimeoutRef.current)
-        }
-        resetScrollAttemptTimeoutRef.current = setTimeout(() => {
-          resetScrollAttempts()
-        }, 1000)
+        // Si on a déjà atteint la fin, naviguer
+        navigateToSection(direction)
       } else {
-        resetScrollAttempts()
+        resetScrollEndState()
       }
     }
 
@@ -304,10 +360,10 @@ function App() {
         el.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [navigateToSection, location.pathname, resetScrollAttempts])
+  }, [navigateToSection, location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation par clavier (sans sécurité pour une navigation directe)
+   * Gestion de la navigation par clavier (sans modification pour une navigation directe)
    */
   useEffect(() => {
     const handleKeyDown = (e) => {

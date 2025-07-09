@@ -1,0 +1,509 @@
+// Card projet front
+.projectCardFront {
+  height: 45vh;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+  will-change: transform;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-in;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.4);
+  }
+  &:active {
+    cursor: grabbing;
+  }
+
+  @media (max-width: 900px) {
+    height: 45vh;
+  }
+
+  @media (max-width: 768px) {
+    height: 40vh;
+  }
+
+  @media (max-width: 480px) {
+    height: 30vh;
+  }
+
+  .imageContainer {
+    width: 100%;
+    height: 100%;
+
+    .img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+  }
+
+  .cardTitle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+      to top,
+      rgba(175, 175, 175, 0),
+      rgba(16, 8, 1, 0.677)
+    );
+    color: white;
+    padding: 1.5rem 1rem 1rem 1rem;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    backdrop-filter: blur(4px);
+
+    @media (max-width: 768px) {
+      font-size: 1.3rem;
+      padding: 1.2rem 0.8rem 0.8rem 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.1rem;
+      padding: 1rem 0.6rem 0.6rem 0.6rem;
+    }
+  }
+}
+
+// Card projet détails
+.projectCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  will-change: transform;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    margin: 0 0.5rem;
+  }
+
+  .projectCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+      padding: 1rem 0.5rem 0 0.5rem;
+    }
+
+    img {
+      width: 150px;
+      height: 150px;
+      object-fit: contain;
+      border-radius: 12px;
+      flex-shrink: 0;
+      background: #ffffff;
+      padding: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 1024px) {
+        width: 120px;
+      }
+
+      @media (max-width: 768px) {
+        width: 100px;
+        padding: 0.75rem;
+      }
+
+      @media (max-width: 480px) {
+        width: 80px;
+        padding: 0.5rem;
+      }
+    }
+
+    p {
+      flex: 1;
+      margin: 0;
+      font-size: clamp(1rem, 2vw, 1.125rem);
+      line-height: 1.7;
+      color: #333;
+      text-align: left;
+
+      @media (max-width: 768px) {
+        text-align: center;
+        font-size: clamp(0.875rem, 2vw, 1rem);
+      }
+
+      @media (max-width: 480px) {
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+      }
+    }
+  }
+
+  .technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 1rem 1.5rem;
+
+    @media (max-width: 768px) {
+      gap: 8px;
+      padding: 1rem;
+      justify-content: center;
+    }
+
+    @media (max-width: 480px) {
+      gap: 6px;
+      padding: 0.75rem 0;
+    }
+  }
+
+  .techBadge {
+    background: linear-gradient(
+      135deg,
+      rgba(231, 76, 60, 0.8),
+      rgba(231, 76, 60, 0.6)
+    );
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    will-change: transform;
+
+    &:hover {
+      background: linear-gradient(
+        135deg,
+        rgba(231, 76, 60, 0.9),
+        rgba(231, 76, 60, 0.7)
+      );
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 13px;
+      padding: 0.4rem 0.8rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 12px;
+      padding: 0.3rem 0.6rem;
+    }
+  }
+
+  .features {
+    margin: 0;
+    padding: 0 1rem;
+
+    @media (max-width: 768px) {
+      padding: 0 0.75rem;
+    }
+
+    h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #333;
+      text-align: center;
+
+      @media (max-width: 768px) {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 0.875rem;
+      }
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: calc(4 * (1.5rem + 0.5rem) + 3 * 0.5rem);
+      overflow-y: auto;
+      padding-right: 8px;
+
+      @media (max-width: 768px) {
+        gap: 0.4rem;
+        max-height: calc(4 * (1.2rem + 0.4rem) + 3 * 0.4rem);
+        padding-right: 6px;
+      }
+
+      @media (max-width: 480px) {
+        max-height: calc(3 * (1rem + 0.4rem) + 2 * 0.4rem);
+        padding-right: 4px;
+      }
+
+      // Style scrollbar harmonisé
+      &::-webkit-scrollbar {
+        width: 6px;
+
+        @media (max-width: 768px) {
+          width: 4px;
+        }
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          135deg,
+          rgba(231, 76, 60, 0.4),
+          rgba(231, 76, 60, 0.2)
+        );
+        border-radius: 3px;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(231, 76, 60, 0.6),
+            rgba(231, 76, 60, 0.4)
+          );
+        }
+      }
+
+      li {
+        position: relative;
+        padding: 0.75rem 0.75rem 0.75rem 48px;
+        color: #333;
+        line-height: 1.6;
+        font-size: 1rem;
+        background: rgba(231, 76, 60, 0.05);
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background: rgba(231, 76, 60, 0.1);
+        }
+
+        @media (max-width: 1024px) {
+          font-size: 0.9375rem;
+          padding-left: 40px;
+        }
+
+        @media (max-width: 768px) {
+          font-size: 0.875rem;
+          padding: 0.6rem 0.6rem 0.6rem 36px;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 0.8125rem;
+          padding-left: 32px;
+        }
+
+        &:before {
+          content: '✓';
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #e74c3c;
+          font-weight: bold;
+          font-size: 16px;
+
+          @media (max-width: 768px) {
+            left: 12px;
+            font-size: 14px;
+          }
+
+          @media (max-width: 480px) {
+            left: 10px;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+
+  .links {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding: 1rem 1rem;
+    margin-top: auto;
+
+    @media (max-width: 768px) {
+      gap: 12px;
+      padding: 1rem 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 10px;
+      padding: 0.75rem;
+    }
+  }
+
+  .githubLink,
+  .demoLink {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 120px;
+    flex: 1;
+    max-width: 150px;
+    will-change: transform;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 0.875rem;
+      min-width: 100px;
+      padding: 0.6rem 1.2rem;
+    }
+
+    @media (max-width: 480px) {
+      min-width: unset;
+      max-width: unset;
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+    }
+  }
+
+  .githubLink {
+    background: #1f2937;
+    color: white;
+
+    &:hover {
+      background: #111827;
+    }
+  }
+
+  .demoLink {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, #c0392b, #a93226);
+    }
+  }
+}
+
+// Support pour les écrans haute densité
+@media (-webkit-min-device-pixel-ratio: 2),
+  (min-resolution: 192dpi),
+  (min-resolution: 2dppx) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+// Animations harmonisées
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Accessibilité améliorée
+.githubLink:focus-visible,
+.demoLink:focus-visible,
+.techBadge:focus-visible {
+  outline: 2px solid #e74c3c;
+  outline-offset: 2px;
+}
+
+// Performance
+.projectCardFront,
+.projectCard,
+.projectCard img,
+.techBadge,
+.githubLink,
+.demoLink {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+// Préférences de mouvement réduit
+@media (prefers-reduced-motion: reduce) {
+  .projectCardFront,
+  .projectCard,
+  img,
+  .techBadge,
+  .githubLink,
+  .demoLink {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .projectCardFront:hover,
+  .projectCard:hover {
+    transform: none !important;
+  }
+}
+
+// Print
+@media print {
+  .projectCardFront {
+    box-shadow: none;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .projectCard {
+    box-shadow: none;
+    page-break-inside: avoid;
+    break-inside: avoid;
+
+    img {
+      box-shadow: none;
+    }
+  }
+
+  .techBadge {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    border: 1px solid #ccc;
+  }
+
+  .githubLink,
+  .demoLink {
+    display: none;
+  }
+
+  .features ul {
+    max-height: none;
+    overflow: visible;
+  }
+
+  p {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+  }
+}

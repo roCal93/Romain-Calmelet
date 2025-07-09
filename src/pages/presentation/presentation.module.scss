@@ -5,28 +5,14 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: calc(100vh - 132px);
+  min-height: calc(100vh - 90px);
   position: relative;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 0.8s ease-out forwards;
 
   @media (max-width: 768px) {
-    min-height: calc(100dvh - 96px);
-
-    // Indicateur de scroll sur mobile
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 30px;
-      height: 3px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 2px;
-      animation: pulse 2s ease-in-out infinite;
-    }
+    min-height: calc(100dvh - 65px);
   }
 }
 
@@ -108,10 +94,6 @@
   justify-content: center;
   gap: 1rem;
 
-  @media (max-width: 1024px) {
-    width: 55%;
-  }
-
   @media (max-width: 768px) {
     width: 100%;
     justify-content: flex-start;
@@ -162,8 +144,7 @@
   @media (max-width: 768px) {
     display: block;
     float: right;
-    width: 50%;
-    max-width: 350px;
+    max-width: 300px;
     margin: 0 0 1rem 1rem;
     shape-outside: circle(50%);
     animation: float 6s ease-in-out infinite;
@@ -222,15 +203,11 @@
 
 // Image desktop
 .desktopImage {
-  width: 40%;
+  width: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 0;
-
-  @media (max-width: 1024px) {
-    width: 40%;
-  }
 
   @media (max-width: 768px) {
     display: none;
@@ -301,13 +278,6 @@
   &:hover {
     transform: scale(1.02);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-  }
-}
-
-// Ajout de breakpoints intermédiaires
-@media (max-width: 1200px) and (min-width: 769px) {
-  .aboutMe {
-    padding: 0 4rem;
   }
 }
 
@@ -407,7 +377,7 @@
 // Accessibilité améliorée
 .navUp > *:focus-visible,
 .navDown > *:focus-visible {
-  outline: 2px solid #007bff;
+  outline: 2px solid #e74c3c;
   outline-offset: 4px;
   border-radius: 4px;
 }

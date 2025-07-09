@@ -23,25 +23,6 @@
       text-transform: uppercase;
     }
   }
-
-  // Animation de chargement subtile
-  .loadingRing {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: #bdbdbd;
-    animation: rotate 2s linear infinite;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  &:hover .loadingRing {
-    opacity: 1;
-  }
 }
 
 @keyframes fadeIn {
@@ -52,15 +33,6 @@
   to {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 

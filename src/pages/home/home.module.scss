@@ -3,7 +3,7 @@
   grid-template-rows: 1fr auto;
   align-items: center;
   width: 100%;
-  min-height: calc(100vh - 132px);
+  min-height: calc(100vh - 90px);
   padding: 2rem 1rem;
   gap: 2rem;
   position: relative;
@@ -14,7 +14,7 @@
   animation: fadeInUp 0.8s ease-out forwards;
 
   @media (max-width: 768px) {
-    min-height: calc(100dvh - 96px);
+    min-height: calc(100dvh - 65px);
     padding: 1rem;
     gap: 1rem;
     padding-top: max(1rem, env(safe-area-inset-top));
@@ -238,7 +238,7 @@
 
 // Effet de focus pour l'accessibilité
 .nav > *:focus-visible {
-  outline: 2px solid #007bff;
+  outline: 2px solid #e74c3c;
   outline-offset: 4px;
   border-radius: 4px;
 }

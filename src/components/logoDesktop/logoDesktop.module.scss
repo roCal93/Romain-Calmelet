@@ -1,7 +1,7 @@
 .logo {
   display: flex;
   width: 600px;
-  height: 100px;
+  height: 85px;
   text-decoration: none;
   align-items: center;
   justify-content: flex-start;
@@ -11,8 +11,8 @@
 
   // Indicateur de focus visible
   &:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 4px;
+    outline: 2px solid #e74c3c;
+    outline-offset: 1px;
     border-radius: 4px;
   }
   .cWithR {
@@ -23,8 +23,9 @@
     justify-content: flex-start;
     position: relative;
     transition: color 0.2s ease;
+    color: #e74d3ca9;
     &:hover {
-      color: rgb(116, 108, 108);
+      color: #e74d3ccb;
     }
 
     .bigC {

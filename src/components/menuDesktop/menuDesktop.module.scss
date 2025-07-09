@@ -18,23 +18,27 @@
     position: relative;
     transition: all 0.2s ease;
     text-decoration: none;
-    color: inherit;
+    color: #333;
+    background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     padding: 0.5rem 0;
+    font-size: 18px;
 
     &:hover {
       transform: scale(1.07);
-      color: rgb(116, 108, 108);
     }
 
     &:focus-visible {
-      outline: 2px solid #007bff;
+      outline: 2px solid #e74c3c;
       outline-offset: 4px;
       border-radius: 4px;
     }
 
     // Indicateur de lien actif
     &.active {
-      color: rgb(116, 108, 108);
+      color: #e74d3c87;
 
       &::after {
         content: '';
@@ -43,7 +47,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background-color: currentColor;
+        background-color: #e74d3c87;
         transform: scaleX(1);
         transition: transform 0.3s ease;
       }
@@ -57,7 +61,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background-color: currentColor;
+      background-color: #e74d3c87;
       transform: scaleX(0);
       transition: transform 0.3s ease;
     }
