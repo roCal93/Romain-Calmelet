@@ -36,6 +36,8 @@ body {
   flex-direction: column;
   height: 100vh; /* Hauteur fixe pour tous les écrans */
   min-height: 100vh; /* Assure une hauteur minimale */
+  max-width: 100vw; /* AJOUTÉ */
+  overflow-x: hidden; /* AJOUTÉ */
 }
 
 .main-content {
@@ -45,8 +47,6 @@ body {
   -webkit-overflow-scrolling: touch;
   position: relative;
   scroll-behavior: smooth;
-  /* AJOUTÉ: hauteur minimale pour assurer le scroll */
-  min-height: 0;
 }
 
 /* Container de page avec scroll conditionnel */

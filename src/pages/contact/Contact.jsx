@@ -2,6 +2,7 @@ import { useEffect, useState, useContext, useMemo, useCallback } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './contact.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
+
 import Footer from '../../components/footer/Footer'
 import StaticLogos from '../../components/StaticLogos/StaticLogos'
 import GameMenu from '../../components/GameMenu/GameMenu'
@@ -13,11 +14,12 @@ function Contact() {
   const [isVisible, setIsVisible] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
   const [showPhoneNumber, setShowPhoneNumber] = useState(false)
+  const [isMouseInGameArea, setIsMouseInGameArea] = useState(false)
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   })
-  const { direction } = useContext(NavigationContext)
+  const { direction, resetNavigation } = useContext(NavigationContext)
 
   const isMobile = windowSize.width <= 768
 
@@ -55,9 +57,13 @@ function Contact() {
 
   // Effets
   useEffect(() => {
+    resetNavigation?.()
     setIsVisible(true)
-    return () => setIsVisible(false)
-  }, [])
+
+    return () => {
+      setIsVisible(false)
+    }
+  }, [resetNavigation])
 
   useEffect(() => {
     const handleResize = debounce(() => {
@@ -113,12 +119,36 @@ function Contact() {
           : ''
       }`}
     >
-      <div className={styles.container}>
-        {!activeGame && <ArrowUp />}
-        {!activeGame && <GameMenu startGame={startGame} />}
-        {activeGame && (
-          <FullscreenGame gameType={activeGame} backToMenu={backToMenu} />
-        )}
+      <main className={styles.container} role="main">
+        <div className={styles.navUp}>
+          <ArrowUp aria-label="Naviguer vers la section précédente" />
+        </div>
+
+        <article
+          className={styles.contactContent}
+          aria-labelledby="contact-title"
+        >
+          <header className={styles.title}>
+            <div className={styles.text}>
+              <h1 id="contact-title">Contactez-moi</h1>
+              <p>Discutons de votre projet ou jouez à un mini-jeu</p>
+            </div>
+          </header>
+
+          <section
+            className={`${styles.gameWrapper} ${
+              isMouseInGameArea ? 'allowScroll' : ''
+            }`}
+            onMouseEnter={() => setIsMouseInGameArea(true)}
+            onMouseLeave={() => setIsMouseInGameArea(false)}
+            aria-label="Zone de jeu et contact"
+          >
+            {!activeGame && <GameMenu startGame={startGame} />}
+            {activeGame && (
+              <FullscreenGame gameType={activeGame} backToMenu={backToMenu} />
+            )}
+          </section>
+        </article>
 
         {/* Logos statiques (toujours visibles sauf en mode jeu) */}
         <StaticLogos
@@ -133,7 +163,8 @@ function Contact() {
           showPhoneNumber={showPhoneNumber}
           setShowPhoneNumber={setShowPhoneNumber}
         />
-      </div>
+      </main>
+
       <Footer />
     </div>
   )

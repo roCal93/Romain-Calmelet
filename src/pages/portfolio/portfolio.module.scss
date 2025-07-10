@@ -134,19 +134,6 @@
   }
 }
 
-.carouselWrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0 2rem;
-
-  @media (max-width: 768px) {
-    padding: 0 1rem;
-  }
-}
-
 // Animations harmonisées
 @keyframes fadeInUp {
   to {
