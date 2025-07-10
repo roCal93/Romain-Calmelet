@@ -49,7 +49,7 @@
 
   // Focus styles améliorés
   &:focus {
-    outline: 3px solid #007aff;
+    outline: 3px solid #e74c3c;
     outline-offset: 4px;
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
   }
@@ -68,19 +68,9 @@
   }
 
   &:focus-visible {
-    outline: 3px solid #007aff;
+    outline: 3px solid #e74c3c;
     outline-offset: 4px;
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-  }
-}
-
-@keyframes focusPulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
   }
 }
 
@@ -154,7 +144,7 @@
 
   // Focus styles pour les boutons
   &:focus {
-    outline: 2px solid #007aff;
+    outline: 2px solid #e74d3cc1;
     outline-offset: 2px;
   }
 
@@ -220,7 +210,7 @@
   transition: all 0.2s;
 
   &.active {
-    background-color: #e74d3cc1;
+    background-color: #e74c3c;
     transform: scale(1.2);
   }
 
@@ -230,7 +220,7 @@
 
   // Focus styles pour les dots
   &:focus {
-    outline: 2px solid #007aff;
+    outline: 2px solid #e74c3c;
     outline-offset: 2px;
   }
 
@@ -240,7 +230,7 @@
 }
 
 .active {
-  background-color: #e74d3cc1;
+  background-color: #e74c3c;
 }
 
 .modal {
@@ -274,7 +264,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   max-width: 50vw;
-  max-height: 85vh;
+  max-height: 80vh;
   overflow: auto;
   transform-origin: center;
   animation: bounceIn 0.5s ease;
@@ -307,7 +297,7 @@
 
   // Focus style pour le bouton de fermeture
   &:focus {
-    outline: 3px solid #fff;
+    outline: 3px solid #e74c3c;
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
   }

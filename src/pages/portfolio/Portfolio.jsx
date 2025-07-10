@@ -71,7 +71,6 @@ function Portfolio() {
               cards={cards}
               cardsTitle={cardsTitle}
               loop={true}
-              autoFocus={false}
             />
           </section>
         </article>

@@ -363,11 +363,28 @@ function App() {
   }, [navigateToSection, location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation par clavier (sans modification pour une navigation directe)
+   * Gestion de la navigation par clavier (modifiée pour éviter les conflits avec les modales)
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (isNavigatingRef.current) return
+
+      // Vérifier si l'élément actif est dans une zone scrollable ou une modale
+      const activeElement = document.activeElement
+      const isInScrollableArea =
+        activeElement &&
+        (activeElement.closest(
+          '.allowScroll, .features, .scrollable, .modal, .project-modal, [role="dialog"]'
+        ) ||
+          activeElement.tagName === 'UL' ||
+          activeElement.tagName === 'LI' ||
+          activeElement.hasAttribute('tabindex') ||
+          activeElement.closest('[tabindex]'))
+
+      // Si on est dans une zone scrollable ou une modale, ne pas intercepter les flèches
+      if (isInScrollableArea) {
+        return
+      }
 
       const currentIndex = getCurrentSectionIndex()
 

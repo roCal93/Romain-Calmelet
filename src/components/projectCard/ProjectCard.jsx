@@ -18,14 +18,14 @@ function ProjectCard({ project, variant = 'detailed' }) {
   }
 
   return (
-    <div className={styles.projectCard}>
+    <div className={`${styles.projectCard} scrollable`}>
       {/* Header section avec logo et description */}
       <header className={styles.projectCardHeader}>
         <img
           src={project.logo}
           alt={`Logo ${project.name}`}
           loading="lazy"
-          tabindex="-1"
+          tabIndex="-1"
         />
         <p>{project.description}</p>
       </header>
@@ -43,11 +43,18 @@ function ProjectCard({ project, variant = 'detailed' }) {
       </section>
 
       {/* Fonctionnalités */}
-      <section className={styles.features}>
+      <section className={`${styles.features} scrollable`}>
         <h4>Fonctionnalités principales:</h4>
-        <ul>
+        <ul
+          tabIndex="0"
+          role="list"
+          aria-label="Liste des fonctionnalités principales"
+          className="scrollable"
+        >
           {project.features.map((feature, index) => (
-            <li key={index}>{feature}</li>
+            <li key={index} role="listitem">
+              {feature}
+            </li>
           ))}
         </ul>
       </section>

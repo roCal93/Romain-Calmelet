@@ -21,29 +21,32 @@ body {
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow: hidden; /* Important : empêche le scroll sur body */
+  /* SUPPRIMÉ: overflow: hidden qui bloquait le scroll */
 }
 
 #root {
   height: 100%;
   width: 100%;
-  overflow: hidden;
+  /* SUPPRIMÉ: overflow: hidden */
 }
 
 /* Structure de l'application */
 .app-container {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  height: 100vh; /* Hauteur fixe pour tous les écrans */
+  min-height: 100vh; /* Assure une hauteur minimale */
 }
 
 .main-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Toujours auto pour permettre le scroll */
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   position: relative;
   scroll-behavior: smooth;
+  /* AJOUTÉ: hauteur minimale pour assurer le scroll */
+  min-height: 0;
 }
 
 /* Container de page avec scroll conditionnel */
@@ -53,11 +56,6 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-
-  /* Le contenu détermine si le scroll est nécessaire */
-  &.scrollable {
-    overflow-y: auto;
-  }
 }
 
 /* Optimisations mobiles */
@@ -72,6 +70,15 @@ body {
 
   .app-container {
     height: 100dvh; /* Utilise dvh pour mobile */
+    min-height: 100dvh;
+  }
+}
+
+/* AJOUTÉ: Gestion spécifique pour desktop */
+@media (min-width: 769px) {
+  .app-container {
+    height: 100vh;
+    min-height: 100vh;
   }
 }
 
@@ -79,6 +86,7 @@ body {
 @supports (-webkit-touch-callout: none) {
   .app-container {
     height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
   }
 }
 
@@ -150,20 +158,24 @@ table {
   word-wrap: break-word;
 }
 
+/* Personnalisation des scrollbars pour desktop */
 @media (min-width: 769px) {
-  .main-content::-webkit-scrollbar,
-  .page-container.scrollable::-webkit-scrollbar {
-    width: 6px; /* Plus fin */
+  .main-content::-webkit-scrollbar {
+    width: 6px;
   }
 
-  .main-content::-webkit-scrollbar-thumb,
-  .page-container.scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.15); /* Plus transparent */
+  .main-content::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 3px;
   }
 
-  .main-content,
-  .page-container.scrollable {
-    overflow-y: scroll !important;
+  .main-content::-webkit-scrollbar-track {
+    background-color: transparent;
   }
+}
+
+/* AJOUTÉ: Gestion du scroll pour toutes les tailles d'écran */
+.main-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
