@@ -21,13 +21,13 @@ body {
   padding: 0;
   height: 100%;
   width: 100%;
-  /* SUPPRIMÉ: overflow: hidden qui bloquait le scroll */
+  overflow: hidden;
 }
 
 #root {
   height: 100%;
   width: 100%;
-  /* SUPPRIMÉ: overflow: hidden */
+  overflow: hidden;
 }
 
 /* Structure de l'application */

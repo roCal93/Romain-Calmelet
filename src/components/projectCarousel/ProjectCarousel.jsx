@@ -64,6 +64,7 @@ export default function ProjectCarousel({
 
   // Variables pour le drag
   const dragStartX = useRef(0)
+  const dragStartY = useRef(0)
   const scrollStartX = useRef(0)
   const lastMoveTime = useRef(Date.now())
   const lastMoveX = useRef(0)
@@ -440,6 +441,7 @@ export default function ProjectCarousel({
       setIsDragging(true)
       setIsKeyboardNavigation(false)
       dragStartX.current = e.touches?.[0]?.clientX
+      dragStartY.current = e.touches?.[0]?.clientY
       scrollStartX.current = container.scrollLeft
       lastMoveTime.current = Date.now()
       lastMoveX.current = dragStartX.current
@@ -449,12 +451,26 @@ export default function ProjectCarousel({
       hasMoved.current = false
     }
 
+    // Modifiez la fonction handleTouchMove dans le useEffect des événements touch :
+
     const handleTouchMove = (e) => {
       if (!isDragging) return
 
-      e.preventDefault()
       const currentX = e.touches?.[0]?.clientX
-      const deltaX = (dragStartX.current - currentX) * SCROLL_SENSITIVITY
+      const currentY = e.touches?.[0]?.clientY
+
+      // Calculer le déplacement depuis le début
+      const deltaX = dragStartX.current - currentX
+      const deltaY = dragStartY.current - currentY // Vous devrez ajouter dragStartY
+
+      // Si le mouvement est plus vertical qu'horizontal, laisser le scroll natif
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        setIsDragging(false)
+        return
+      }
+
+      // Sinon, empêcher le scroll vertical et gérer le swipe horizontal
+      e.preventDefault()
 
       hasMoved.current = true
 
@@ -467,7 +483,7 @@ export default function ProjectCarousel({
       lastMoveTime.current = currentTime
       lastMoveX.current = currentX
 
-      container.scrollLeft = scrollStartX.current + deltaX
+      container.scrollLeft = scrollStartX.current + deltaX * SCROLL_SENSITIVITY
     }
 
     const handleTouchEnd = (e) => {
@@ -516,25 +532,6 @@ export default function ProjectCarousel({
     scrollToCard,
     focusedIndex,
   ])
-
-  /**
-   * Mouse wheel support
-   */
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const handleWheel = (e) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault()
-        setIsKeyboardNavigation(false)
-        container.scrollLeft += e.deltaY * 2
-      }
-    }
-
-    container.addEventListener('wheel', handleWheel, { passive: false })
-    return () => container.removeEventListener('wheel', handleWheel)
-  }, [])
 
   /**
    * Center first and last items on mount

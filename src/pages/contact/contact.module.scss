@@ -17,20 +17,24 @@
 } // ======================
 // CONTENEUR PRINCIPAL
 // ======================
+
+// contact.module.scss
+
+// ======================
+// CONTENEUR PRINCIPAL
+// ======================
 .container {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
   width: 100%;
-  min-height: calc(100vh - 90px);
+  min-height: calc(100vh - 140px);
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 0.8s ease-out forwards;
 
   @media (max-width: 768px) {
-    min-height: calc(100dvh - 65px);
+    min-height: calc(100dvh - 115px);
     padding: 0;
   }
 }
@@ -46,6 +50,7 @@
   opacity: 0;
   transform: translateY(-20px);
   animation: bounceInDown 1s ease-out 0.8s forwards;
+  flex-shrink: 0; // Empêche la compression
 
   @media (max-width: 768px) {
     padding: 0.5rem 0;
@@ -65,13 +70,13 @@
   flex-direction: column;
   width: 100%;
   flex: 1;
-  gap: 2rem;
   opacity: 0;
   transform: translateY(20px);
   animation: fadeIn 0.8s ease-out 0.6s forwards;
+  overflow: hidden; // Empêche le débordement
 
   @media (max-width: 768px) {
-    gap: 1.5rem;
+    padding: 0 2rem;
   }
 }
 
@@ -81,33 +86,25 @@
 .title {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 5rem;
+  justify-content: center; // Centrer le titre
+  padding: 2rem 5rem;
   width: 100%;
   opacity: 0;
   transform: translateY(30px);
   animation: slideInFromTop 0.8s ease-out 0.4s forwards;
+  flex-shrink: 0; // Empêche la compression
 
   @media (max-width: 1024px) {
-    padding: 0 3rem;
-  }
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-    text-align: center;
+    padding: 1.5rem 3rem;
   }
 
   @media (max-width: 768px) {
-    padding: 0 1rem;
+    padding: 0rem;
   }
 
   .text {
     text-align: center;
-
-    @media (max-width: 900px) {
-      text-align: center;
-      margin-top: 1rem;
-    }
+    width: 100%;
 
     h1 {
       margin: 0 0 0.5rem 0;
@@ -118,13 +115,10 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-
-      @media (max-width: 880px) {
-        font-size: 25px;
-      }
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
 
       @media (max-width: 768px) {
-        font-size: 20px;
+        font-size: clamp(1.25rem, 4vw, 1.75rem);
       }
     }
 
@@ -150,10 +144,13 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0 2rem;
+  padding: 2rem;
+  overflow-y: auto; // Permet le scroll si nécessaire
+  overflow-x: hidden;
 
   @media (max-width: 768px) {
-    padding: 0 1rem;
+    padding: 0.5rem;
+    align-items: flex-start; // Aligne en haut sur mobile
   }
 }
 

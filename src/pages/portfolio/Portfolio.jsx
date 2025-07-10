@@ -10,7 +10,6 @@ import { projects } from '../../assets/data/projects'
 
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
-  const [isMouseInCarousel, setIsMouseInCarousel] = useState(false)
   const { direction, resetNavigation } = useContext(NavigationContext)
 
   useEffect(() => {
@@ -60,11 +59,7 @@ function Portfolio() {
           </header>
 
           <section
-            className={`${styles.carouselWrapper} ${
-              isMouseInCarousel ? 'allowScroll' : ''
-            }`}
-            onMouseEnter={() => setIsMouseInCarousel(true)}
-            onMouseLeave={() => setIsMouseInCarousel(false)}
+            className={styles.carouselWrapper}
             aria-label="Carrousel de projets"
           >
             <ProjectCarousel

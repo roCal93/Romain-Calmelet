@@ -35,16 +35,21 @@ const LogoSocial = memo(({ type, position, onClick, isMobile }) => {
     }
   }
 
-  return (
-    <div
-      className={styles.staticLogo}
-      style={{
+  // Style conditionnel : utilise position si fournie, sinon style par défaut
+  const logoStyle = position
+    ? {
         position: 'fixed',
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: 'pointer',
         zIndex: 1000,
-      }}
+      }
+    : undefined
+
+  return (
+    <div
+      className={styles.staticLogo}
+      style={logoStyle}
       onClick={() => onClick(type)}
       role="button"
       tabIndex="0"

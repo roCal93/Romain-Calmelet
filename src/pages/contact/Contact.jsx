@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useMemo, useCallback } from 'react'
+import { useEffect, useState, useContext, useCallback } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './contact.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
@@ -15,45 +15,7 @@ function Contact() {
   const [activeGame, setActiveGame] = useState(null)
   const [showPhoneNumber, setShowPhoneNumber] = useState(false)
   const [isMouseInGameArea, setIsMouseInGameArea] = useState(false)
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  })
   const { direction, resetNavigation } = useContext(NavigationContext)
-
-  const isMobile = windowSize.width <= 768
-
-  // Debounce pour le resize
-  const debounce = useCallback((func, wait) => {
-    let timeout
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout)
-        func(...args)
-      }
-      clearTimeout(timeout)
-      timeout = setTimeout(later, wait)
-    }
-  }, [])
-
-  // Positions des logos avec toutes les dépendances
-  const staticPositions = useMemo(
-    () => ({
-      linkedin: {
-        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 380 : windowSize.height - 460,
-      },
-      github: {
-        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 300 : windowSize.height - 360,
-      },
-      phone: {
-        x: isMobile ? windowSize.width - 45 : windowSize.width - 80,
-        y: isMobile ? windowSize.height - 220 : windowSize.height - 260,
-      },
-    }),
-    [isMobile, windowSize.width, windowSize.height]
-  )
 
   // Effets
   useEffect(() => {
@@ -64,18 +26,6 @@ function Contact() {
       setIsVisible(false)
     }
   }, [resetNavigation])
-
-  useEffect(() => {
-    const handleResize = debounce(() => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })
-    }, 100)
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [debounce])
 
   // Fonctions
   const startGame = useCallback((gameType) => {
@@ -120,9 +70,11 @@ function Contact() {
       }`}
     >
       <main className={styles.container} role="main">
-        <div className={styles.navUp}>
-          <ArrowUp aria-label="Naviguer vers la section précédente" />
-        </div>
+        {!activeGame && (
+          <div className={styles.navUp}>
+            <ArrowUp aria-label="Naviguer vers la section précédente" />
+          </div>
+        )}
 
         <article
           className={styles.contactContent}
@@ -131,7 +83,6 @@ function Contact() {
           <header className={styles.title}>
             <div className={styles.text}>
               <h1 id="contact-title">Contactez-moi</h1>
-              <p>Discutons de votre projet ou jouez à un mini-jeu</p>
             </div>
           </header>
 
@@ -153,9 +104,7 @@ function Contact() {
         {/* Logos statiques (toujours visibles sauf en mode jeu) */}
         <StaticLogos
           activeGame={activeGame}
-          staticPositions={staticPositions}
           handleLogoClick={handleLogoClick}
-          isMobile={isMobile}
         />
 
         {/* Affichage du numéro de téléphone et email */}

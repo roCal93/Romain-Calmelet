@@ -20,13 +20,18 @@ function AlternatingContactLogo({ position, onClick, isMobile }) {
     'aria-hidden': 'true',
   }
 
+  // Style conditionnel : utilise position si fournie
+  const logoStyle = position
+    ? {
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+      }
+    : undefined
+
   return (
     <div
       className={styles.contactLogo}
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-      }}
+      style={logoStyle}
       onClick={onClick}
       role="button"
       tabIndex="0"

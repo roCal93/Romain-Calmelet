@@ -1,34 +1,19 @@
 import { memo } from 'react'
 import LogoSocial from '../logoSocial/LogoSocial'
 import AlternatingContactLogo from '../alternatingContactLogo/AlternatingContactLogo'
+import styles from './StaticLogos.module.scss'
 
-const StaticLogos = memo(
-  ({ activeGame, staticPositions, handleLogoClick, isMobile }) => {
-    if (activeGame) return null
+const StaticLogos = memo(({ activeGame, handleLogoClick }) => {
+  if (activeGame) return null
 
-    return (
-      <>
-        <LogoSocial
-          type="linkedin"
-          position={staticPositions.linkedin}
-          onClick={handleLogoClick}
-          isMobile={isMobile}
-        />
-        <LogoSocial
-          type="github"
-          position={staticPositions.github}
-          onClick={handleLogoClick}
-          isMobile={isMobile}
-        />
-        <AlternatingContactLogo
-          position={staticPositions.phone}
-          onClick={() => handleLogoClick('phone')}
-          isMobile={isMobile}
-        />
-      </>
-    )
-  }
-)
+  return (
+    <div className={styles.logosContainer}>
+      <LogoSocial type="linkedin" onClick={handleLogoClick} />
+      <LogoSocial type="github" onClick={handleLogoClick} />
+      <AlternatingContactLogo onClick={() => handleLogoClick('phone')} />
+    </div>
+  )
+})
 
 StaticLogos.displayName = 'StaticLogos'
 

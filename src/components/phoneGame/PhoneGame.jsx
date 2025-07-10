@@ -99,7 +99,6 @@ function PhoneGame({ backButton }) {
     },
     [draggedItem]
   )
-
   // Gestion du tactile - sans preventDefault direct
   const handleTouchStart = useCallback(
     (e, imageId) => {
@@ -300,99 +299,105 @@ function PhoneGame({ backButton }) {
     }
   }, [])
 
-  // Écran de jeu (directement affiché)
+  // Écran de jeu
   return (
-    <div
-      className={`${styles.container} ${isLoaded ? styles.loaded : ''} ${
-        isDragging ? styles.dragging : ''
-      }`}
-    >
-      {/* Modal de succès */}
-      {showSuccessModal && (
-        <PhoneMessage phoneNumber={PHONE_NUMBER} onClose={backButton} />
-      )}
+    <div className={styles.scrollWrapper}>
+      <div
+        className={`${styles.container} ${isLoaded ? styles.loaded : ''} ${
+          isDragging ? styles.dragging : ''
+        }`}
+      >
+        {/* Modal de succès */}
+        {showSuccessModal && (
+          <PhoneMessage phoneNumber={PHONE_NUMBER} onClose={backButton} />
+        )}
 
-      <div className={styles.gameArea}>
-        <div className={styles.header}>
-          <h3 className={styles.gameTitle}>Séquence Mécanique</h3>
-        </div>
-
-        <div className={styles.gameContainer}>
-          {/* Zone des emplacements */}
-          <div className={styles.slotsContainer}>
-            {slots.map((slot, index) => (
-              <div
-                key={index}
-                className={`${styles.slot} ${
-                  slot !== null ? styles.filled : ''
-                }`}
-                data-slot={index}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
-                onClick={() => handleSlotClick(index)}
-              >
-                {slot !== null ? (
-                  <img
-                    src={getImageById(slot).src}
-                    alt={getImageById(slot).name}
-                    className={`${styles.slotImage} ${styles[`wheel${slot}`]}`}
-                  />
-                ) : (
-                  <div className={styles.emptySlot}>
-                    <span className={styles.slotHint}>Déposez ici</span>
-                  </div>
-                )}
-              </div>
-            ))}
+        <div className={styles.gameArea}>
+          <div className={styles.header}>
+            <h3 className={styles.gameTitle}>Séquence Mécanique</h3>
           </div>
 
-          {/* Indicateur de statut */}
-          <div
-            className={`${styles.statusBar} ${
-              isCompleted ? styles.success : ''
-            } ${showError ? styles.error : ''}`}
-          >
-            {isCompleted
-              ? '✓ SÉQUENCE CORRECTE'
-              : showError
-              ? '✗ MAUVAIS ORDRE - RÉESSAYEZ !'
-              : 'TROUVE LE BON ORDRE...'}
-          </div>
-        </div>
-        {/* Images disponibles */}
-        <div>
-          <div>Roues disponibles :</div>
-          <div className={styles.imagesList}>
-            {IMAGES.map((image, index) => {
-              const placed = isImagePlaced(image.id)
-              const isSelected = draggedItem === image.id && !isDragging
-              return (
+          <div className={styles.gameContainer}>
+            {/* Zone des emplacements */}
+            <div className={styles.slotsContainer}>
+              {slots.map((slot, index) => (
                 <div
-                  key={image.id}
-                  ref={(el) => (draggableRefs.current[index] = el)}
-                  className={`${styles.imageItem} ${
-                    placed ? styles.placed : ''
-                  } ${isSelected ? styles.selected : ''}`}
-                  draggable={!placed}
-                  onDragStart={(e) => !placed && handleDragStart(e, image.id)}
-                  // Les handlers touch sont gérés par useEffect avec { passive: false }
-                  onClick={() => !placed && console.log('Image clicked')}
+                  key={index}
+                  className={`${styles.slot} slot ${
+                    slot !== null ? styles.filled : ''
+                  }`}
+                  data-slot={index}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onClick={() => handleSlotClick(index)}
                 >
-                  <img
-                    src={image.src}
-                    alt={image.name}
-                    className={`${styles.imageIcon} ${
-                      styles[`wheel${image.id}`]
-                    }`}
-                  />
+                  {slot !== null ? (
+                    <img
+                      src={getImageById(slot).src}
+                      alt={getImageById(slot).name}
+                      className={`${styles.slotImage} ${
+                        styles[`wheel${slot}`]
+                      }`}
+                    />
+                  ) : (
+                    <div className={styles.emptySlot}>
+                      <span className={styles.slotHint}>Déposez ici</span>
+                    </div>
+                  )}
                 </div>
-              )
-            })}
+              ))}
+            </div>
+
+            {/* Indicateur de statut */}
+            <div
+              className={`${styles.statusBar} ${
+                isCompleted ? styles.success : ''
+              } ${showError ? styles.error : ''}`}
+            >
+              {isCompleted
+                ? '✓ SÉQUENCE CORRECTE'
+                : showError
+                ? '✗ MAUVAIS ORDRE - RÉESSAYEZ !'
+                : 'TROUVE LE BON ORDRE...'}
+            </div>
+          </div>
+
+          {/* Images disponibles */}
+          <div>
+            <div>Roues disponibles :</div>
+            <div className={styles.imagesList}>
+              {IMAGES.map((image, index) => {
+                const placed = isImagePlaced(image.id)
+                const isSelected = draggedItem === image.id && !isDragging
+                return (
+                  <div
+                    key={image.id}
+                    ref={(el) => (draggableRefs.current[index] = el)}
+                    className={`${styles.imageItem} ${
+                      placed ? styles.placed : ''
+                    } ${isSelected ? styles.selected : ''}`}
+                    draggable={!placed}
+                    onDragStart={(e) => !placed && handleDragStart(e, image.id)}
+                    // Les handlers touch sont gérés par useEffect avec { passive: false }
+                    onClick={() => !placed && console.log('Image clicked')}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.name}
+                      className={`${styles.imageIcon} ${
+                        styles[`wheel${image.id}`]
+                      }`}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className={styles.interactionHint}>
+            <p>Glissez-déposez les roues dans les emplacements</p>
           </div>
         </div>
-      </div>
-      <div className={styles.interactionHint}>
-        <p>Glissez-déposez les roues dans les emplacements</p>
       </div>
     </div>
   )
