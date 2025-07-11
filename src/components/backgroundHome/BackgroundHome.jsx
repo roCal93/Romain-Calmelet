@@ -5,7 +5,7 @@ import { useParticles } from './hooks/useParticles'
 import { drawShape, drawConnections } from './utils/shapes'
 import { getCachedColor } from './utils/colors'
 import { DEFAULT_CONFIG } from './constants/config'
-import styles from './styles/GeometricBackgroundHome.module.scss'
+import styles from './styles/backgroundHome.module.scss'
 
 const GeometricBackgroundHome = ({
   config = DEFAULT_CONFIG,

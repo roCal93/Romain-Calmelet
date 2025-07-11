@@ -1,20 +1,21 @@
-// Styles pour les logos flottants avec collision
-.GameContainer {
+// ==================== BASE STYLES ====================
+.gameContainer {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #aaaaaa88;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(231, 77, 60, 0.1) 100%);
+  overflow: hidden;
 }
 
+// ==================== FLOATING LOGOS ====================
 .floatingLogos {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
   z-index: 10;
-  overflow: hidden;
 }
 
 .floatingLogo {
@@ -27,10 +28,17 @@
   pointer-events: all;
   cursor: pointer;
   backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 
   svg {
     transition: all 0.3s ease;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4ecdc4;
+    outline-offset: 4px;
   }
 
   &.inZone {
@@ -39,27 +47,6 @@
     filter: drop-shadow(0 0 10px currentColor);
   }
 
-  // NOUVEAU: Amélioration pour l'accessibilité - focus visible
-  &:focus {
-    outline: 2px solid #4ecdc4;
-    outline-offset: 4px;
-  }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
-
-  // NOUVEAU: Style pour le mode statique
-  &.static {
-    cursor: pointer;
-
-    &:hover {
-      transform: scale(1.1);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  // NOUVEAU: Animation quand touché
   &.touched {
     animation: pulse 0.3s ease;
   }
@@ -75,98 +62,14 @@
   color: white;
 }
 
-// NOUVEAU: Styles pour l'écran de démarrage
-.startScreen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: start;
-  justify-content: center;
-  margin-top: 6rem;
-  @media (max-width: 380px) {
-    margin-top: 4rem;
-  }
-}
-
-.startContent {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 40px;
-  max-width: 600px;
-  text-align: center;
-  color: white;
-
-  h2 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
-
-  p {
-    font-size: 18px;
-    margin-bottom: 20px;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    margin: 20px 0 30px 0;
-
-    li {
-      margin-bottom: 15px;
-      padding-left: 25px;
-      position: relative;
-
-      &:before {
-        content: '•';
-        position: absolute;
-        left: 0;
-        color: #4ecdc4;
-        font-size: 20px;
-      }
-    }
-  }
-}
-
-.startButton {
-  padding: 15px 30px;
-  background: #4ecdc4;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #45b7b0;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
-  }
-}
-
-// NOUVEAU: Styles pour les boutons
-.startButtons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 30px;
-}
-
-// Zone de détection
+// ==================== DETECTION ZONE ====================
 .detectionZone {
   position: absolute;
   bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   border: 2px dashed rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, #ffffff 0%, rgba(231, 77, 60, 0.26) 100%);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -186,18 +89,57 @@
     }
   }
 
-  .zoneText {
-    font-size: 18px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    transition: all 0.3s ease;
-    user-select: none;
+  @media (max-width: 768px) {
+    bottom: 60px;
   }
 }
 
-// MODIFICATION: Amélioration de la notification
+.zoneText {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+  user-select: none;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    font-size: 16px;
+  }
+
+  @media (min-width: 1920px) {
+    font-size: 22px;
+  }
+}
+
+// ==================== INTERACTION HINT ====================
+.interactionHint {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+  z-index: 100;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// ==================== NOTIFICATION ====================
 .popupNotification {
   position: fixed;
   top: 20px;
@@ -212,7 +154,6 @@
   min-width: 320px;
   animation: slideInBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  // NOUVEAU: Styles pour succès et erreur
   &.success {
     background: #4caf50;
   }
@@ -227,14 +168,6 @@
     max-width: calc(100% - 20px);
     min-width: auto;
   }
-}
-
-// NOUVEAU: Message de succès
-.successMessage {
-  font-size: 16px;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
 }
 
 .notificationContent {
@@ -269,7 +202,7 @@
 
 .notificationButton {
   flex: 1;
-  background: #0077b5;
+  background: #e74d3c98;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -277,10 +210,10 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: background-color 0.2s;
 
   &:hover {
-    background: #005885;
+    background-color: #e74c3c;
   }
 
   &:active {
@@ -303,6 +236,10 @@
   &:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -329,31 +266,24 @@
   }
 }
 
-.interactionHint {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  animation: pulse 2s infinite;
-  z-index: 100;
+.successMessage {
+  font-size: 16px;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
 
-  @media (max-width: 768px) {
-    bottom: 60px;
-    font-size: 12px;
-    padding: 10px 20px;
+// ==================== ANIMATIONS ====================
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.8;
   }
-
-  p {
-    margin: 0;
+  50% {
+    opacity: 1;
   }
 }
 
-// NOUVEAU: Animation slideInBounce
 @keyframes slideInBounce {
   0% {
     transform: translateX(100%) scale(0.8);
@@ -368,103 +298,7 @@
   }
 }
 
-// NOUVEAU: Animation fadeIn
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-// AMÉLIORATION: Responsive amélioré
-@media (max-width: 768px) {
-  .detectionZone {
-    bottom: 60px;
-
-    .zoneText {
-      font-size: 14px;
-    }
-  }
-
-  // NOUVEAU: Responsive pour l'écran de démarrage
-  .startContent {
-    padding: 20px;
-    margin: 20px;
-
-    h2 {
-      font-size: 24px;
-    }
-
-    p,
-    li {
-      font-size: 14px;
-    }
-  }
-
-  .startButtons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .startButton {
-    width: 100%;
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-
-  .interactionHint {
-    display: none;
-  }
-}
-
-// NOUVEAU: Support pour tablettes
-@media (min-width: 769px) and (max-width: 1024px) {
-  .startContent {
-    padding: 30px;
-
-    h2 {
-      font-size: 28px;
-    }
-
-    p,
-    li {
-      font-size: 16px;
-    }
-  }
-
-  .detectionZone {
-    bottom: 90px;
-
-    .zoneText {
-      font-size: 16px;
-    }
-  }
-}
-
-// NOUVEAU: Support pour le mode sombre/clair du système
+// ==================== THEME SUPPORT ====================
 @media (prefers-color-scheme: light) {
   .floatingLogo {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -489,25 +323,6 @@
     }
   }
 
-  .startScreen {
-    background: rgba(255, 255, 255, 0.9);
-  }
-
-  .startContent {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: #333;
-
-    h2,
-    h3 {
-      color: #0077b5;
-    }
-
-    ul li:before {
-      color: #0077b5;
-    }
-  }
-
   .interactionHint {
     background: rgba(255, 255, 255, 0.9);
     color: #333;
@@ -516,7 +331,7 @@
 
   .popupNotification {
     &.error {
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff 0%, rgb(231, 77, 60) 600%);
       color: #333;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
@@ -546,24 +361,37 @@
   }
 }
 
-// NOUVEAU: Support pour les écrans haute résolution
-@media (min-width: 1920px) {
-  .container {
-    max-width: 1920px;
-    margin: 0 auto;
+// ==================== RESPONSIVE DESIGN ====================
+@media (max-width: 768px) {
+  .detectionZone {
+    bottom: 60px;
+
+    .zoneText {
+      font-size: 14px;
+    }
   }
 
-  .startContent {
-    max-width: 800px;
+  .interactionHint {
+    bottom: 60px;
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+}
 
-    h2 {
-      font-size: 40px;
-    }
+@media (min-width: 769px) and (max-width: 1024px) {
+  .detectionZone {
+    bottom: 90px;
 
-    p,
-    li {
-      font-size: 20px;
+    .zoneText {
+      font-size: 16px;
     }
+  }
+}
+
+@media (min-width: 1920px) {
+  .gameContainer {
+    max-width: 1920px;
+    margin: 0 auto;
   }
 
   .detectionZone {
@@ -573,55 +401,7 @@
   }
 }
 
-// NOUVEAU: Animations supplémentaires pour les interactions
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-10px);
-  }
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(10px);
-  }
-}
-
-// NOUVEAU: Classes utilitaires pour les animations
-.animate-bounce {
-  animation: bounceIn 0.6s ease;
-}
-
-.animate-shake {
-  animation: shake 0.5s ease;
-}
-
-// NOUVEAU: Support pour la réduction de mouvement
+// ==================== ACCESSIBILITY ====================
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -645,13 +425,12 @@
   }
 }
 
-// NOUVEAU: Support pour l'impression (au cas où)
+// ==================== PRINT STYLES ====================
 @media print {
   .floatingLogos,
   .detectionZone,
   .interactionHint,
-  .popupNotification,
-  .startScreen {
+  .popupNotification {
     display: none !important;
   }
 }

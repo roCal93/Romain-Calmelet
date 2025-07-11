@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './home.module.scss'
-import GeometricBackgroundHome from '../../components/geometricBackgroundHome/GeometricBackgroundHome'
+import BackgroundHome from '../../components/backgroundHome/BackgroundHome'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
 import TextIntro from '../../components/textIntro/TextIntro'
 
@@ -28,7 +28,7 @@ function Home() {
           : ''
       }`}
     >
-      <GeometricBackgroundHome />
+      <BackgroundHome />
       <div className={styles.container}>
         <div className={styles.intro}>
           <h2>Salut !</h2>

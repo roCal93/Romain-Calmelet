@@ -101,7 +101,6 @@
 
   h1 {
     margin: 0 0 0.5rem 0;
-    flex-shrink: 0;
     font-weight: 700;
     line-height: 1.1;
     color: #333;
@@ -109,14 +108,10 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-
-    @media (max-width: 880px) {
-      font-size: 25px;
-    }
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
 
     @media (max-width: 768px) {
-      font-size: 20px;
-      margin-bottom: 1rem;
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
     }
   }
 }

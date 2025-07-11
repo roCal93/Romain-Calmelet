@@ -1,0 +1,64 @@
+// Mixins
+@mixin gpu-acceleration {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+// Container principal
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+// SVG des vagues
+.waveSvg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  @include gpu-acceleration;
+}
+
+.wavePath {
+  will-change: transform, filter;
+  @include gpu-acceleration;
+
+  // Optimisation pour haute résolution
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    // Forcer le rendu GPU
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+// Fond statique pour les animations réduites
+.staticBackground {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(231, 76, 60, 0.05) 50%,
+    #f8f8f8 100%
+  );
+  opacity: 0.5;
+}
+
+// Optimisations pour les petits écrans
+@media (max-width: 768px) {
+  .container {
+    @include gpu-acceleration;
+  }
+}
+
+// Préférence pour les animations réduites
+@media (prefers-reduced-motion: reduce) {
+  .wavePath {
+    will-change: auto;
+    animation: none !important;
+  }
+}

@@ -15,7 +15,7 @@
   user-select: none;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 2rem;
+  padding: 1rem;
 
   &::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
@@ -280,7 +280,7 @@
   right: -50px;
   width: 40px;
   height: 40px;
-  background: white;
+  background: linear-gradient(180deg, #ffffff 0%, rgb(231, 77, 60) 600%);
   border: none;
   border-radius: 50%;
   font-size: 24px;

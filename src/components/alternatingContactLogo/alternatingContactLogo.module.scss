@@ -12,6 +12,11 @@
     transition: transform 0.2s ease;
     opacity: 1;
   }
+  &:focus-visible {
+    outline: 3px solid #e74c3c;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 .iconContainer {

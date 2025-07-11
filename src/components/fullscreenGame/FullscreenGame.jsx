@@ -4,23 +4,25 @@ import PhoneGame from '../phoneGame/PhoneGame'
 import styles from './fullscreenGame.module.scss'
 
 const FullscreenGame = ({ gameType, backToMenu }) => {
-  const [isLandscape, setIsLandscape] = useState(false)
+  const [shouldShowMessage, setShouldShowMessage] = useState(false)
 
   useEffect(() => {
-    const checkOrientation = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight)
+    const checkScreenSize = () => {
+      const heightTooSmall = window.innerHeight < 600
+
+      setShouldShowMessage(heightTooSmall)
     }
 
-    // Vérifier l'orientation initiale
-    checkOrientation()
+    // Vérifier la taille initiale
+    checkScreenSize()
 
-    // Écouter les changements d'orientation
-    window.addEventListener('resize', checkOrientation)
-    window.addEventListener('orientationchange', checkOrientation)
+    // Écouter les changements de taille
+    window.addEventListener('resize', checkScreenSize)
+    window.addEventListener('orientationchange', checkScreenSize)
 
     return () => {
-      window.removeEventListener('resize', checkOrientation)
-      window.removeEventListener('orientationchange', checkOrientation)
+      window.removeEventListener('resize', checkScreenSize)
+      window.removeEventListener('orientationchange', checkScreenSize)
     }
   }, [])
 
@@ -30,12 +32,12 @@ const FullscreenGame = ({ gameType, backToMenu }) => {
         ← Retour
       </button>
 
-      {isLandscape ? (
+      {shouldShowMessage ? (
         <div className={styles.orientationMessage}>
           <div className={styles.messageContent}>
             <span className={styles.rotateIcon}>📱</span>
             <h2>Veuillez tourner votre appareil</h2>
-            <p>Ce jeu est optimisé pour le mode portrait</p>
+            <p>Ce jeu a été optimisé pour le mode portrait</p>
           </div>
         </div>
       ) : (

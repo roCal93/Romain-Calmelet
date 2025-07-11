@@ -12,7 +12,7 @@
   position: absolute;
   top: 20px;
   left: 20px;
-  background: rgba(0, 0, 0, 0.8);
+  background: #e74d3c98;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -25,7 +25,7 @@
   backdrop-filter: blur(10px);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: #e74c3c;
     transform: translateX(-2px);
   }
 
@@ -39,7 +39,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid #007bff;
+    outline: 3px solid #e74c3c;
     outline-offset: 2px;
   }
 }
@@ -86,12 +86,5 @@
   }
   50% {
     transform: rotate(90deg);
-  }
-}
-
-// Masquer le message sur les écrans larges (desktop)
-@media (min-width: 768px) {
-  .orientationMessage {
-    display: none;
   }
 }

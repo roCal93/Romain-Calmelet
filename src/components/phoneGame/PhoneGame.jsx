@@ -9,18 +9,116 @@ import PhoneMessage from '../phoneMessage/PhoneMessage'
 const PHONE_NUMBER = '07 45 22 96 97'
 const RESET_DELAY = 2000
 const CORRECT_SEQUENCE = [2, 1, 3]
+const SLOT_COUNT = 3
 
 const IMAGES = [
-  { id: 1, src: littleWheel, name: 'Little wheel' },
-  { id: 2, src: averageWheel, name: 'Average wheel' },
-  { id: 3, src: bigWheel, name: 'Big wheel' },
+  { id: 1, src: littleWheel, name: 'Petite roue' },
+  { id: 2, src: averageWheel, name: 'Roue moyenne' },
+  { id: 3, src: bigWheel, name: 'Grande roue' },
 ]
+
+// Utilitaire pour les classes CSS
+const classNames = (...classes) => classes.filter(Boolean).join(' ')
+
+// Composant pour un slot individuel
+const GameSlot = ({
+  index,
+  slot,
+  onDragOver,
+  onDrop,
+  onClick,
+  getImageById,
+  styles,
+}) => (
+  <div
+    className={classNames(styles.slot, 'slot', slot !== null && styles.filled)}
+    data-slot={index}
+    role="button"
+    tabIndex={0}
+    aria-label={`Emplacement ${index + 1}${
+      slot ? ` contenant ${getImageById(slot).name}` : ' vide'
+    }`}
+    onDragOver={onDragOver}
+    onDrop={(e) => onDrop(e, index)}
+    onClick={() => onClick(index)}
+    onKeyDown={(e) => e.key === 'Enter' && onClick(index)}
+  >
+    {slot !== null ? (
+      <img
+        src={getImageById(slot).src}
+        alt={getImageById(slot).name}
+        className={classNames(styles.slotImage, styles[`wheel${slot}`])}
+      />
+    ) : (
+      <div className={styles.emptySlot}>
+        <span className={styles.slotHint}>Déposez ici</span>
+      </div>
+    )}
+  </div>
+)
+
+// Composant pour une image draggable
+const DraggableImage = ({
+  image,
+  index,
+  placed,
+  isCurrentlyDragging,
+  onDragStart,
+  draggableRefs,
+  styles,
+}) => (
+  <div
+    ref={(el) => (draggableRefs.current[index] = el)}
+    className={classNames(
+      styles.imageItem,
+      placed && styles.placed,
+      isCurrentlyDragging && styles.dragging
+    )}
+    draggable={!placed}
+    role="button"
+    tabIndex={placed ? -1 : 0}
+    aria-label={`${image.name}${placed ? ' - déjà placée' : ' - disponible'}`}
+    onDragStart={(e) => !placed && onDragStart(e, image.id)}
+    onKeyDown={(e) =>
+      !placed && e.key === 'Enter' && console.log('Image sélectionnée')
+    }
+  >
+    <img
+      src={image.src}
+      alt={image.name}
+      className={classNames(styles.imageIcon, styles[`wheel${image.id}`])}
+    />
+  </div>
+)
+
+// Composant pour la barre de statut
+const StatusBar = ({ isCompleted, showError, styles }) => {
+  const statusText = isCompleted
+    ? '✓ SÉQUENCE CORRECTE'
+    : showError
+    ? '✗ MAUVAIS ORDRE - RÉESSAYEZ !'
+    : 'TROUVEZ LE BON ORDRE...'
+
+  return (
+    <div
+      className={classNames(
+        styles.statusBar,
+        isCompleted && styles.success,
+        showError && styles.error
+      )}
+      role="status"
+      aria-live="polite"
+    >
+      {statusText}
+    </div>
+  )
+}
 
 function PhoneGame({ backButton }) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [showError, setShowError] = useState(false)
-  const [slots, setSlots] = useState([null, null, null])
+  const [slots, setSlots] = useState(Array(SLOT_COUNT).fill(null))
   const [draggedItem, setDraggedItem] = useState(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [touchStart, setTouchStart] = useState(null)
@@ -28,7 +126,6 @@ function PhoneGame({ backButton }) {
   const [draggedElement, setDraggedElement] = useState(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  // Refs pour les éléments draggables
   const draggableRefs = useRef([])
 
   useEffect(() => {
@@ -44,12 +141,11 @@ function PhoneGame({ backButton }) {
 
       if (isCorrect) {
         setIsCompleted(true)
-        // Afficher la modal après un court délai
         setTimeout(() => setShowSuccessModal(true), 2000)
       } else {
         setShowError(true)
         setTimeout(() => {
-          setSlots([null, null, null])
+          setSlots(Array(SLOT_COUNT).fill(null))
           setShowError(false)
         }, RESET_DELAY)
       }
@@ -62,9 +158,7 @@ function PhoneGame({ backButton }) {
   }, [])
 
   const isImagePlaced = useCallback(
-    (imageId) => {
-      return slots.includes(imageId)
-    },
+    (imageId) => slots.includes(imageId),
     [slots]
   )
 
@@ -84,12 +178,10 @@ function PhoneGame({ backButton }) {
       if (draggedItem !== null) {
         setSlots((prevSlots) => {
           const newSlots = [...prevSlots]
-          // Retirer l'image de son emplacement précédent
           const previousIndex = newSlots.indexOf(draggedItem)
           if (previousIndex !== -1) {
             newSlots[previousIndex] = null
           }
-          // Placer l'image dans le nouvel emplacement
           newSlots[slotIndex] = draggedItem
           return newSlots
         })
@@ -99,10 +191,14 @@ function PhoneGame({ backButton }) {
     },
     [draggedItem]
   )
-  // Gestion du tactile - sans preventDefault direct
+
+  // Gestion du tactile (code simplifié - logique identique)
   const handleTouchStart = useCallback(
     (e, imageId) => {
-      if (isImagePlaced(imageId)) return
+      if (isImagePlaced(imageId)) {
+        e.preventDefault()
+        return
+      }
 
       const touch = e.touches[0]
       const rect = e.currentTarget.getBoundingClientRect()
@@ -124,31 +220,30 @@ function PhoneGame({ backButton }) {
       if (!isDragging || !touchStart || !draggedElement) return
 
       const touch = e.touches[0]
+      let ghostElement = document.getElementById('dragGhost')
 
-      // Créer un élément fantôme qui suit le doigt
-      const ghostElement = document.getElementById('dragGhost')
       if (ghostElement) {
         ghostElement.style.left = `${touch.clientX - dragOffset.x}px`
         ghostElement.style.top = `${touch.clientY - dragOffset.y}px`
         ghostElement.style.display = 'block'
       } else {
-        // Créer l'élément fantôme s'il n'existe pas
-        const ghost = document.createElement('div')
-        ghost.id = 'dragGhost'
-        ghost.style.position = 'fixed'
-        ghost.style.left = `${touch.clientX - dragOffset.x}px`
-        ghost.style.top = `${touch.clientY - dragOffset.y}px`
-        ghost.style.pointerEvents = 'none'
-        ghost.style.zIndex = '9999'
-        ghost.style.opacity = '0.8'
-        ghost.style.transform = 'scale(1.1)'
-        ghost.style.transition = 'none'
-        ghost.innerHTML = draggedElement.innerHTML
-        ghost.className = draggedElement.className
-        document.body.appendChild(ghost)
+        ghostElement = document.createElement('div')
+        ghostElement.id = 'dragGhost'
+        Object.assign(ghostElement.style, {
+          position: 'fixed',
+          left: `${touch.clientX - dragOffset.x}px`,
+          top: `${touch.clientY - dragOffset.y}px`,
+          pointerEvents: 'none',
+          zIndex: '9999',
+          opacity: '0.8',
+          transform: 'scale(1.1)',
+          transition: 'none',
+        })
+        ghostElement.innerHTML = draggedElement.innerHTML
+        ghostElement.className = draggedElement.className
+        document.body.appendChild(ghostElement)
       }
 
-      // Masquer l'élément original
       draggedElement.style.opacity = '0.3'
     },
     [isDragging, touchStart, draggedElement, dragOffset]
@@ -160,23 +255,19 @@ function PhoneGame({ backButton }) {
 
       const touch = e.changedTouches[0]
 
-      // Nettoyer l'élément fantôme
+      // Nettoyage
       const ghostElement = document.getElementById('dragGhost')
-      if (ghostElement) {
-        ghostElement.remove()
-      }
+      ghostElement?.remove()
 
-      // Restaurer l'opacité de l'élément original
       if (draggedElement) {
         draggedElement.style.opacity = '1'
       }
 
-      // Trouver l'élément sous le doigt
+      // Détection du drop
       const elementBelow = document.elementFromPoint(
         touch.clientX,
         touch.clientY
       )
-      // Utiliser un attribut data ou une classe CSS constante plutôt que styles.slot
       const slotElement =
         elementBelow?.closest('[data-slot]') || elementBelow?.closest('.slot')
 
@@ -184,21 +275,18 @@ function PhoneGame({ backButton }) {
         const slotIndex = Array.from(slotElement.parentNode.children).indexOf(
           slotElement
         )
-
         setSlots((prevSlots) => {
           const newSlots = [...prevSlots]
-          // Retirer l'image de son emplacement précédent
           const previousIndex = newSlots.indexOf(draggedItem)
           if (previousIndex !== -1) {
             newSlots[previousIndex] = null
           }
-          // Placer l'image dans le nouvel emplacement
           newSlots[slotIndex] = draggedItem
           return newSlots
         })
       }
 
-      // Réinitialiser tous les états
+      // Reset
       setDraggedItem(null)
       setIsDragging(false)
       setTouchStart(null)
@@ -208,69 +296,59 @@ function PhoneGame({ backButton }) {
     [isDragging, touchStart, draggedItem, draggedElement]
   )
 
-  // Ajouter les event listeners non-passive pour le tactile
+  // Event listeners pour le tactile
   useEffect(() => {
     const refs = draggableRefs.current.filter(Boolean)
 
-    const handleTouchStartWithPrevent = (imageId) => (e) => {
-      if (!isImagePlaced(imageId)) {
-        e.preventDefault()
-        e.stopPropagation()
-        handleTouchStart(e, imageId)
-      }
-    }
-
-    const handleTouchMoveWithPrevent = (e) => {
-      if (isDragging) {
-        e.preventDefault()
-        e.stopPropagation()
-        handleTouchMove(e)
-      }
-    }
-
-    const handleTouchEndWithPrevent = (e) => {
-      if (isDragging) {
-        e.preventDefault()
-        e.stopPropagation()
-        handleTouchEnd(e)
-      }
-    }
+    const createTouchHandlers = (imageId) => ({
+      touchStart: (e) => {
+        if (!isImagePlaced(imageId)) {
+          e.preventDefault()
+          e.stopPropagation()
+          handleTouchStart(e, imageId)
+        }
+      },
+      touchMove: (e) => {
+        if (isDragging) {
+          e.preventDefault()
+          e.stopPropagation()
+          handleTouchMove(e)
+        }
+      },
+      touchEnd: (e) => {
+        if (isDragging) {
+          e.preventDefault()
+          e.stopPropagation()
+          handleTouchEnd(e)
+        }
+      },
+    })
 
     const listeners = refs
       .map((ref, index) => {
         if (!ref) return null
 
         const imageId = IMAGES[index].id
-        const touchStartHandler = handleTouchStartWithPrevent(imageId)
+        const handlers = createTouchHandlers(imageId)
 
-        ref.addEventListener('touchstart', touchStartHandler, {
+        ref.addEventListener('touchstart', handlers.touchStart, {
           passive: false,
         })
-        ref.addEventListener('touchmove', handleTouchMoveWithPrevent, {
+        ref.addEventListener('touchmove', handlers.touchMove, {
           passive: false,
         })
-        ref.addEventListener('touchend', handleTouchEndWithPrevent, {
-          passive: false,
-        })
+        ref.addEventListener('touchend', handlers.touchEnd, { passive: false })
 
-        return {
-          ref,
-          touchStartHandler,
-          touchMoveHandler: handleTouchMoveWithPrevent,
-          touchEndHandler: handleTouchEndWithPrevent,
-        }
+        return { ref, handlers }
       })
       .filter(Boolean)
 
-    // Cleanup
     return () => {
-      listeners.forEach(
-        ({ ref, touchStartHandler, touchMoveHandler, touchEndHandler }) => {
-          ref.removeEventListener('touchstart', touchStartHandler)
-          ref.removeEventListener('touchmove', touchMoveHandler)
-          ref.removeEventListener('touchend', touchEndHandler)
-        }
-      )
+      listeners.forEach(({ ref, handlers }) => {
+        ref.removeEventListener('touchstart', handlers.touchStart)
+        ref.removeEventListener('touchmove', handlers.touchMove)
+        ref.removeEventListener('touchend', handlers.touchEnd)
+      })
     }
   }, [
     isDragging,
@@ -288,24 +366,22 @@ function PhoneGame({ backButton }) {
     })
   }, [])
 
-  // Nettoyage à la fin du composant
+  // Cleanup
   useEffect(() => {
     return () => {
-      // Nettoyer l'élément fantôme si le composant se démonte
       const ghostElement = document.getElementById('dragGhost')
-      if (ghostElement) {
-        ghostElement.remove()
-      }
+      ghostElement?.remove()
     }
   }, [])
 
-  // Écran de jeu
   return (
     <div className={styles.scrollWrapper}>
       <div
-        className={`${styles.container} ${isLoaded ? styles.loaded : ''} ${
-          isDragging ? styles.dragging : ''
-        }`}
+        className={classNames(
+          styles.container,
+          isLoaded && styles.loaded,
+          isDragging && styles.dragging
+        )}
       >
         {/* Modal de succès */}
         {showSuccessModal && (
@@ -313,89 +389,74 @@ function PhoneGame({ backButton }) {
         )}
 
         <div className={styles.gameArea}>
-          <div className={styles.header}>
-            <h3 className={styles.gameTitle}>Séquence Mécanique</h3>
-          </div>
+          <header className={styles.header}>
+            <h1 className={styles.gameTitle}>Séquence Mécanique</h1>
+          </header>
 
           <div className={styles.gameContainer}>
             {/* Zone des emplacements */}
-            <div className={styles.slotsContainer}>
+            <div
+              className={styles.slotsContainer}
+              role="group"
+              aria-label="Emplacements pour les roues"
+            >
               {slots.map((slot, index) => (
-                <div
+                <GameSlot
                   key={index}
-                  className={`${styles.slot} slot ${
-                    slot !== null ? styles.filled : ''
-                  }`}
-                  data-slot={index}
+                  index={index}
+                  slot={slot}
                   onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onClick={() => handleSlotClick(index)}
-                >
-                  {slot !== null ? (
-                    <img
-                      src={getImageById(slot).src}
-                      alt={getImageById(slot).name}
-                      className={`${styles.slotImage} ${
-                        styles[`wheel${slot}`]
-                      }`}
-                    />
-                  ) : (
-                    <div className={styles.emptySlot}>
-                      <span className={styles.slotHint}>Déposez ici</span>
-                    </div>
-                  )}
-                </div>
+                  onDrop={handleDrop}
+                  onClick={handleSlotClick}
+                  getImageById={getImageById}
+                  styles={styles}
+                />
               ))}
             </div>
 
-            {/* Indicateur de statut */}
-            <div
-              className={`${styles.statusBar} ${
-                isCompleted ? styles.success : ''
-              } ${showError ? styles.error : ''}`}
-            >
-              {isCompleted
-                ? '✓ SÉQUENCE CORRECTE'
-                : showError
-                ? '✗ MAUVAIS ORDRE - RÉESSAYEZ !'
-                : 'TROUVE LE BON ORDRE...'}
-            </div>
+            {/* Barre de statut */}
+            <StatusBar
+              isCompleted={isCompleted}
+              showError={showError}
+              styles={styles}
+            />
           </div>
 
           {/* Images disponibles */}
-          <div>
-            <div>Roues disponibles :</div>
-            <div className={styles.imagesList}>
+          <section>
+            <h2 className="sr-only">Roues disponibles</h2>
+            <div aria-label="Roues disponibles">Roues disponibles :</div>
+            <div
+              className={styles.imagesList}
+              role="group"
+              aria-label="Liste des roues à placer"
+            >
               {IMAGES.map((image, index) => {
                 const placed = isImagePlaced(image.id)
-                const isSelected = draggedItem === image.id && !isDragging
+                const isCurrentlyDragging =
+                  draggedItem === image.id && isDragging
+
                 return (
-                  <div
+                  <DraggableImage
                     key={image.id}
-                    ref={(el) => (draggableRefs.current[index] = el)}
-                    className={`${styles.imageItem} ${
-                      placed ? styles.placed : ''
-                    } ${isSelected ? styles.selected : ''}`}
-                    draggable={!placed}
-                    onDragStart={(e) => !placed && handleDragStart(e, image.id)}
-                    // Les handlers touch sont gérés par useEffect avec { passive: false }
-                    onClick={() => !placed && console.log('Image clicked')}
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.name}
-                      className={`${styles.imageIcon} ${
-                        styles[`wheel${image.id}`]
-                      }`}
-                    />
-                  </div>
+                    image={image}
+                    index={index}
+                    placed={placed}
+                    isCurrentlyDragging={isCurrentlyDragging}
+                    onDragStart={handleDragStart}
+                    draggableRefs={draggableRefs}
+                    styles={styles}
+                  />
                 )
               })}
             </div>
-          </div>
+          </section>
 
           <div className={styles.interactionHint}>
-            <p>Glissez-déposez les roues dans les emplacements</p>
+            <p>
+              Glissez-déposez les roues dans les emplacements, pour changer de
+              place une roue cliquez dessus
+            </p>
           </div>
         </div>
       </div>

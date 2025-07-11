@@ -1,7 +1,7 @@
 // Card projet front
 .projectCardFront {
   min-height: 300px;
-  height: 45vh;
+  height: 41vh;
   overflow: hidden;
   position: relative;
   border-radius: 12px;
@@ -76,7 +76,7 @@
 
 // Card projet détails
 .projectCard {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, #ffffff 0%, rgb(231, 77, 60) 600%);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   will-change: transform;
@@ -489,11 +489,11 @@
   }
 
   .demoLink {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: #e74d3c98;
     color: white;
 
     &:hover {
-      background: linear-gradient(135deg, #c0392b, #a93226);
+      background: #e74c3c;
     }
   }
 }

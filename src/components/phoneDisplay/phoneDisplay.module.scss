@@ -25,7 +25,7 @@
 .phoneModal {
   position: relative;
   z-index: 2;
-  background: white;
+  background: linear-gradient(180deg, #ffffff 0%, rgb(231, 77, 60) 300%);
   border-radius: 10px;
   padding: 0.5rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -51,7 +51,7 @@
 }
 
 .closeButton {
-  background-color: #626b75;
+  background-color: #e74d3c98;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -61,16 +61,15 @@
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #5a230c92;
+    background-color: #e74c3c;
   }
 
   &:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
   }
-
   &:focus-visible {
-    outline: 3px solid #007bff;
+    outline: 3px solid #e74c3c;
     outline-offset: 2px;
   }
 }
