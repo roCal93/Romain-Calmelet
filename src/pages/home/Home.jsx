@@ -7,6 +7,7 @@ import TextIntro from '../../components/textIntro/TextIntro'
 
 function Home() {
   const [isVisible, setIsVisible] = useState(false)
+  const [title, setTitle] = useState('Salut !')
   const { direction } = useContext(NavigationContext)
 
   useEffect(() => {
@@ -17,6 +18,13 @@ function Home() {
 
     return () => clearTimeout(timer)
   }, [])
+
+  const handleTitleChange = () => {
+    setTitle('Bonjour,')
+    if (title == 'Bonjour,') {
+      setTitle('Salut !')
+    }
+  }
 
   return (
     <div
@@ -31,12 +39,17 @@ function Home() {
       <BackgroundHome />
       <div className={styles.container}>
         <div className={styles.intro}>
-          <h2>Salut !</h2>
+          <h2>{title}</h2>
           <TextIntro />
         </div>
         <div className={styles.nav}>
           <ArrowDown />
         </div>
+        <aside>
+          <button onClick={handleTitleChange} className={styles.button}>
+            {title === 'Bonjour,' ? 'Je suis chill' : 'Je suis important'}
+          </button>
+        </aside>
       </div>
     </div>
   )

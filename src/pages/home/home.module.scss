@@ -189,6 +189,34 @@
       }
     }
   }
+  .button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: #66636329;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      background: #e74c3c;
+      transform: translateX(-2px);
+      @media (max-width: 768px) {
+        background: #66636329;
+      }
+    }
+    &:focus-visible {
+      outline: 3px solid #e74c3c;
+      outline-offset: 2px;
+    }
+  }
 }
 
 // Animations responsives améliorées
