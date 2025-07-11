@@ -23,7 +23,7 @@ const BackgroundContact = () => {
   const WAVE_COUNT = isHighDensity ? 3 : 5
   const WAVE_AMPLITUDE = 80
   const WAVE_FREQUENCY = 0.02
-  const WAVE_SPEED = 0.02
+  const WAVE_SPEED = 0.005
   const MOUSE_INFLUENCE = 50
   const MOUSE_DISTANCE_EFFECT = 150
   const MOUSE_DISTANCE_EFFECT_SQUARED = MOUSE_DISTANCE_EFFECT ** 2

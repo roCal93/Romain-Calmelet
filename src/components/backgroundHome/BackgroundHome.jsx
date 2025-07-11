@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useCanvas } from './hooks/useCanvas'
 import { useMousePosition } from './hooks/useMouseInteraction'
 import { useParticles } from './hooks/useParticles'
@@ -17,9 +17,6 @@ const GeometricBackgroundHome = ({
 
   const draw = useCallback(
     (ctx, canvas) => {
-      // Initialiser les particules
-      initParticles(canvas)
-
       // Background
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
       gradient.addColorStop(0.2, getCachedColor('--bg-gradient-start'))
@@ -57,17 +54,32 @@ const GeometricBackgroundHome = ({
         )
       }
     },
-    [
-      config,
-      enableConnections,
-      enableMouseInteraction,
-      mouse,
-      particles,
-      initParticles,
-    ]
+    [config, enableConnections, enableMouseInteraction, mouse, particles]
   )
 
   const canvasRef = useCanvas(draw)
+
+  // Initialiser les particules quand le canvas est prêt
+  useEffect(() => {
+    if (canvasRef.current) {
+      initParticles(canvasRef.current)
+    }
+  }, [initParticles, canvasRef])
+
+  // Réinitialiser les particules lors du redimensionnement
+  useEffect(() => {
+    const handleResize = () => {
+      if (canvasRef.current) {
+        // Petit délai pour s'assurer que le canvas a été redimensionné
+        setTimeout(() => {
+          initParticles(canvasRef.current)
+        }, 100)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [initParticles, canvasRef])
 
   return <canvas ref={canvasRef} className={styles.canvas} />
 }

@@ -10,7 +10,7 @@
   position: relative; // Ajout pour le positionnement du focus
 
   // Indicateur de focus visible
-  &:focus {
+  &:focus-visible {
     outline: 2px solid #e74c3c;
     outline-offset: 1px;
     border-radius: 4px;

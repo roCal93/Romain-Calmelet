@@ -7,7 +7,7 @@
   transition: transform 0.2s ease;
   overflow: hidden;
   cursor: pointer;
-  &:focus {
+  &:focus-visible {
     outline: 2px solid #e74c3c;
     outline-offset: 1px;
     border-radius: 4px;

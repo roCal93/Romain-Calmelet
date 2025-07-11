@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import styles from './textIntro.module.scss'
 
-const TEXTS = ['Développeur Web', 'Intégrateur']
+const TEXTS = [
+  'Développeur Web',
+  'Intégrateur',
+  'Curieux',
+  'Inventif',
+  'Précis',
+]
 const TYPING_SPEED = 100
 const DELETING_SPEED = 50
 const PAUSE_AFTER_WRITE = 1500 // 3 secondes
