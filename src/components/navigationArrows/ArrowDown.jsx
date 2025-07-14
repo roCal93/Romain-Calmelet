@@ -4,10 +4,10 @@ import { useState } from 'react'
 import styles from './navigationArrows.module.scss'
 
 const SECTIONS = [
-  { path: '/Romain-Calmelet/', id: 'home' },
-  { path: '/Romain-Calmelet/presentation', id: 'presentation' },
-  { path: '/Romain-Calmelet/portfolio', id: 'portfolio' },
-  { path: '/Romain-Calmelet/contact', id: 'contact' },
+  { path: '/', id: 'home' },
+  { path: '/presentation', id: 'presentation' },
+  { path: '/portfolio', id: 'portfolio' },
+  { path: '/contact', id: 'contact' },
 ]
 
 const ArrowDown = ({ className = '', ...props }) => {

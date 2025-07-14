@@ -55,6 +55,9 @@
   align-items: center;
   gap: 1rem;
   width: 100%;
+  @media (max-width: 840px), (max-height: 780px) {
+    gap: 0;
+  }
 }
 
 /* ===== SLOTS (EMPLACEMENTS) ===== */

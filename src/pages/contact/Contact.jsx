@@ -9,7 +9,7 @@ import BackgroundContact from '../../components/backgroundContact/BackgroundCont
 import Footer from '../../components/footer/Footer'
 import StaticLogos from '../../components/StaticLogos/StaticLogos'
 import GameMenu from '../../components/GameMenu/GameMenu'
-import FullscreenGame from '../../components/FullscreenGame/FullscreenGame'
+import FullscreenGame from '../../components/fullscreenGame/FullscreenGame'
 import PhoneDisplay from '../../components/PhoneDisplay/PhoneDisplay'
 
 // Styles
@@ -36,6 +36,62 @@ function Contact() {
     setIsVisible(true)
     return () => setIsVisible(false)
   }, [resetNavigation])
+
+  // Gestion du bouton retour du navigateur pour les jeux
+  useEffect(() => {
+    if (!activeGame) return
+
+    // Fonction pour gérer le retour
+    const handlePopState = (e) => {
+      // Si un jeu est actif, fermer le jeu au lieu de naviguer
+      if (activeGame) {
+        e.preventDefault()
+        setActiveGame(null)
+      }
+    }
+
+    // Ajouter un listener pour le bouton retour
+    window.addEventListener('popstate', handlePopState)
+
+    // Nettoyer
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [activeGame])
+
+  // Gestion de la touche Échap
+  useEffect(() => {
+    if (!activeGame) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && activeGame) {
+        setActiveGame(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeGame])
+
+  // Bloquer la navigation accidentelle quand un jeu est actif
+  useEffect(() => {
+    if (!activeGame) return
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault()
+      e.returnValue = 'Êtes-vous sûr de vouloir quitter le jeu ?'
+      return e.returnValue
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [activeGame])
 
   // Handlers
   const startGame = useCallback((gameType) => {

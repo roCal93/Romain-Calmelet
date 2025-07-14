@@ -445,7 +445,7 @@ function ContactGame() {
           height: `${config.detectionZone}px`,
         }}
       >
-        <span className={styles.zoneText}>Drop Zone</span>
+        <span className={styles.zoneText}>Amenez le logo ici !</span>
       </div>
 
       {/* Logos */}

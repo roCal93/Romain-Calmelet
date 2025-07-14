@@ -3,6 +3,7 @@ import styles from './phoneDisplay.module.scss'
 
 const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
   const [isExiting, setIsExiting] = useState(false)
+  const [copiedItem, setCopiedItem] = useState(null) // Pour afficher le feedback
   const modalRef = useRef(null)
   const firstFocusableElementRef = useRef(null)
 
@@ -13,6 +14,27 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
       setShowPhoneNumber(false)
       setIsExiting(false)
     }, 200)
+  }
+
+  // Fonction pour copier dans le presse-papier
+  const copyToClipboard = async (text, type) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedItem(type)
+      // Retirer le message après 2 secondes
+      setTimeout(() => setCopiedItem(null), 2000)
+    } catch (err) {
+      console.error('Erreur lors de la copie:', err)
+      // Fallback pour les navigateurs plus anciens
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopiedItem(type)
+      setTimeout(() => setCopiedItem(null), 2000)
+    }
   }
 
   // Gestion de la touche Echap
@@ -93,24 +115,30 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
         <div className={styles.phoneContent}>
           <h3 id="modal-title">Mes coordonnées</h3>
 
-          <a
-            href="tel:+33745229697"
+          <button
+            onClick={() => copyToClipboard('0745229697', 'phone')}
             className={styles.contactLink}
             ref={firstFocusableElementRef}
-            aria-label="Appeler le 07 45 22 96 97"
+            aria-label="Copier le numéro 07 45 22 96 97"
           >
             <span className={styles.icon}>📞</span>
             <span className={styles.text}>07 45 22 96 97</span>
-          </a>
+            {copiedItem === 'phone' && (
+              <span className={styles.copiedMessage}>✓ Copié !</span>
+            )}
+          </button>
 
-          <a
-            href="mailto:romaincalmelet@gmail.com"
+          <button
+            onClick={() => copyToClipboard('romaincalmelet@gmail.com', 'email')}
             className={styles.contactLink}
-            aria-label="Envoyer un email à romaincalmelet@gmail.com"
+            aria-label="Copier l'email romaincalmelet@gmail.com"
           >
             <span className={styles.icon}>✉️</span>
             <span className={styles.text}>romaincalmelet@gmail.com</span>
-          </a>
+            {copiedItem === 'email' && (
+              <span className={styles.copiedMessage}>✓ Copié !</span>
+            )}
+          </button>
 
           <button
             onClick={handleClose}

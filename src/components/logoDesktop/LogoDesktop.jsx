@@ -8,7 +8,7 @@ const FIRSTNAME_LETTERS = ['O', 'M', 'A', 'I', 'N']
 const LogoDesktop = () => {
   return (
     <div>
-      <Link to="/Romain-Calmelet/" className={styles.logo} aria-label="Home">
+      <Link to="/" className={styles.logo} aria-label="Home">
         {/* Utilise la classe sr-only globale */}
         <span className="sr-only">Calmelet Romain</span>
 

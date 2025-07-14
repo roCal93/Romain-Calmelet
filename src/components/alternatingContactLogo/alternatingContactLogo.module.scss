@@ -5,13 +5,14 @@
   z-index: 1000;
   perspective: 1000px;
   opacity: 0.7;
-  transition: left 0.3s ease, top 0.3s ease; // Ajoutez cette ligne
+  transition: left 0.3s ease, top 0.3s ease;
 
   &:hover {
     transform: scale(1.1);
     transition: transform 0.2s ease;
     opacity: 1;
   }
+
   &:focus-visible {
     outline: 3px solid #e74c3c;
     outline-offset: 2px;
@@ -26,10 +27,30 @@
 
   &.phone {
     transform: rotateY(0deg);
+
+    .iconFace:not(.iconBack) {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .iconBack {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   &.email {
     transform: rotateY(180deg);
+
+    .iconFace:not(.iconBack) {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .iconBack {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
 
@@ -38,9 +59,11 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 
   &.iconBack {
     transform: rotateY(180deg);

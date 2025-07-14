@@ -4,11 +4,23 @@
   transform: translate(-50%, -50%);
 }
 
-@mixin will-change-optimized {
-  will-change: transform, opacity;
+// ✅ NOUVEAU : Mixin optimisé pour remplacer will-change
+@mixin gpu-optimized {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
-// Container principal - MODIFIÉ pour arrière-plan
+// ✅ NOUVEAU : Mixin pour will-change conditionnel
+@mixin will-change-conditional {
+  will-change: auto; // Par défaut
+
+  &:hover,
+  &.animating {
+    will-change: transform, opacity;
+  }
+}
+
+// Container principal
 .container {
   position: fixed;
   inset: 0;
@@ -17,49 +29,56 @@
   pointer-events: none;
 }
 
-// Particules
+// ✅ MODIFIÉ : Particules optimisées
 .particle {
   @include absolute-center;
-  @include will-change-optimized;
+  @include gpu-optimized; // Remplace will-change-optimized
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+
+  // Optionnel : will-change seulement pour les premières particules
+  &:nth-child(-n + 20) {
+    will-change: transform, opacity;
+  }
 }
 
-// Cercle suiveur de souris
+// ✅ MODIFIÉ : Cercle suiveur optimisé
 .mouseFollower {
   @include absolute-center;
+  @include gpu-optimized;
   position: absolute;
   width: 180px;
   height: 180px;
   border-radius: 50%;
   filter: blur(15px);
   pointer-events: none;
-  will-change: transform;
+  will-change: auto; // Géré par JavaScript
   z-index: 1;
 }
 
-// Effet de vague au curseur
+// ✅ MODIFIÉ : Curseur ring optimisé
 .cursorRing {
   @include absolute-center;
+  @include gpu-optimized;
   position: absolute;
   width: 40px;
   height: 40px;
   border-radius: 50%;
   pointer-events: none;
   animation: pulse 1.5s infinite;
-  will-change: transform;
+  will-change: auto; // Géré par JavaScript
   z-index: 2;
 }
 
-// Animations
+// ✅ MODIFIÉ : Animation optimisée
 @keyframes pulse {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate(-50%, -50%) scale(0) translate3d(0, 0, 0);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) scale(4);
+    transform: translate(-50%, -50%) scale(4) translate3d(0, 0, 0);
     opacity: 0;
   }
 }

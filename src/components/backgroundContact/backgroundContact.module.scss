@@ -1,6 +1,6 @@
 // Mixins
 @mixin gpu-acceleration {
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -24,13 +24,20 @@
   @include gpu-acceleration;
 }
 
+// ✅ MODIFIÉ : Chemin des vagues optimisé
 .wavePath {
-  will-change: transform, filter;
+  // Supprimer will-change du CSS - géré par JavaScript
+  will-change: auto;
   @include gpu-acceleration;
+
+  // ✅ NOUVEAU : Optimisation sélective
+  &:nth-child(-n + 2) {
+    // Seulement les 2 premières vagues peuvent avoir will-change
+    // (géré par JavaScript)
+  }
 
   // Optimisation pour haute résolution
   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    // Forcer le rendu GPU
     transform: translate3d(0, 0, 0);
   }
 }
@@ -46,6 +53,7 @@
     #f8f8f8 100%
   );
   opacity: 0.5;
+  @include gpu-acceleration;
 }
 
 // Optimisations pour les petits écrans
@@ -53,12 +61,17 @@
   .container {
     @include gpu-acceleration;
   }
+
+  // ✅ NOUVEAU : Réduire encore plus sur mobile
+  .wavePath {
+    will-change: auto !important;
+  }
 }
 
 // Préférence pour les animations réduites
 @media (prefers-reduced-motion: reduce) {
   .wavePath {
-    will-change: auto;
+    will-change: auto !important;
     animation: none !important;
   }
 }

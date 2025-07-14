@@ -7,10 +7,10 @@ import '../styles/global.scss'
 
 // Configuration des sections de navigation
 const SECTIONS = [
-  { path: '/Romain-Calmelet/', id: 'home' },
-  { path: '/Romain-Calmelet/presentation', id: 'presentation' },
-  { path: '/Romain-Calmelet/portfolio', id: 'portfolio' },
-  { path: '/Romain-Calmelet/contact', id: 'contact' },
+  { path: '/', id: 'home' },
+  { path: '/presentation', id: 'presentation' },
+  { path: '/portfolio', id: 'portfolio' },
+  { path: '/contact', id: 'contact' },
 ]
 
 // ==================== PARAMÈTRES DE SENSIBILITÉ ====================
@@ -33,6 +33,7 @@ const SENSITIVITY_CONFIG = {
     epsilon: 5, // Marge d'erreur pour détecter les extrémités (px)
     navigationCooldown: 800, // Délai de blocage après navigation (ms)
     initDelay: 200, // Délai d'initialisation des événements (ms)
+    animationDuration: 1900, // Durée de l'animation de transition (ms) - AJOUTÉ
   },
 }
 
@@ -52,6 +53,9 @@ function App() {
   const scrollEndReachedRef = useRef(false)
   const scrollEndTimeoutRef = useRef(null)
   const wheelDeltaAccumulatorRef = useRef(0)
+
+  // AJOUTÉ: Référence pour le timer d'activation du scroll
+  const enableScrollTimerRef = useRef(null)
 
   // État pour la direction de navigation
   const [direction, setDirection] = useState('down')
@@ -148,7 +152,9 @@ function App() {
    * Réinitialise l'état de navigation à chaque changement de route
    */
   useEffect(() => {
+    // Désactive le scroll pendant la transition
     if (mainRef.current) {
+      mainRef.current.style.overflowY = 'hidden'
       mainRef.current.scrollTop = 0
     }
 
@@ -165,11 +171,29 @@ function App() {
       scrollEndTimeoutRef.current = null
     }
 
+    // Annule le timer précédent si il existe
+    if (enableScrollTimerRef.current) {
+      clearTimeout(enableScrollTimerRef.current)
+    }
+
+    // Réactive le scroll après l'animation
+    enableScrollTimerRef.current = setTimeout(() => {
+      if (mainRef.current) {
+        mainRef.current.style.overflowY = 'auto'
+      }
+      enableScrollTimerRef.current = null
+    }, SENSITIVITY_CONFIG.scroll.animationDuration)
+
     const resetTimer = setTimeout(() => {
       isNavigatingRef.current = false
     }, SENSITIVITY_CONFIG.scroll.initDelay)
 
-    return () => clearTimeout(resetTimer)
+    return () => {
+      clearTimeout(resetTimer)
+      if (enableScrollTimerRef.current) {
+        clearTimeout(enableScrollTimerRef.current)
+      }
+    }
   }, [location.pathname, resetScrollEndState])
 
   /**

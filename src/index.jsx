@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
 import App from './app/App.jsx'
 import NotFound from './pages/not-found/NotFound.jsx'
 import Presentation from './pages/presentation/Presentation.jsx'
@@ -8,18 +8,18 @@ import Home from './pages/home/Home.jsx'
 import Portfolio from './pages/portfolio/Portfolio.jsx'
 import Contact from './pages/contact/contact.jsx'
 
-// Creating a browser router with defined routes
-const router = createBrowserRouter([
+// Remplacez createBrowserRouter par createHashRouter
+const router = createHashRouter([
   {
-    path: '/Romain-Calmelet/',
+    path: '/', // Notez : plus besoin du basename avec HashRouter
     element: <App />,
     children: [
       {
-        index: true, // This makes it the default child route
+        index: true,
         element: <Home />,
       },
       {
-        path: 'presentation', // Relative path (no leading slash)
+        path: 'presentation',
         element: <Presentation />,
       },
       {
@@ -33,12 +33,11 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '*', // Catch-all route at the root level
+    path: '*',
     element: <NotFound />,
   },
 ])
 
-// Rendering the application into the root HTML node
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <RouterProvider router={router} />

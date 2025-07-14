@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router'
 
 // Constantes pour la navigation
 const NAVIGATION_ITEMS = [
-  { path: '/Romain-Calmelet/presentation', label: 'PRESENTATION' },
-  { path: '/Romain-Calmelet/portfolio', label: 'PORTFOLIO' },
-  { path: '/Romain-Calmelet/contact', label: 'CONTACT' },
+  { path: '/presentation', label: 'PRESENTATION' },
+  { path: '/portfolio', label: 'PORTFOLIO' },
+  { path: '/contact', label: 'CONTACT' },
 ]
 
 const MenuMobile = ({ onMenuStateChange }) => {

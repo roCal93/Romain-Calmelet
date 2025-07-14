@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 const LogoMobile = () => {
   return (
     <div>
-      <Link to="/Romain-Calmelet/" className={styles.logo} aria-label="Home">
+      <Link to="/" className={styles.logo} aria-label="Home">
         {/* Ajout du texte pour les lecteurs d'écran */}
         <span className="sr-only">Calmelet Romain</span>
         <div className={styles.cWithR}>

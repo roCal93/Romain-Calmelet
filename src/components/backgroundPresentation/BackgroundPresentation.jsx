@@ -8,6 +8,9 @@ const MouseReactiveBackground = () => {
   const PARTICLE_HUE_BASE = 30 // violet
   const PARTICLE_HUE_RANGE = 40 // jusqu'à ~320 (rose)
 
+  // ✅ NOUVEAU : Limite pour les particules optimisées
+  const MAX_OPTIMIZED_PARTICLES = 20
+
   const [mousePos, setMousePos] = useState({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
@@ -18,6 +21,12 @@ const MouseReactiveBackground = () => {
   const mousePosRef = useRef(mousePos)
   const previousMousePosRef = useRef(mousePos)
   const animationRef = useRef()
+
+  // ✅ NOUVEAU : Refs pour les éléments du curseur
+  const mouseFollowerRef = useRef()
+  const cursorRingRef = useRef()
+  const influenceZoneRef = useRef()
+  const willChangeTimeoutRef = useRef()
 
   useEffect(() => {
     const screenArea = window.innerWidth * window.innerHeight
@@ -55,21 +64,54 @@ const MouseReactiveBackground = () => {
         floatSpeed: (Math.random() * 0.02 + 0.01) / 2,
         mouseReactivity: 1.5 - size / 40,
         dampening: 0.95,
+        // ✅ NOUVEAU : Priorité pour l'optimisation
+        isPriority: i < MAX_OPTIMIZED_PARTICLES,
       }
     })
     setParticles(initialParticles)
   }, [])
 
-  const handleMouseMove = useCallback((e) => {
-    previousMousePosRef.current = mousePosRef.current
-    const newPos = { x: e.clientX, y: e.clientY }
-    mousePosRef.current = newPos
-    setMousePos(newPos)
+  // ✅ NOUVEAU : Gestion optimisée du will-change pour le curseur
+  const optimizeWillChange = useCallback(() => {
+    const elements = [
+      mouseFollowerRef.current,
+      cursorRingRef.current,
+      influenceZoneRef.current,
+    ].filter(Boolean)
+
+    // Activer will-change
+    elements.forEach((el) => {
+      el.style.willChange = 'transform'
+    })
+
+    // Désactiver après un délai
+    clearTimeout(willChangeTimeoutRef.current)
+    willChangeTimeoutRef.current = setTimeout(() => {
+      elements.forEach((el) => {
+        el.style.willChange = 'auto'
+      })
+    }, 100)
   }, [])
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      previousMousePosRef.current = mousePosRef.current
+      const newPos = { x: e.clientX, y: e.clientY }
+      mousePosRef.current = newPos
+      setMousePos(newPos)
+
+      // ✅ NOUVEAU : Optimiser will-change pendant le mouvement
+      optimizeWillChange()
+    },
+    [optimizeWillChange]
+  )
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      clearTimeout(willChangeTimeoutRef.current)
+    }
   }, [handleMouseMove])
 
   useEffect(() => {
@@ -220,21 +262,38 @@ const MouseReactiveBackground = () => {
               50 + p.opacity * 20
             }%)40`,
             filter: p.size > 15 ? 'blur(0.5px)' : 'none',
+            // ✅ NOUVEAU : will-change conditionnel
+            willChange: p.isPriority ? 'transform, opacity' : 'auto',
           }}
         />
       ))}
 
       <div
+        ref={mouseFollowerRef}
         className={styles.mouseFollower}
-        style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }}
+        style={{
+          left: `${mousePos.x}px`,
+          top: `${mousePos.y}px`,
+          willChange: 'auto', // Géré par JavaScript
+        }}
       />
       <div
+        ref={influenceZoneRef}
         className={styles.influenceZone}
-        style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }}
+        style={{
+          left: `${mousePos.x}px`,
+          top: `${mousePos.y}px`,
+          willChange: 'auto', // Géré par JavaScript
+        }}
       />
       <div
+        ref={cursorRingRef}
         className={styles.cursorRing}
-        style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }}
+        style={{
+          left: `${mousePos.x}px`,
+          top: `${mousePos.y}px`,
+          willChange: 'auto', // Géré par JavaScript
+        }}
       />
     </div>
   )

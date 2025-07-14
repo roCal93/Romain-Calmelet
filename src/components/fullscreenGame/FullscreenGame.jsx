@@ -6,10 +6,10 @@ import styles from './fullscreenGame.module.scss'
 const FullscreenGame = ({ gameType, backToMenu }) => {
   const [shouldShowMessage, setShouldShowMessage] = useState(false)
 
+  // Gérer la taille de l'écran
   useEffect(() => {
     const checkScreenSize = () => {
       const heightTooSmall = window.innerHeight < 600
-
       setShouldShowMessage(heightTooSmall)
     }
 
@@ -28,7 +28,11 @@ const FullscreenGame = ({ gameType, backToMenu }) => {
 
   return (
     <div className={`${styles.fullGame} allowScroll`}>
-      <button onClick={backToMenu} className={styles.backButton}>
+      <button
+        onClick={backToMenu}
+        className={styles.backButton}
+        title="Retour au menu (Échap)"
+      >
         ← Retour
       </button>
 

@@ -1,13 +1,306 @@
-.notFound {
-  margin: 50px 100px 50px 100px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 100px;
-  .title {
-    font-size: 60px;
+// notFound.module.scss
+
+// Container de page
+.pageContainer {
+  width: 100%;
+  height: auto; // Explicitement auto
+  overflow: visible; // Force le scroll visible
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+
+  &.visible {
+    opacity: 1;
   }
-  .link:hover {
-    text-decoration: underline;
+}
+
+// Container principal
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto; // Changé de min-height à height auto
+  min-height: 100vh; // min-height sans calc
+  padding: 2rem 0;
+  position: relative;
+  overflow: visible; // Assure que le contenu peut déborder
+  animation: fadeInUp 0.8s ease-out forwards;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
+}
+
+// Contenu principal
+.notFoundContent {
+  display: flex;
+  justify-content: center; // Changé de space-between
+  align-items: center;
+  padding: 2rem 5rem; // Ajout de padding vertical
+  width: 100%;
+  max-width: 1200px;
+  gap: 4rem;
+  margin: auto; // Centre le contenu
+  animation: slideInFromTop 0.8s ease-out 0.2s both;
+
+  @media (max-width: 1024px) {
+    padding: 2rem 3rem;
+    gap: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    gap: 2rem;
+  }
+}
+
+// Section erreur
+.errorSection {
+  flex: 0 1 auto; // Changé de flex: 1
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+}
+
+// Code 404
+.errorCode {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(4rem, 12vw, 8rem); // Réduit la taille max
+  line-height: 1;
+  color: #333;
+  background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.errorMessage {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2rem); // Réduit
+  color: #333;
+}
+
+// Contenu textuel
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.paragraphs {
+  max-width: 500px;
+
+  p {
+    font-size: clamp(0.95rem, 2vw, 1.125rem);
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Lien retour
+.homeLink {
+  gap: 0.75rem;
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+
+  @media (max-width: 768px) {
+    align-self: center;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+
+    .linkArrow {
+      transform: translateX(5px);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+  }
+}
+
+.linkText {
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+}
+
+.linkArrow {
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+}
+
+// Engrenages décoratifs
+.decorativeGears {
+  flex: 0 1 auto; // Changé de flex: 1
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  min-height: 350px;
+
+  @media (max-width: 768px) {
+    min-height: 250px;
+    max-width: 300px;
+  }
+}
+
+// Style des engrenages - Tailles réduites
+@mixin gear($size, $color) {
+  width: $size;
+  height: $size;
+  border: 3px solid $color;
+  border-radius: 50%;
+  position: absolute;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: inherit;
+    border-radius: inherit;
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 35%;
+    height: 35%;
+    background: $color;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.gear1 {
+  @include gear(140px, rgba(231, 76, 60, 0.3));
+  top: 10%;
+  left: 5%;
+  animation: rotate 20s linear infinite;
+
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.gear2 {
+  @include gear(180px, rgba(231, 76, 60, 0.2));
+  top: 30%;
+  right: 10%;
+  animation: rotate 15s linear infinite reverse;
+
+  @media (max-width: 768px) {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+.gear3 {
+  @include gear(100px, rgba(231, 76, 60, 0.4));
+  bottom: 15%;
+  left: 25%;
+  animation: rotate 25s linear infinite;
+
+  @media (max-width: 768px) {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+// Le reste des animations reste identique...
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Accessibilité
+.homeLink:focus-visible {
+  outline: 3px solid #e74c3c;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+// Préférences de mouvement réduit
+@media (prefers-reduced-motion: reduce) {
+  .pageContainer,
+  .container,
+  .notFoundContent,
+  .errorCode,
+  .gear1,
+  .gear2,
+  .gear3,
+  .homeLink {
+    animation: none !important;
+    transition: opacity 0.3s ease-out !important;
+  }
+
+  .homeLink:hover {
+    transform: none !important;
   }
 }

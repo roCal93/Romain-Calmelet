@@ -19,8 +19,9 @@ const BackgroundContact = () => {
   const devicePixelRatio = window.devicePixelRatio || 1
   const isHighDensity = devicePixelRatio > 1.5
 
-  // Paramètres adaptatifs
-  const WAVE_COUNT = isHighDensity ? 3 : 5
+  // ✅ PARAMÈTRES OPTIMISÉS pour le budget will-change
+  const WAVE_COUNT = isHighDensity ? 2 : 3 // Réduit de 3/5 à 2/3
+  const MAX_OPTIMIZED_WAVES = 2 // Limite will-change
   const WAVE_AMPLITUDE = 80
   const WAVE_FREQUENCY = 0.02
   const WAVE_SPEED = 0.005
@@ -47,11 +48,33 @@ const BackgroundContact = () => {
   const [waves, setWaves] = useState([])
   const [isMouseMoving, setIsMouseMoving] = useState(false)
 
-  // Refs
+  // ✅ NOUVEAUX REFS pour l'optimisation will-change
   const animationRef = useRef()
   const mousePosRef = useRef(mousePos)
   const mouseTimeoutRef = useRef()
   const frameCountRef = useRef(0)
+  const waveRefs = useRef([])
+  const willChangeTimeoutRef = useRef()
+
+  // ✅ NOUVELLE FONCTION : Gestion optimisée du will-change
+  const optimizeWillChange = useCallback(() => {
+    // Activer will-change seulement sur les vagues prioritaires
+    waveRefs.current.forEach((wave, index) => {
+      if (wave && index < MAX_OPTIMIZED_WAVES) {
+        wave.style.willChange = 'transform, filter'
+      }
+    })
+
+    // Désactiver après l'animation
+    clearTimeout(willChangeTimeoutRef.current)
+    willChangeTimeoutRef.current = setTimeout(() => {
+      waveRefs.current.forEach((wave) => {
+        if (wave) {
+          wave.style.willChange = 'auto'
+        }
+      })
+    }, 1000) // Durée d'une animation complète
+  }, [])
 
   // Gestion du redimensionnement de la fenêtre
   useEffect(() => {
@@ -77,28 +100,37 @@ const BackgroundContact = () => {
       hue: 0,
       opacity: 0.15 + Math.random() * 0.25,
       offset: Math.random() * 100,
+      // ✅ NOUVEAU : Priorité pour l'optimisation
+      isPriority: i < MAX_OPTIMIZED_WAVES,
     }))
     setWaves(initialWaves)
   }, [WAVE_COUNT])
 
-  // Gestion du mouvement de la souris
-  const handleMouseMove = useCallback((e) => {
-    const newPos = { x: e.clientX, y: e.clientY }
-    mousePosRef.current = newPos
-    setMousePos(newPos)
-    setIsMouseMoving(true)
+  // ✅ MODIFIÉ : Gestion du mouvement de la souris avec optimisation
+  const handleMouseMove = useCallback(
+    (e) => {
+      const newPos = { x: e.clientX, y: e.clientY }
+      mousePosRef.current = newPos
+      setMousePos(newPos)
+      setIsMouseMoving(true)
 
-    clearTimeout(mouseTimeoutRef.current)
-    mouseTimeoutRef.current = setTimeout(() => {
-      setIsMouseMoving(false)
-    }, 150)
-  }, [])
+      // Optimiser will-change pendant le mouvement
+      optimizeWillChange()
+
+      clearTimeout(mouseTimeoutRef.current)
+      mouseTimeoutRef.current = setTimeout(() => {
+        setIsMouseMoving(false)
+      }, 150)
+    },
+    [optimizeWillChange]
+  )
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       clearTimeout(mouseTimeoutRef.current)
+      clearTimeout(willChangeTimeoutRef.current)
     }
   }, [handleMouseMove])
 
@@ -124,12 +156,21 @@ const BackgroundContact = () => {
     }
 
     animationRef.current = requestAnimationFrame(animate)
+
+    // ✅ NOUVEAU : Optimisation périodique
+    const optimizationInterval = setInterval(() => {
+      if (!isMouseMoving) {
+        optimizeWillChange()
+      }
+    }, 3000)
+
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
+      clearInterval(optimizationInterval)
     }
-  }, [prefersReducedMotion, isHighDensity])
+  }, [prefersReducedMotion, isHighDensity, isMouseMoving, optimizeWillChange])
 
   // Génération optimisée des points de vague
   const generateWavePoints = useCallback(
@@ -183,7 +224,7 @@ const BackgroundContact = () => {
     )
   }
 
-  // Version SVG optimisée
+  // ✅ MODIFIÉ : Version SVG optimisée avec refs et will-change conditionnel
   return (
     <div className={styles.container} aria-hidden="true">
       <svg className={styles.waveSvg}>
@@ -208,14 +249,17 @@ const BackgroundContact = () => {
           ))}
         </defs>
 
-        {waves.map((wave) => (
+        {waves.map((wave, index) => (
           <path
             key={`wave-${wave.id}`}
+            ref={(el) => (waveRefs.current[index] = el)}
             d={generateWavePoints(wave)}
             fill={`url(#gradient-${wave.id})`}
             className={styles.wavePath}
             style={{
               filter: `blur(${1 + wave.id * 0.5}px)`,
+              // ✅ NOUVEAU : will-change conditionnel géré par JavaScript
+              willChange: 'auto',
             }}
           />
         ))}
