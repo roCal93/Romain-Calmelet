@@ -1,3 +1,12 @@
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
+
+/**
+ * Static Logos Container Styles
+ * 
+ * Fixed-position container for social media links
+ * Positioned at bottom-right of viewport
+ */
 .logosContainer {
   position: fixed;
   bottom: 60px;
@@ -7,24 +16,64 @@
   gap: 30px;
   z-index: 100;
 
-  // Force tous les logos enfants à être en position relative
+  /**
+   * Direct children styling
+   * Ensures proper positioning and interactive states
+   */
   > div {
-    position: relative !important;
-    left: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+    // Reset any absolute positioning from child components
+    position: relative;
+    inset: unset; // Modern way to reset top/right/bottom/left
+
+    // Interactive states
     cursor: pointer;
     transition: transform 0.2s ease;
 
+    // Hover effect with slight scale
     &:hover {
       transform: scale(1.1);
     }
+
+    // Focus styles for accessibility
+    &:focus-within {
+      outline: $focus-color;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    // Active state with primary color tint
+    &:active {
+      transform: scale(1.05);
+      filter: brightness(0.95);
+    }
   }
 
+  /**
+   * Mobile responsive adjustments
+   * Reduces spacing and adjusts position for smaller screens
+   */
   @media (max-width: 768px) {
     bottom: 50px;
     right: 15px;
     gap: 20px;
+
+    // Slightly smaller hover effect on mobile
+    > div:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  /**
+   * Reduced motion preference
+   * Respects user's motion preferences for accessibility
+   */
+  @media (prefers-reduced-motion: reduce) {
+    > div {
+      transition: none;
+
+      &:hover {
+        transform: none;
+      }
+    }
   }
 }

@@ -1,38 +1,141 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import styles from './phoneMessage.module.scss'
 import Confetti from 'react-confetti'
 
-const SuccessModal = ({ phoneNumber, onClose }) => {
-  const [showContent, setShowContent] = useState(false)
-  const [windowDimension, setWindowDimension] = useState({
+/**
+ * Custom hook to track window dimensions with debounce
+ * @returns {Object} Current window dimensions {width, height}
+ */
+const useWindowDimensions = () => {
+  const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   })
 
   useEffect(() => {
-    // Afficher le contenu progressivement
-    const timer = setTimeout(() => setShowContent(true), 100)
+    // Create the actual resize handler
+    let timeoutId
+    const debouncedResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        })
+      }, 100)
+    }
+
+    window.addEventListener('resize', debouncedResize)
 
     return () => {
-      clearTimeout(timer)
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', debouncedResize)
     }
   }, [])
 
+  return dimensions
+}
+
+/**
+ * Success Modal Component
+ * Displays a congratulatory message with confetti when user finds the correct sequence
+ *
+ * @param {string} phoneNumber - The unlocked phone number to display
+ * @param {Function} onClose - Callback function when modal is closed
+ */
+const SuccessModal = ({ phoneNumber, onClose }) => {
+  const [showContent, setShowContent] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState(null)
+  const modalRef = useRef(null)
+  const previousActiveElement = useRef(null)
+
+  // Use custom hook for window dimensions
+  const windowDimension = useWindowDimensions()
+
+  // Handle modal appearance animation
   useEffect(() => {
-    // Détecter le redimensionnement de la fenêtre
-    const detectSize = () => {
-      setWindowDimension({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })
+    const timer = setTimeout(() => setShowContent(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Handle focus management and escape key
+  useEffect(() => {
+    // Store the previously focused element
+    previousActiveElement.current = document.activeElement
+
+    // Focus the modal content
+    modalRef.current?.focus()
+
+    // Handle escape key press
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
     }
 
-    window.addEventListener('resize', detectSize)
-    return () => window.removeEventListener('resize', detectSize)
-  }, [])
+    document.addEventListener('keydown', handleEscape)
+
+    // Cleanup: restore focus and remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      previousActiveElement.current?.focus()
+    }
+  }, [onClose])
+
+  /**
+   * Handle phone number copy to clipboard
+   * Includes fallback for older browsers
+   */
+  const handleCopyPhone = async () => {
+    try {
+      // Modern clipboard API
+      await navigator.clipboard.writeText(phoneNumber)
+      setCopied(true)
+      setError(null)
+
+      // Reset copy status after 2 seconds
+      setTimeout(() => {
+        setCopied(false)
+      }, 2000)
+    } catch (err) {
+      console.error('Copy error:', err)
+
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = phoneNumber
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.select()
+
+      try {
+        const successful = document.execCommand('copy')
+        if (successful) {
+          setCopied(true)
+          setError(null)
+          setTimeout(() => setCopied(false), 2000)
+        } else {
+          setError('Unable to copy phone number')
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback copy error:', fallbackErr)
+        setError('Unable to copy phone number. Please copy manually.')
+      }
+
+      document.body.removeChild(textArea)
+    }
+  }
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div
+      className={styles.modalOverlay}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="success-title"
+      aria-describedby="success-description"
+    >
       <Confetti
         width={windowDimension.width}
         height={windowDimension.height}
@@ -43,19 +146,61 @@ const SuccessModal = ({ phoneNumber, onClose }) => {
       <div
         className={`${styles.modalContent} ${showContent ? styles.show : ''}`}
         onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+        ref={modalRef}
       >
-        <div className={styles.successIcon}>
+        {/* Success icon with checkmark */}
+        <div className={styles.successIcon} aria-hidden="true">
           <span className={styles.checkmark}>✓</span>
         </div>
-        <h2 className={styles.congratsTitle}>Félicitations !</h2>
-        <p className={styles.congratsText}>
+
+        {/* Success title */}
+        <h2 id="success-title" className={styles.congratsTitle}>
+          Félicitations !
+        </h2>
+
+        {/* Success description */}
+        <p id="success-description" className={styles.congratsText}>
           Vous avez trouvé la bonne séquence !
         </p>
+
+        {/* Phone number reveal section */}
         <div className={styles.phoneReveal}>
           <span className={styles.phoneLabel}>Numéro déverrouillé :</span>
-          <div className={styles.phoneNumberReveal}>{phoneNumber}</div>
+          <div
+            className={`${styles.phoneNumberReveal} ${styles.clickable}`}
+            onClick={handleCopyPhone}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleCopyPhone()
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={`Phone number: ${phoneNumber}. Click to copy`}
+            title="Click to copy"
+          >
+            {phoneNumber}
+            {copied && (
+              <span className={styles.copiedMessage} aria-live="polite">
+                Copié !
+              </span>
+            )}
+            {error && (
+              <span className={styles.errorMessage} aria-live="assertive">
+                {error}
+              </span>
+            )}
+          </div>
         </div>
-        <button className={styles.continueButton} onClick={onClose}>
+
+        {/* Close button */}
+        <button
+          className={styles.continueButton}
+          onClick={onClose}
+          aria-label="Close success modal"
+        >
           Fermer
         </button>
       </div>

@@ -1,3 +1,11 @@
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
+
+// Animation performance optimization
+%will-change-animation {
+  will-change: transform, opacity;
+}
+
 .container {
   display: grid;
   grid-template-rows: 1fr auto;
@@ -8,15 +16,18 @@
   gap: 2rem;
   position: relative;
   overflow-x: hidden;
-  // Animation d'entrée pour le conteneur
+
+  // Entrance animation
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 0.8s ease-out forwards;
+  @extend %will-change-animation;
 
   @media (max-width: 768px) {
     min-height: calc(100dvh - 65px);
     padding: 1rem;
     gap: 1rem;
+    // Safe area insets for notched devices
     padding-top: max(1rem, env(safe-area-inset-top));
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
@@ -52,25 +63,34 @@
       line-height: 1.1;
       margin: 0;
       color: #333;
-      background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+
+      // Gradient using primary color with transparency
+      background: linear-gradient(
+        135deg,
+        color.adjust($primary, $alpha: -0.5) 0%,
+        $primary 100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      // Animation d'apparition
+
+      // Entrance animation
       opacity: 0;
       transform: translateY(30px);
       animation: slideInFromTop 0.8s ease-out 0.2s forwards;
+      @extend %will-change-animation;
 
       @media (max-width: 768px) {
         font-size: clamp(2.5rem, 8vw, 4rem);
       }
     }
 
-    // Animation pour le TextIntro
+    // Animation for TextIntro component
     > :last-child {
       opacity: 0;
       transform: translateY(20px);
       animation: slideInFromTop 0.8s ease-out 0.4s forwards;
+      @extend %will-change-animation;
     }
 
     @keyframes slideInFromTop {
@@ -80,7 +100,7 @@
       }
     }
 
-    // Styles pour le texte alternatif (si c'est dans TextIntro)
+    // Styles for alternating text (if used in TextIntro)
     .alternatingText {
       position: relative;
       display: inline-block;
@@ -130,7 +150,7 @@
       }
     }
 
-    // Styles pour les paragraphes
+    // Paragraph styles
     p {
       font-size: clamp(1.25rem, 4vw, 2rem);
       line-height: 1.6;
@@ -158,13 +178,14 @@
       padding-bottom: 1rem;
     }
 
-    // Animation pour la flèche
+    // Arrow animation
     > * {
       opacity: 0;
       transform: translateY(20px);
       animation: bounceInUp 1s ease-out 0.8s forwards;
+      @extend %will-change-animation;
 
-      // Effet hover
+      // Hover effect
       &:hover {
         transform: translateY(-2px);
         transition: transform 0.2s ease-out;
@@ -189,37 +210,45 @@
       }
     }
   }
-  .button {
+
+  // Actions section for semantic structure
+  .actions {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    background: #66636329;
+    z-index: 1000;
+  }
+
+  .button {
+    background: color.adjust(#666363, $alpha: -0.84);
     color: white;
     border: none;
     padding: 0.5rem 0.5rem;
     border-radius: 8px;
     cursor: pointer;
-    z-index: 1000;
     font-size: clamp(0.9rem, 2vw, 1rem);
     font-weight: 500;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
 
     &:hover {
-      background: #e74c3c;
+      background: $primary;
       transform: translateX(-2px);
+
       @media (max-width: 768px) {
-        background: #66636329;
+        // Keep subtle background on mobile
+        background: color.adjust(#666363, $alpha: -0.84);
       }
     }
+
     &:focus-visible {
-      outline: 3px solid #e74c3c;
+      outline: $focus-color;
       outline-offset: 2px;
     }
   }
 }
 
-// Animations responsives améliorées
+// Improved responsive animations
 @media (max-width: 768px) {
   .container {
     .intro {
@@ -238,7 +267,7 @@
   }
 }
 
-// Animation pour les états de chargement
+// Loading state animations
 .container.loading {
   .intro > *,
   .nav > * {
@@ -246,15 +275,17 @@
   }
 }
 
-// Animation pour les préférences de mouvement réduit
+// Reduced motion preferences
 @media (prefers-reduced-motion: reduce) {
   .container,
   .container .intro h2,
   .container .intro > :last-child,
-  .container .nav > * {
-    animation: none;
-    opacity: 1;
-    transform: none;
+  .container .nav > *,
+  .button {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   .alternatingText span {
@@ -264,9 +295,9 @@
   }
 }
 
-// Effet de focus pour l'accessibilité
+// Accessibility focus states
 .nav > *:focus-visible {
-  outline: 2px solid #e74c3c;
+  outline: $focus-color;
   outline-offset: 4px;
   border-radius: 4px;
 }

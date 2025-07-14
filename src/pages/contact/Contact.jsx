@@ -1,3 +1,4 @@
+// pages/contact/Contact.jsx
 import { useEffect, useState, useContext, useCallback } from 'react'
 
 // Contexts
@@ -22,7 +23,7 @@ const EXTERNAL_LINKS = {
 }
 
 function Contact() {
-  // États
+  // State management
   const [isVisible, setIsVisible] = useState(false)
   const [activeGame, setActiveGame] = useState(null)
   const [showPhoneNumber, setShowPhoneNumber] = useState(false)
@@ -30,21 +31,21 @@ function Contact() {
   // Context
   const { direction, resetNavigation } = useContext(NavigationContext)
 
-  // Effets
+  // Initial setup effect
   useEffect(() => {
     resetNavigation?.()
     setIsVisible(true)
     return () => setIsVisible(false)
   }, [resetNavigation])
 
-  // Gestion du bouton retour du navigateur pour les jeux
+  // Browser back button handling for games
   useEffect(() => {
     if (activeGame) {
-      // Ajouter un état fictif à l'historique quand un jeu est lancé
+      // Add a dummy state to history when a game starts
       window.history.pushState({ game: activeGame }, '', window.location.href)
 
       const handlePopState = (e) => {
-        // Si on revient en arrière et qu'un jeu est actif
+        // If going back and a game is active
         if (!e.state?.game && activeGame) {
           setActiveGame(null)
         }
@@ -58,14 +59,28 @@ function Contact() {
     }
   }, [activeGame])
 
-  // Gestion de la touche Échap
+  // Handlers
+  const startGame = useCallback((gameType) => {
+    setActiveGame(gameType)
+  }, [])
+
+  // Back to menu handler - handles both button click and ESC key
+  const backToMenu = useCallback(() => {
+    setActiveGame(null)
+    // Only go back in history if there's an actual game history state
+    if (window.history.state?.game) {
+      window.history.back()
+    }
+  }, [])
+
+  // Handle ESC key press
   useEffect(() => {
     if (!activeGame) return
 
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && activeGame) {
-        // Simuler un retour en arrière pour maintenir la cohérence de l'historique
-        window.history.back()
+      if (e.key === 'Escape') {
+        e.preventDefault() // Prevent any default behavior
+        backToMenu() // Use the same function as the button
       }
     }
 
@@ -74,9 +89,9 @@ function Contact() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [activeGame])
+  }, [activeGame, backToMenu])
 
-  // Bloquer la navigation accidentelle quand un jeu est actif
+  // Prevent accidental navigation when game is active
   useEffect(() => {
     if (!activeGame) return
 
@@ -93,16 +108,7 @@ function Contact() {
     }
   }, [activeGame])
 
-  // Handlers
-  const startGame = useCallback((gameType) => {
-    setActiveGame(gameType)
-  }, [])
-
-  const backToMenu = useCallback(() => {
-    // Retirer l'état du jeu de l'historique
-    window.history.back()
-  }, [])
-
+  // Handle logo clicks
   const handleLogoClick = useCallback((type) => {
     const actions = {
       linkedin: () =>
@@ -115,7 +121,7 @@ function Contact() {
     actions[type]?.()
   }, [])
 
-  // Classes CSS
+  // CSS classes
   const pageClasses = `page-container ${
     isVisible ? `page-enter-${direction === 'down' ? 'down' : 'up'}` : ''
   }`
@@ -125,6 +131,7 @@ function Contact() {
       <BackgroundContact />
 
       <main className={styles.container} role="main">
+        {/* Navigation arrow - hidden when game is active */}
         {!activeGame && (
           <div className={styles.navUp}>
             <ArrowUp aria-label="Naviguer vers la section précédente" />
@@ -135,12 +142,14 @@ function Contact() {
           className={styles.contactContent}
           aria-labelledby="contact-title"
         >
+          {/* Page header */}
           <header className={styles.title}>
             <div className={styles.text}>
               <h1 id="contact-title">Contactez-moi</h1>
             </div>
           </header>
 
+          {/* Game area */}
           <section
             className={styles.gameWrapper}
             aria-label="Zone de jeu et contact"
@@ -153,11 +162,13 @@ function Contact() {
           </section>
         </article>
 
+        {/* Social media logos */}
         <StaticLogos
           activeGame={activeGame}
           handleLogoClick={handleLogoClick}
         />
 
+        {/* Phone number display modal */}
         <PhoneDisplay
           showPhoneNumber={showPhoneNumber}
           setShowPhoneNumber={setShowPhoneNumber}

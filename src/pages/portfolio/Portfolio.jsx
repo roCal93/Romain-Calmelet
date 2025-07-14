@@ -1,4 +1,5 @@
-import { useEffect, useState, useContext } from 'react'
+// pages/portfolio/Portfolio.jsx
+import { useEffect, useState, useContext, useMemo, useCallback } from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './portfolio.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
@@ -8,27 +9,104 @@ import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
 import ProjectCard from '../../components/projectCard/ProjectCard'
 import { projects } from '../../assets/data/projects'
 
+// Constants
+const ANIMATION_DELAY = 800
+const VARIANTS = {
+  FRONT: 'front',
+  DETAILED: 'detailed',
+}
+
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
   const { direction, resetNavigation } = useContext(NavigationContext)
 
+  // Store projects length in a variable
+  const projectsCount = projects.length
+
   useEffect(() => {
+    // Reset navigation and show page
     resetNavigation?.()
     setIsVisible(true)
 
+    // Cleanup on unmount
     return () => {
       setIsVisible(false)
     }
   }, [resetNavigation])
 
-  // Transformer les projets en cards pour le carousel
-  const cardsTitle = projects.map((project) => (
-    <ProjectCard key={project.id} project={project} variant="front" />
-  ))
+  // Memoize project cards to avoid unnecessary re-renders
+  const cardsTitle = useMemo(
+    () =>
+      projects.map((project) => (
+        <ProjectCard
+          key={project.id}
+          project={project}
+          variant={VARIANTS.FRONT}
+        />
+      )),
+    []
+  )
 
-  const cards = projects.map((project) => (
-    <ProjectCard key={project.id} project={project} variant="detailed" />
-  ))
+  const cards = useMemo(
+    () =>
+      projects.map((project) => (
+        <ProjectCard
+          key={project.id}
+          project={project}
+          variant={VARIANTS.DETAILED}
+        />
+      )),
+    []
+  )
+
+  // Handle carousel navigation
+  const handleProjectChange = useCallback((index) => {
+    setCurrentProjectIndex(index)
+  }, [])
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (!projectsCount) return
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault()
+          setCurrentProjectIndex((prev) =>
+            prev === 0 ? projectsCount - 1 : prev - 1
+          )
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          setCurrentProjectIndex((prev) =>
+            prev === projectsCount - 1 ? 0 : prev + 1
+          )
+          break
+      }
+    },
+    [projectsCount]
+  )
+
+  // Loading state handler
+  const handleNavigationStart = useCallback(() => {
+    setIsLoading(true)
+    setTimeout(() => setIsLoading(false), ANIMATION_DELAY)
+  }, [])
+
+  // Handle empty projects case
+  if (!projects || projectsCount === 0) {
+    return (
+      <div className={`page-container ${styles.container}`}>
+        <BackgroundPortfolio />
+        <main className={styles.emptyState} role="main">
+          <h1>No projects available</h1>
+          <p>Projects will be displayed here once available.</p>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -38,19 +116,25 @@ function Portfolio() {
             ? 'page-enter-down'
             : 'page-enter-up'
           : ''
-      }`}
+      } ${isLoading ? styles.isLoading : ''}`}
+      onKeyDown={handleKeyDown}
     >
       <BackgroundPortfolio />
 
       <main className={styles.container} role="main">
+        {/* Navigation up arrow */}
         <div className={styles.navUp}>
-          <ArrowUp aria-label="Naviguer vers la section précédente" />
+          <ArrowUp
+            aria-label="Navigate to previous section"
+            onClick={handleNavigationStart}
+          />
         </div>
 
         <article
           className={styles.portfolioContent}
           aria-labelledby="portfolio-title"
         >
+          {/* Portfolio header */}
           <header className={styles.title}>
             <div className={styles.text}>
               <h1 id="portfolio-title">Mes réalisations</h1>
@@ -58,20 +142,42 @@ function Portfolio() {
             </div>
           </header>
 
+          {/* Projects carousel */}
           <section
             className={styles.carouselWrapper}
-            aria-label="Carrousel de projets"
+            aria-label="Projects carousel"
           >
             <ProjectCarousel
               cards={cards}
               cardsTitle={cardsTitle}
               loop={true}
+              onProjectChange={handleProjectChange}
+              currentIndex={currentProjectIndex}
             />
+
+            {/* Screen reader announcements */}
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
+              {`Project ${currentProjectIndex + 1} of ${projectsCount}: ${
+                projects[currentProjectIndex]?.title || ''
+              }`}
+            </div>
           </section>
         </article>
 
-        <nav className={styles.navDown} aria-label="Navigation entre sections">
-          <ArrowDown aria-label="Naviguer vers la section suivante" />
+        {/* Navigation down arrow */}
+        <nav
+          className={styles.navDown}
+          aria-label="Navigation between sections"
+        >
+          <ArrowDown
+            aria-label="Navigate to next section"
+            onClick={handleNavigationStart}
+          />
         </nav>
       </main>
     </div>

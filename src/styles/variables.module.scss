@@ -1,0 +1,17 @@
+// ===================================
+// Color Palette
+// ===================================
+
+// Primary color
+$primary: #e74c3c;
+
+// Focus
+$focus-color: 3px solid $primary;
+
+// Wave color (using primary)
+$wave-color: $primary;
+
+// Export for JavaScript
+:export {
+  waveColor: $wave-color;
+}

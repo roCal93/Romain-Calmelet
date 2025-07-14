@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import styles from './contactGame.module.scss'
 
-// ==================== CONSTANTES ====================
+// ==================== CONSTANTS ====================
 const LINKS = {
   linkedin: 'https://www.linkedin.com/in/romain-calmelet/',
   github: 'https://github.com/RoCal93',
@@ -30,7 +30,7 @@ const RESPONSIVE_CONFIG = {
   desktop: { speedFactor: 1, logoSize: 60, detectionZone: 180 },
 }
 
-// ==================== UTILITAIRES ====================
+// ==================== UTILITIES ====================
 const throttle = (func, delay) => {
   let lastCall = 0
   return (...args) => {
@@ -49,7 +49,7 @@ const isSafari = () => {
 const getRandomPosition = (max, logoSize) =>
   Math.random() * Math.max(0, max - logoSize)
 
-// ==================== COMPOSANTS ====================
+// ==================== COMPONENTS ====================
 const LinkedInIcon = ({ size }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -82,17 +82,13 @@ const Notification = ({ url, type, onAction, onClose }) => (
         <p className={styles.successMessage}>{url}</p>
       )}
     </div>
-    <button
-      onClick={onClose}
-      className={styles.closeButton}
-      aria-label="Fermer"
-    >
+    <button onClick={onClose} className={styles.closeButton} aria-label="Close">
       ✕
     </button>
   </div>
 )
 
-// ==================== COMPOSANT PRINCIPAL ====================
+// ==================== MAIN COMPONENT ====================
 function ContactGame() {
   // Refs
   const gameContainerRef = useRef(null)
@@ -101,7 +97,7 @@ function ContactGame() {
   const hasClickedRef = useRef({ linkedin: false, github: false })
   const logoTouchedRef = useRef({ linkedin: false, github: false })
 
-  // États
+  // States
   const [logos, setLogos] = useState([])
   const [logoInZone, setLogoInZone] = useState({
     linkedin: false,
@@ -127,7 +123,7 @@ function ContactGame() {
     [isMobile, isTablet]
   )
 
-  // ==================== INITIALISATION ====================
+  // ==================== INITIALIZATION ====================
   const initializeLogos = useCallback(() => {
     const { speedFactor, logoSize } = config
     const windowWidth = window.innerWidth
@@ -161,7 +157,7 @@ function ContactGame() {
     setLogos(initializeLogos())
   }, [initializeLogos])
 
-  // ==================== GESTIONNAIRES ====================
+  // ==================== EVENT HANDLERS ====================
   const openLink = useCallback((url, logoId) => {
     try {
       window.open(url, '_blank', 'noopener,noreferrer')
@@ -170,7 +166,7 @@ function ContactGame() {
         setNotification({ show: true, url, type: 'error' })
       }
     } catch (error) {
-      console.error(`Erreur ouverture ${logoId}:`, error)
+      console.error(`Error opening ${logoId}:`, error)
       setNotification({ show: true, url, type: 'error' })
     }
   }, [])
@@ -181,7 +177,7 @@ function ContactGame() {
         window.open(notification.url, '_blank', 'noopener,noreferrer')
         setNotification({ show: false, url: null, type: 'error' })
       } catch {
-        // Suppression de la variable 'error' non utilisée
+        // Removed unused 'error' variable
         if (
           window.confirm(
             "Impossible d'ouvrir le lien. Ouvrir dans la fenêtre actuelle ?"
@@ -197,7 +193,7 @@ function ContactGame() {
     setNotification({ show: false, url: null, type: 'error' })
   }, [])
 
-  // ==================== GESTION SOURIS ====================
+  // ==================== MOUSE HANDLING ====================
   const handleMouseMove = useMemo(
     () =>
       throttle((e) => {
@@ -218,7 +214,7 @@ function ContactGame() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [handleMouseMove])
 
-  // Support tactile mobile
+  // Mobile touch support
   useEffect(() => {
     if (!isMobile) return
 
@@ -240,7 +236,7 @@ function ContactGame() {
     return () => container.removeEventListener('touchmove', handleTouchMove)
   }, [isMobile])
 
-  // ==================== GESTION REDIMENSIONNEMENT ====================
+  // ==================== RESIZE HANDLING ====================
   useEffect(() => {
     const handleResize = () => {
       setLogos((prevLogos) =>
@@ -256,18 +252,18 @@ function ContactGame() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // ==================== LOGIQUE D'ANIMATION ====================
+  // ==================== ANIMATION LOGIC ====================
   const updateLogoPosition = useCallback(
     (logo, containerWidth, containerHeight, otherLogos) => {
       let { x, y, dx, dy, size, baseSpeed } = logo
 
-      // Mise à jour position
+      // Update position
       let newX = x + dx
       let newY = y + dy
       let newDx = dx
       let newDy = dy
 
-      // Interaction souris
+      // Mouse interaction
       const mouseX = mouseRef.current.x
       const mouseY = mouseRef.current.y
       const logoCenterX = x + size / 2
@@ -289,7 +285,7 @@ function ContactGame() {
         newDx += Math.cos(angle) * force
         newDy += Math.sin(angle) * force
 
-        // Limitation vitesse max
+        // Limit maximum speed
         const maxSpeed = baseSpeed * ANIMATION_CONFIG.maxSpeedMultiplier
         const currentSpeed = Math.hypot(newDx, newDy)
 
@@ -299,7 +295,7 @@ function ContactGame() {
           newDy *= ratio
         }
       } else {
-        // Régulation vitesse
+        // Speed regulation
         const currentSpeed = Math.hypot(newDx, newDy)
         const { reduction, increase, minThreshold } =
           ANIMATION_CONFIG.speedRegulation
@@ -313,7 +309,7 @@ function ContactGame() {
         }
       }
 
-      // Rebonds sur les bords
+      // Bounce off edges
       if (newX <= 0 || newX >= containerWidth - size) {
         newDx = -newDx
         newX = Math.max(0, Math.min(containerWidth - size, newX))
@@ -325,7 +321,7 @@ function ContactGame() {
         logoTouchedRef.current[logo.id] = false
       }
 
-      // Collisions entre logos
+      // Logo collisions
       otherLogos.forEach((other) => {
         const dist = Math.hypot(
           newX + size / 2 - other.x - other.size / 2,
@@ -338,7 +334,7 @@ function ContactGame() {
           newDx = -newDx * damping
           newDy = -newDy * damping
 
-          // Séparation
+          // Separation
           const angle = Math.atan2(
             newY + size / 2 - other.y - other.size / 2,
             newX + size / 2 - other.x - other.size / 2
@@ -349,7 +345,7 @@ function ContactGame() {
           newY =
             other.y + other.size / 2 + Math.sin(angle) * pushDistance - size / 2
 
-          // Garder dans les limites
+          // Keep within bounds
           newX = Math.max(0, Math.min(containerWidth - size, newX))
           newY = Math.max(0, Math.min(containerHeight - size, newY))
         }
@@ -379,7 +375,7 @@ function ContactGame() {
     [config.detectionZone]
   )
 
-  // ==================== BOUCLE D'ANIMATION ====================
+  // ==================== ANIMATION LOOP ====================
   useEffect(() => {
     const animate = () => {
       setLogos((prevLogos) => {
@@ -398,11 +394,11 @@ function ContactGame() {
             otherLogos
           )
 
-          // Vérifier zone de drop
+          // Check drop zone
           const isInZone = checkDropZone(updatedLogo, width, height)
           tempLogoInZone[logo.id] = isInZone
 
-          // Déclencher action si dans la zone
+          // Trigger action if in zone
           if (
             isInZone &&
             !hasClickedRef.current[logo.id] &&
@@ -432,10 +428,10 @@ function ContactGame() {
     }
   }, [updateLogoPosition, checkDropZone, openLink])
 
-  // ==================== RENDU ====================
+  // ==================== RENDER ====================
   return (
     <div className={styles.gameContainer} ref={gameContainerRef}>
-      {/* Zone de drop */}
+      {/* Drop zone */}
       <div
         className={`${styles.detectionZone} ${
           logoInZone.linkedin || logoInZone.github ? styles.active : ''
@@ -462,7 +458,7 @@ function ContactGame() {
               width: `${logo.size}px`,
               height: `${logo.size}px`,
             }}
-            aria-label={`Ouvrir le profil ${logo.id}`}
+            aria-label={`Open ${logo.id} profile`}
           >
             {logo.id === 'linkedin' ? (
               <LinkedInIcon size={isMobile ? 20 : 30} />
@@ -473,7 +469,7 @@ function ContactGame() {
         ))}
       </div>
 
-      {/* Aide */}
+      {/* Help text */}
       <div className={styles.interactionHint}>
         <p>
           Approchez votre souris des logos, puis poussez-les dans la zone pour

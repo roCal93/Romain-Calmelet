@@ -8,38 +8,44 @@ import Home from './pages/home/Home.jsx'
 import Portfolio from './pages/portfolio/Portfolio.jsx'
 import Contact from './pages/contact/contact.jsx'
 
-// Remplacez createBrowserRouter par createHashRouter
+// Replace createBrowserRouter with createHashRouter
+// This creates a router that uses hash-based routing (URLs with #)
 const router = createHashRouter([
   {
-    path: '/', // Notez : plus besoin du basename avec HashRouter
-    element: <App />,
+    path: '/', // Note: no need for basename with HashRouter
+    element: <App />, // Main app component that serves as the layout
     children: [
+      // Nested routes that will render inside App component
       {
-        index: true,
-        element: <Home />,
+        index: true, // This route renders when the parent route matches exactly
+        element: <Home />, // Home page component
       },
       {
-        path: 'presentation',
+        path: 'presentation', // Route for the presentation page
         element: <Presentation />,
       },
       {
-        path: 'portfolio',
+        path: 'portfolio', // Route for the portfolio page
         element: <Portfolio />,
       },
       {
-        path: 'contact',
+        path: 'contact', // Route for the contact page
         element: <Contact />,
       },
     ],
   },
   {
-    path: '*',
-    element: <NotFound />,
+    path: '*', // Catch-all route for any unmatched paths
+    element: <NotFound />, // 404 Not Found page component
   },
 ])
 
+// Mount the React application to the DOM element with id 'root'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    {' '}
+    {/* Enables additional checks and warnings in development */}
+    <RouterProvider router={router} />{' '}
+    {/* Provides routing context to the app */}
   </React.StrictMode>
 )

@@ -1,11 +1,21 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import styles from './projectCarousel.module.scss'
 
-const SCROLL_SENSITIVITY = 2
-const SNAP_THRESHOLD = 50
+// ===================================
+// Constants
+// ===================================
+const SCROLL_SENSITIVITY = 2 // Multiplier for scroll/drag sensitivity
+const SNAP_THRESHOLD = 50 // Minimum distance in pixels to trigger snap
+const VELOCITY_THRESHOLD = 0.5 // Minimum velocity to trigger momentum scroll
+const DRAG_THRESHOLD = 5 // Minimum movement to consider as drag
+const TAP_DURATION = 300 // Maximum duration for a tap (vs drag)
+const FOCUS_DELAY = 50 // Delay before focusing element
 
 /**
- * Custom hook pour le focus trap dans le modal
+ * Custom hook for implementing focus trap within modal
+ * Ensures keyboard navigation stays within modal boundaries
+ * @param {boolean} isActive - Whether the focus trap is active
+ * @param {React.RefObject} modalRef - Reference to the modal element
  */
 const useFocusTrap = (isActive, modalRef) => {
   useEffect(() => {
@@ -17,6 +27,7 @@ const useFocusTrap = (isActive, modalRef) => {
       const modal = modalRef.current
       if (!modal) return
 
+      // Find all focusable elements within modal
       const focusableElements = modal.querySelectorAll(
         'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )
@@ -24,6 +35,7 @@ const useFocusTrap = (isActive, modalRef) => {
       const firstElement = focusableElements[0]
       const lastElement = focusableElements[focusableElements.length - 1]
 
+      // Trap focus at boundaries
       if (e.shiftKey && document.activeElement === firstElement) {
         lastElement.focus()
         e.preventDefault()
@@ -39,45 +51,65 @@ const useFocusTrap = (isActive, modalRef) => {
 }
 
 /**
- * ProjectCarousel Component - A horizontal carousel with improved focus management
+ * ProjectCarousel Component
+ * A horizontal scrolling carousel with modal view, keyboard navigation,
+ * and touch/mouse drag support
+ *
+ * @param {Array} cards - Array of React elements to display in modal
+ * @param {Array} cardsTitle - Array of titles for carousel items
+ * @param {boolean} autoFocus - Whether to auto-focus first item on mount
  */
 export default function ProjectCarousel({
   cards = [],
   cardsTitle = [],
-  autoFocus = false, // Désactivé par défaut
+  autoFocus = false, // Disabled by default for better UX
 }) {
-  const containerRef = useRef(null)
-  const cardRefs = useRef([])
-  const modalRef = useRef(null)
-  const lastFocusedElement = useRef(null)
-  const closeButtonRef = useRef(null)
+  // ===================================
+  // Refs
+  // ===================================
+  const containerRef = useRef(null) // Main carousel container
+  const cardRefs = useRef([]) // Array of card element refs
+  const modalRef = useRef(null) // Modal container ref
+  const lastFocusedElement = useRef(null) // Store element to restore focus
+  const closeButtonRef = useRef(null) // Modal close button ref
 
-  const [focusedIndex, setFocusedIndex] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [selectedCard, setSelectedCard] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [showLeftArrow, setShowLeftArrow] = useState(false)
-  const [showRightArrow, setShowRightArrow] = useState(true)
+  // ===================================
+  // State
+  // ===================================
+  const [focusedIndex, setFocusedIndex] = useState(0) // Currently focused card index
+  const [isDragging, setIsDragging] = useState(false) // Drag state
+  const [selectedCard, setSelectedCard] = useState(null) // Selected card for modal
+  const [isModalOpen, setIsModalOpen] = useState(false) // Modal visibility
+  const [showLeftArrow, setShowLeftArrow] = useState(false) // Left arrow visibility
+  const [showRightArrow, setShowRightArrow] = useState(true) // Right arrow visibility
+  const [isKeyboardNavigation, setIsKeyboardNavigation] = useState(false) // Track keyboard usage
 
-  // Nouveau state pour tracker si on navigue au clavier
-  const [isKeyboardNavigation, setIsKeyboardNavigation] = useState(false)
+  // ===================================
+  // Drag/Swipe tracking variables
+  // ===================================
+  const dragStartX = useRef(0) // Initial X position
+  const dragStartY = useRef(0) // Initial Y position for vertical detection
+  const scrollStartX = useRef(0) // Initial scroll position
+  const lastMoveTime = useRef(Date.now()) // Time of last move
+  const lastMoveX = useRef(0) // Last X position
+  const velocity = useRef(0) // Current swipe velocity
+  const dragStartTime = useRef(0) // Drag start timestamp
+  const hasMoved = useRef(false) // Whether user has moved during drag
 
-  // Variables pour le drag
-  const dragStartX = useRef(0)
-  const dragStartY = useRef(0)
-  const scrollStartX = useRef(0)
-  const lastMoveTime = useRef(Date.now())
-  const lastMoveX = useRef(0)
-  const velocity = useRef(0)
-  const dragStartTime = useRef(0)
-  const hasMoved = useRef(false)
-
-  // Use focus trap hook
+  // Apply focus trap hook
   useFocusTrap(isModalOpen, modalRef)
 
-  // Fonction focus améliorée - seulement si navigation clavier
+  // ===================================
+  // Focus Management
+  // ===================================
+
+  /**
+   * Focus card element with enhanced browser compatibility
+   * Only focuses during keyboard navigation to prevent unwanted scrolling
+   */
   const focusCard = useCallback(
     (index, force = false) => {
+      // Only focus if keyboard navigation or forced
       if (!force && !isKeyboardNavigation) return
 
       const targetCard = cardRefs.current[index]
@@ -86,12 +118,17 @@ export default function ProjectCarousel({
       const doFocus = () => {
         if (targetCard.tabIndex === 0) {
           targetCard.focus({ preventScroll: true })
+          // Retry focus if needed (browser compatibility)
           if (document.activeElement !== targetCard) {
-            setTimeout(() => targetCard.focus({ preventScroll: true }), 50)
+            setTimeout(
+              () => targetCard.focus({ preventScroll: true }),
+              FOCUS_DELAY
+            )
           }
         }
       }
 
+      // Use RAF for smooth focus transition
       requestAnimationFrame(() => {
         setTimeout(doFocus, 10)
       })
@@ -100,7 +137,8 @@ export default function ProjectCarousel({
   )
 
   /**
-   * Updates the focused card index
+   * Update focused card index based on scroll position
+   * Determines which card is closest to center of viewport
    */
   const updateFocusedIndex = useCallback(() => {
     const container = containerRef.current
@@ -112,6 +150,7 @@ export default function ProjectCarousel({
     let closestIndex = 0
     let minDistance = Infinity
 
+    // Find card closest to center
     items.forEach((item, index) => {
       const itemCenter = item.offsetLeft + item.offsetWidth / 2
       const distance = Math.abs(containerCenter - itemCenter)
@@ -122,7 +161,7 @@ export default function ProjectCarousel({
       }
     })
 
-    // Mettre à jour les tabIndex
+    // Update tabIndex for accessibility
     cardRefs.current.forEach((card, index) => {
       if (card) {
         card.tabIndex = index === closestIndex ? 0 : -1
@@ -135,7 +174,8 @@ export default function ProjectCarousel({
   }, [cards.length])
 
   /**
-   * Scrolls to a specific card with smooth animation
+   * Smoothly scroll to specific card index
+   * Centers the target card in viewport
    */
   const scrollToCard = useCallback(
     (index) => {
@@ -159,13 +199,19 @@ export default function ProjectCarousel({
     [cards.length]
   )
 
+  // ===================================
+  // Navigation Functions
+  // ===================================
+
   /**
-   * Navigation functions - sans focus automatique
+   * Navigate to previous card
+   * Wraps to last card if at beginning
    */
   const handlePrevious = useCallback(() => {
-    setIsKeyboardNavigation(false) // Reset keyboard navigation flag
+    setIsKeyboardNavigation(false) // Reset keyboard flag for button clicks
     const newIndex = focusedIndex > 0 ? focusedIndex - 1 : cards.length - 1
 
+    // Update tabIndex immediately
     cardRefs.current.forEach((card, index) => {
       if (card) {
         card.tabIndex = index === newIndex ? 0 : -1
@@ -174,13 +220,17 @@ export default function ProjectCarousel({
 
     setFocusedIndex(newIndex)
     scrollToCard(newIndex)
-    // Pas de focus automatique ici
   }, [focusedIndex, cards.length, scrollToCard])
 
+  /**
+   * Navigate to next card
+   * Wraps to first card if at end
+   */
   const handleNext = useCallback(() => {
-    setIsKeyboardNavigation(false) // Reset keyboard navigation flag
+    setIsKeyboardNavigation(false) // Reset keyboard flag for button clicks
     const newIndex = focusedIndex < cards.length - 1 ? focusedIndex + 1 : 0
 
+    // Update tabIndex immediately
     cardRefs.current.forEach((card, index) => {
       if (card) {
         card.tabIndex = index === newIndex ? 0 : -1
@@ -189,16 +239,19 @@ export default function ProjectCarousel({
 
     setFocusedIndex(newIndex)
     scrollToCard(newIndex)
-    // Pas de focus automatique ici
   }, [focusedIndex, cards.length, scrollToCard])
 
+  /**
+   * Open modal with selected card content
+   * Stores focus reference for restoration
+   */
   const openModal = (index) => {
     lastFocusedElement.current = cardRefs.current[index]
     setSelectedCard(index)
     setIsModalOpen(true)
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden' // Prevent body scroll
 
-    // Focus automatique seulement si navigation clavier active
+    // Auto-focus close button only for keyboard users
     if (isKeyboardNavigation) {
       setTimeout(() => {
         closeButtonRef.current?.focus()
@@ -206,18 +259,24 @@ export default function ProjectCarousel({
     }
   }
 
+  // ===================================
+  // Touch/Mouse Interaction Handlers
+  // ===================================
+
   /**
-   * Handle touch/mouse interactions
+   * Handle start of drag/swipe gesture
+   * Initialize tracking variables
    */
   const handlePointerDown = (e) => {
     setIsDragging(true)
-    setIsKeyboardNavigation(false) // Reset keyboard navigation
+    setIsKeyboardNavigation(false) // User is using mouse/touch
+
     dragStartX.current = e.clientX || e.touches?.[0]?.clientX
+    dragStartY.current = e.clientY || e.touches?.[0]?.clientY
     scrollStartX.current = containerRef.current.scrollLeft
     lastMoveTime.current = Date.now()
     lastMoveX.current = dragStartX.current
     velocity.current = 0
-
     dragStartTime.current = Date.now()
     hasMoved.current = false
 
@@ -226,6 +285,10 @@ export default function ProjectCarousel({
     }
   }
 
+  /**
+   * Handle drag/swipe movement
+   * Calculate velocity and update scroll position
+   */
   const handlePointerMove = (e) => {
     if (!isDragging) return
 
@@ -238,6 +301,7 @@ export default function ProjectCarousel({
 
     hasMoved.current = true
 
+    // Calculate velocity for momentum
     const currentTime = Date.now()
     const timeDelta = currentTime - lastMoveTime.current
     if (timeDelta > 0) {
@@ -247,9 +311,14 @@ export default function ProjectCarousel({
     lastMoveTime.current = currentTime
     lastMoveX.current = currentX
 
+    // Update scroll position
     containerRef.current.scrollLeft = scrollStartX.current + deltaX
   }
 
+  /**
+   * Handle end of drag/swipe gesture
+   * Determine final card position based on velocity and distance
+   */
   const handlePointerUp = (e) => {
     if (!isDragging) return
 
@@ -258,15 +327,21 @@ export default function ProjectCarousel({
     const endX = e.clientX || e.changedTouches?.[0]?.clientX
     const deltaX = dragStartX.current - endX
 
-    if (Math.abs(deltaX) < 5) return
+    // Ignore tiny movements
+    if (Math.abs(deltaX) < DRAG_THRESHOLD) return
 
-    if (Math.abs(deltaX) > SNAP_THRESHOLD || Math.abs(velocity.current) > 0.5) {
-      if (deltaX > 0 || velocity.current < -0.5) {
+    // Check if swipe was significant enough
+    if (
+      Math.abs(deltaX) > SNAP_THRESHOLD ||
+      Math.abs(velocity.current) > VELOCITY_THRESHOLD
+    ) {
+      if (deltaX > 0 || velocity.current < -VELOCITY_THRESHOLD) {
         handleNext()
-      } else if (deltaX < 0 || velocity.current > 0.5) {
+      } else if (deltaX < 0 || velocity.current > VELOCITY_THRESHOLD) {
         handlePrevious()
       }
     } else {
+      // Snap to closest card
       setTimeout(() => {
         updateFocusedIndex()
         scrollToCard(focusedIndex)
@@ -274,6 +349,10 @@ export default function ProjectCarousel({
     }
   }
 
+  /**
+   * Handle card click/tap
+   * Distinguish between tap and drag
+   */
   const handleCardClick = (index, e) => {
     const currentTime = Date.now()
     const timeDelta = currentTime - dragStartTime.current
@@ -282,8 +361,12 @@ export default function ProjectCarousel({
       dragStartX.current - (e.clientX || e.changedTouches?.[0]?.clientX || 0)
     )
 
+    // Determine if this was a real tap (not a drag)
     const isRealTap =
-      !hasMoved.current && deltaX < 10 && timeDelta < 300 && !isDragging
+      !hasMoved.current &&
+      deltaX < 10 &&
+      timeDelta < TAP_DURATION &&
+      !isDragging
 
     if (!isRealTap) return
 
@@ -291,65 +374,90 @@ export default function ProjectCarousel({
   }
 
   /**
-   * Handle card keyboard interaction - avec focus approprié
+   * Handle keyboard navigation on cards
+   * Supports arrow keys, Home, End, Enter, and Space
    */
   const handleCardKeyDown = (index, e) => {
     e.stopPropagation()
-    setIsKeyboardNavigation(true) // Marquer comme navigation clavier
+    setIsKeyboardNavigation(true) // Mark as keyboard navigation
 
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      openModal(index)
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      handlePrevious()
-      // Focus seulement pour navigation clavier
-      setTimeout(
-        () =>
-          focusCard(
-            focusedIndex > 0 ? focusedIndex - 1 : cards.length - 1,
-            true
-          ),
-        150
-      )
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      handleNext()
-      // Focus seulement pour navigation clavier
-      setTimeout(
-        () =>
-          focusCard(
-            focusedIndex < cards.length - 1 ? focusedIndex + 1 : 0,
-            true
-          ),
-        150
-      )
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      cardRefs.current.forEach((card, i) => {
-        if (card) card.tabIndex = i === 0 ? 0 : -1
-      })
-      setFocusedIndex(0)
-      scrollToCard(0)
-      setTimeout(() => focusCard(0, true), 150)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      const lastIndex = cards.length - 1
-      cardRefs.current.forEach((card, i) => {
-        if (card) card.tabIndex = i === lastIndex ? 0 : -1
-      })
-      setFocusedIndex(lastIndex)
-      scrollToCard(lastIndex)
-      setTimeout(() => focusCard(lastIndex, true), 150)
+    switch (e.key) {
+      case 'Enter':
+      case ' ': {
+        e.preventDefault()
+        openModal(index)
+        break
+      }
+
+      case 'ArrowLeft': {
+        e.preventDefault()
+        handlePrevious()
+        // Focus previous card after navigation
+        setTimeout(
+          () =>
+            focusCard(
+              focusedIndex > 0 ? focusedIndex - 1 : cards.length - 1,
+              true
+            ),
+          150
+        )
+        break
+      }
+
+      case 'ArrowRight': {
+        e.preventDefault()
+        handleNext()
+        // Focus next card after navigation
+        setTimeout(
+          () =>
+            focusCard(
+              focusedIndex < cards.length - 1 ? focusedIndex + 1 : 0,
+              true
+            ),
+          150
+        )
+        break
+      }
+
+      case 'Home': {
+        e.preventDefault()
+        // Navigate to first card
+        cardRefs.current.forEach((card, i) => {
+          if (card) card.tabIndex = i === 0 ? 0 : -1
+        })
+        setFocusedIndex(0)
+        scrollToCard(0)
+        setTimeout(() => focusCard(0, true), 150)
+        break
+      }
+
+      case 'End': {
+        e.preventDefault()
+        // Navigate to last card
+        const lastIndex = cards.length - 1
+        cardRefs.current.forEach((card, i) => {
+          if (card) card.tabIndex = i === lastIndex ? 0 : -1
+        })
+        setFocusedIndex(lastIndex)
+        scrollToCard(lastIndex)
+        setTimeout(() => focusCard(lastIndex, true), 150)
+        break
+      }
     }
   }
 
+  /**
+   * Close modal and restore focus to triggering element
+   */
   const closeModal = () => {
     setIsModalOpen(false)
+
+    // Delay cleanup to allow animation
     setTimeout(() => {
       setSelectedCard(null)
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset' // Restore body scroll
 
+      // Restore focus to last focused element
       if (
         lastFocusedElement.current &&
         lastFocusedElement.current.tabIndex === 0
@@ -359,21 +467,33 @@ export default function ProjectCarousel({
     }, 300)
   }
 
+  /**
+   * Handle modal keyboard shortcuts
+   * Currently supports Escape key
+   */
   const handleModalKeyDown = (e) => {
     if (e.key === 'Escape') {
       closeModal()
     }
   }
 
-  // Gestion du focus sur les interactions directes avec les éléments
+  /**
+   * Handle direct focus on card elements
+   * Updates state when user tabs into carousel
+   */
   const handleCardFocus = (index) => {
     setIsKeyboardNavigation(true)
     setFocusedIndex(index)
     scrollToCard(index)
   }
 
+  // ===================================
+  // Effects
+  // ===================================
+
   /**
    * Scroll event handler
+   * Updates focused index with debouncing
    */
   useEffect(() => {
     const container = containerRef.current
@@ -395,13 +515,15 @@ export default function ProjectCarousel({
   }, [updateFocusedIndex, isDragging])
 
   /**
-   * Initial focus - seulement si autoFocus est activé
+   * Initial focus setup
+   * Only runs if autoFocus prop is true
    */
   useEffect(() => {
     if (autoFocus && cards.length > 0) {
       const initializeFocus = () => {
         const firstCard = cardRefs.current[0]
         if (firstCard) {
+          // Set initial tabIndex values
           cardRefs.current.forEach((card, index) => {
             if (card) {
               card.tabIndex = index === 0 ? 0 : -1
@@ -411,6 +533,7 @@ export default function ProjectCarousel({
           setIsKeyboardNavigation(true)
           focusCard(0, true)
         } else {
+          // Retry if elements not ready
           setTimeout(initializeFocus, 50)
         }
       }
@@ -421,6 +544,7 @@ export default function ProjectCarousel({
 
   /**
    * Update tabindex when focused index changes
+   * Ensures only one card is keyboard accessible at a time
    */
   useEffect(() => {
     cardRefs.current.forEach((card, index) => {
@@ -431,12 +555,16 @@ export default function ProjectCarousel({
   }, [focusedIndex])
 
   /**
-   * Touch event handlers
+   * Touch event handlers for mobile devices
+   * Handles swipe gestures with vertical scroll detection
    */
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
+    /**
+     * Initialize touch tracking
+     */
     const handleTouchStart = (e) => {
       setIsDragging(true)
       setIsKeyboardNavigation(false)
@@ -446,34 +574,36 @@ export default function ProjectCarousel({
       lastMoveTime.current = Date.now()
       lastMoveX.current = dragStartX.current
       velocity.current = 0
-
       dragStartTime.current = Date.now()
       hasMoved.current = false
     }
 
-    // Modifiez la fonction handleTouchMove dans le useEffect des événements touch :
-
+    /**
+     * Handle touch movement
+     * Differentiates between horizontal swipe and vertical scroll
+     */
     const handleTouchMove = (e) => {
       if (!isDragging) return
 
       const currentX = e.touches?.[0]?.clientX
       const currentY = e.touches?.[0]?.clientY
 
-      // Calculer le déplacement depuis le début
+      // Calculate movement deltas
       const deltaX = dragStartX.current - currentX
-      const deltaY = dragStartY.current - currentY // Vous devrez ajouter dragStartY
+      const deltaY = dragStartY.current - currentY
 
-      // Si le mouvement est plus vertical qu'horizontal, laisser le scroll natif
+      // If movement is more vertical than horizontal, allow native scroll
       if (Math.abs(deltaY) > Math.abs(deltaX)) {
         setIsDragging(false)
         return
       }
 
-      // Sinon, empêcher le scroll vertical et gérer le swipe horizontal
+      // Prevent vertical scroll and handle horizontal swipe
       e.preventDefault()
 
       hasMoved.current = true
 
+      // Calculate velocity for momentum
       const currentTime = Date.now()
       const timeDelta = currentTime - lastMoveTime.current
       if (timeDelta > 0) {
@@ -483,9 +613,14 @@ export default function ProjectCarousel({
       lastMoveTime.current = currentTime
       lastMoveX.current = currentX
 
+      // Update scroll position
       container.scrollLeft = scrollStartX.current + deltaX * SCROLL_SENSITIVITY
     }
 
+    /**
+     * Handle touch end
+     * Determine final position based on gesture
+     */
     const handleTouchEnd = (e) => {
       if (!isDragging) return
 
@@ -494,18 +629,21 @@ export default function ProjectCarousel({
       const endX = e.changedTouches?.[0]?.clientX
       const deltaX = dragStartX.current - endX
 
-      if (Math.abs(deltaX) < 5) return
+      // Ignore tiny movements
+      if (Math.abs(deltaX) < DRAG_THRESHOLD) return
 
+      // Check if swipe was significant
       if (
         Math.abs(deltaX) > SNAP_THRESHOLD ||
-        Math.abs(velocity.current) > 0.5
+        Math.abs(velocity.current) > VELOCITY_THRESHOLD
       ) {
-        if (deltaX > 0 || velocity.current < -0.5) {
+        if (deltaX > 0 || velocity.current < -VELOCITY_THRESHOLD) {
           handleNext()
-        } else if (deltaX < 0 || velocity.current > 0.5) {
+        } else if (deltaX < 0 || velocity.current > VELOCITY_THRESHOLD) {
           handlePrevious()
         }
       } else {
+        // Snap to closest card
         setTimeout(() => {
           updateFocusedIndex()
           scrollToCard(focusedIndex)
@@ -513,12 +651,14 @@ export default function ProjectCarousel({
       }
     }
 
+    // Add touch event listeners
     container.addEventListener('touchstart', handleTouchStart, {
       passive: true,
     })
     container.addEventListener('touchmove', handleTouchMove, { passive: false })
     container.addEventListener('touchend', handleTouchEnd, { passive: true })
 
+    // Cleanup
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
       container.removeEventListener('touchmove', handleTouchMove)
@@ -535,6 +675,7 @@ export default function ProjectCarousel({
 
   /**
    * Center first and last items on mount
+   * Adds margin to ensure proper centering
    */
   useEffect(() => {
     const container = containerRef.current
@@ -546,25 +687,33 @@ export default function ProjectCarousel({
       const containerWidth = container.clientWidth
       const margin = (containerWidth - itemWidth) / 2
 
+      // Add margins to first and last items
       items[0].style.marginLeft = `${margin}px`
       items[items.length - 1].style.marginRight = `${margin}px`
     }
   }, [cards])
 
+  // ===================================
+  // Render
+  // ===================================
+
   return (
     <>
+      {/* Main carousel wrapper */}
       <div className={styles.carouselWrapper}>
+        {/* Scrollable carousel container */}
         <div
           ref={containerRef}
           className={styles.carouselContainer}
           role="region"
-          aria-label="Carousel de projets"
+          aria-label="Project carousel"
           aria-roledescription="carousel"
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerUp}
           onMouseLeave={handlePointerUp}
         >
+          {/* Render carousel items */}
           {cardsTitle.map((title, index) => (
             <div
               key={index}
@@ -572,7 +721,7 @@ export default function ProjectCarousel({
               className={styles.carouselItem}
               role="button"
               tabIndex={index === focusedIndex ? 0 : -1}
-              aria-label={`Projet ${index + 1}: ${title}`}
+              aria-label={`Project ${index + 1}: ${title}`}
               aria-selected={index === focusedIndex}
               onClick={(e) => handleCardClick(index, e)}
               onKeyDown={(e) => handleCardKeyDown(index, e)}
@@ -583,14 +732,16 @@ export default function ProjectCarousel({
           ))}
         </div>
 
+        {/* Navigation controls */}
         <div className={styles.navigationWrapper}>
           <div className={styles.navigationBar}>
+            {/* Previous button */}
             <button
               className={`${styles.arrowButton} ${styles.arrowLeft} ${
                 !showLeftArrow ? styles.hidden : ''
               }`}
               onClick={handlePrevious}
-              aria-label="Projet précédent"
+              aria-label="Previous project"
               tabIndex={showLeftArrow ? 0 : -1}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -604,15 +755,14 @@ export default function ProjectCarousel({
               </svg>
             </button>
 
+            {/* Pagination dots */}
             <div className={styles.carouselIndicator} role="tablist">
               {cards.map((_, index) => (
                 <button
                   key={index}
                   role="tab"
                   aria-selected={index === focusedIndex}
-                  aria-label={`Aller au projet ${index + 1} sur ${
-                    cards.length
-                  }`}
+                  aria-label={`Go to project ${index + 1} of ${cards.length}`}
                   className={`${styles.dot} ${
                     index === focusedIndex ? styles.active : ''
                   }`}
@@ -631,12 +781,13 @@ export default function ProjectCarousel({
               ))}
             </div>
 
+            {/* Next button */}
             <button
               className={`${styles.arrowButton} ${styles.arrowRight} ${
                 !showRightArrow ? styles.hidden : ''
               }`}
               onClick={handleNext}
-              aria-label="Projet suivant"
+              aria-label="Next project"
               tabIndex={showRightArrow ? 0 : -1}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -652,11 +803,13 @@ export default function ProjectCarousel({
           </div>
         </div>
 
-        <div aria-live="polite" aria-atomic="true" className={styles.srOnly}>
-          Projet {focusedIndex + 1} sur {cards.length}
+        {/* Screen reader announcements */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          Project {focusedIndex + 1} of {cards.length}
         </div>
       </div>
 
+      {/* Modal for full project view */}
       {isModalOpen && (
         <div
           ref={modalRef}
@@ -665,20 +818,22 @@ export default function ProjectCarousel({
           onKeyDown={handleModalKeyDown}
           role="dialog"
           aria-modal="true"
-          aria-label={`Détails du projet ${selectedCard + 1}`}
+          aria-label={`Project details ${selectedCard + 1}`}
         >
           <div
             className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking content
           >
+            {/* Modal close button */}
             <button
               ref={closeButtonRef}
               className={styles.closeButton}
               onClick={closeModal}
-              aria-label="Fermer la fenêtre modale"
+              aria-label="Close modal window"
             >
               ×
             </button>
+            {/* Modal content */}
             <div className={styles.modalCard}>{cards[selectedCard]}</div>
           </div>
         </div>

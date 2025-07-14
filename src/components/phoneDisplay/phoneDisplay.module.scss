@@ -1,17 +1,7 @@
-// Overlay pour fermer la modal en cliquant à l'extérieur (non utilisé maintenant)
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1999;
-  backdrop-filter: blur(2px);
-  cursor: pointer;
-}
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
 
-// Container principal de la modal (sert aussi d'overlay)
+// Overlay functionality (also serves as modal backdrop)
 .phoneDisplay {
   position: fixed;
   top: 0;
@@ -29,14 +19,14 @@
   cursor: pointer;
 }
 
-// Modal elle-même
+// Modal container
 .phoneModal {
   position: relative;
   background: linear-gradient(
     145deg,
     #ffffff 0%,
     #f8f9fa 50%,
-    rgba(231, 77, 60, 0.1) 100%
+    rgba($primary, 0.1) 100%
   );
   border-radius: 16px;
   padding: 2rem;
@@ -51,7 +41,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-// Contenu de la modal
+// Modal content wrapper
 .phoneContent {
   h3 {
     margin: 0 0 1.5rem 0;
@@ -62,7 +52,7 @@
   }
 }
 
-// Liens de contact
+// Contact links styling
 .contactLink {
   display: inline-block;
   text-decoration: none;
@@ -74,20 +64,22 @@
   background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(231, 77, 60, 0.2);
+  border: 1px solid rgba($primary, 0.2);
   width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
+  position: relative;
 
   &:hover {
-    background: rgba(231, 77, 60, 0.1);
+    background: rgba($primary, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(231, 77, 60, 0.2);
-    border-color: rgba(231, 77, 60, 0.4);
+    box-shadow: 0 4px 12px rgba($primary, 0.2);
+    border-color: rgba($primary, 0.4);
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(231, 77, 60, 0.3);
+    box-shadow: 0 0 0 $focus-color;
   }
 
   .icon {
@@ -103,9 +95,13 @@
   }
 }
 
-// Bouton de fermeture
+// Close button styling
 .closeButton {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  background: linear-gradient(
+    135deg,
+    $primary 0%,
+    color.adjust($primary, $lightness: -10%) 100%
+  );
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -115,17 +111,21 @@
   font-weight: 600;
   transition: all 0.3s ease;
   margin-top: 1.5rem;
-  box-shadow: 0 4px 12px rgba(231, 77, 60, 0.3);
+  box-shadow: 0 4px 12px rgba($primary, 0.3);
 
   &:hover {
-    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    background: linear-gradient(
+      135deg,
+      color.adjust($primary, $lightness: -10%) 0%,
+      color.adjust($primary, $lightness: -20%) 100%
+    );
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(231, 77, 60, 0.4);
+    box-shadow: 0 6px 16px rgba($primary, 0.4);
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(231, 77, 60, 0.5);
+    box-shadow: 0 0 0 $focus-color;
   }
 
   &:active {
@@ -133,11 +133,38 @@
   }
 }
 
+// Success message styling
 .copiedMessage {
   color: #4caf50;
   font-size: 0.8em;
   margin-left: 8px;
   font-weight: bold;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+// Error message styling
+.errorMessage {
+  color: $primary;
+  font-size: 0.9em;
+  margin: 0.5rem 0;
+  font-weight: bold;
+  display: block;
+}
+
+// Screen reader only content
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 // Animations
@@ -161,7 +188,7 @@
   }
 }
 
-// Responsive
+// Responsive design
 @media (max-width: 768px) {
   .phoneModal {
     padding: 1.5rem;
@@ -174,9 +201,16 @@
     font-size: 1rem;
     padding: 0.875rem 1rem;
   }
+
+  .copiedMessage {
+    position: static;
+    display: block;
+    margin-top: 0.5rem;
+    transform: none;
+  }
 }
 
-// Animation de sortie
+// Exit animations
 .phoneDisplay.exiting {
   animation: fadeOut 0.2s ease-in;
 }

@@ -1,4 +1,4 @@
-/* Ajout du box-sizing global - TRÈS IMPORTANT */
+/* Global box-sizing addition - VERY IMPORTANT */
 *,
 *::before,
 *::after {
@@ -30,7 +30,7 @@ body {
   overflow: hidden;
 }
 
-/* Structure de l'application */
+/* Application structure */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -48,11 +48,11 @@ body {
   position: relative;
   scroll-behavior: smooth;
 
-  /* Transition pour l'overflow */
-  transition: none; /* Pas de transition sur overflow pour éviter les effets indésirables */
+  /* Transition for overflow */
+  transition: none; /* No transition on overflow to avoid unwanted effects */
 }
 
-/* Container de page avec scroll conditionnel */
+/* Page container with conditional scroll */
 .page-container {
   min-height: 100%;
   width: 100%;
@@ -61,7 +61,7 @@ body {
   position: relative;
 }
 
-/* Optimisations mobiles */
+/* Mobile optimizations */
 @media (max-width: 768px) {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -77,14 +77,14 @@ body {
   }
 }
 
-/* Gestion spécifique pour desktop */
+/* Specific handling for desktop */
 @media (min-width: 769px) {
   .app-container {
     height: 100vh;
     min-height: 100vh;
   }
 
-  /* Personnalisation simple de la scrollbar */
+  /* Simple scrollbar customization */
   .main-content::-webkit-scrollbar {
     width: 8px;
   }
@@ -99,7 +99,7 @@ body {
   }
 }
 
-/* Fix pour iOS */
+/* Fix for iOS */
 @supports (-webkit-touch-callout: none) {
   .app-container {
     height: -webkit-fill-available;
@@ -107,7 +107,7 @@ body {
   }
 }
 
-/* Animations de transition */
+/* Transition animations */
 .page-enter-down {
   opacity: 0.5;
   transform: translateY(15%);
@@ -134,7 +134,7 @@ body {
   }
 }
 
-/* Classes utilitaires */
+/* Utility classes */
 .sr-only {
   border: 0 !important;
   clip: rect(1px, 1px, 1px, 1px) !important;
@@ -149,7 +149,7 @@ body {
   white-space: nowrap !important;
 }
 
-/* Styles de base pour les éléments */
+/* Base styles for elements */
 h1,
 h2,
 h3,
@@ -175,7 +175,7 @@ table {
   word-wrap: break-word;
 }
 
-/* Gestion du scroll pour toutes les tailles d'écran */
+/* Scroll handling for all screen sizes */
 .main-content {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;

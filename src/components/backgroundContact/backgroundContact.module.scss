@@ -1,3 +1,6 @@
+// Import variables
+@use '../../styles/variables.module.scss' as *;
+
 // Mixins
 @mixin gpu-acceleration {
   transform: translate3d(0, 0, 0);
@@ -5,7 +8,7 @@
   -webkit-backface-visibility: hidden;
 }
 
-// Container principal
+// Main container - Fixed fullscreen background
 .container {
   position: fixed;
   inset: 0;
@@ -14,61 +17,55 @@
   overflow: hidden;
 }
 
-// SVG des vagues
+// SVG container for wave animations
 .waveSvg {
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
   @include gpu-acceleration;
 }
 
-// ✅ MODIFIÉ : Chemin des vagues optimisé
+// Individual wave path styles
 .wavePath {
-  // Supprimer will-change du CSS - géré par JavaScript
+  // will-change managed by JavaScript for performance
   will-change: auto;
   @include gpu-acceleration;
 
-  // ✅ NOUVEAU : Optimisation sélective
-  &:nth-child(-n + 2) {
-    // Seulement les 2 premières vagues peuvent avoir will-change
-    // (géré par JavaScript)
-  }
-
-  // Optimisation pour haute résolution
+  // Additional optimization for high-density displays
   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     transform: translate3d(0, 0, 0);
   }
 }
 
-// Fond statique pour les animations réduites
+// Static background fallback for reduced motion preference
 .staticBackground {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
     #ffffff 0%,
-    rgba(231, 76, 60, 0.05) 50%,
+    rgba($primary, 0.05) 50%,
     #f8f8f8 100%
   );
   opacity: 0.5;
   @include gpu-acceleration;
 }
 
-// Optimisations pour les petits écrans
+// Mobile optimizations
 @media (max-width: 768px) {
   .container {
     @include gpu-acceleration;
   }
 
-  // ✅ NOUVEAU : Réduire encore plus sur mobile
+  // Force auto will-change on mobile for better performance
   .wavePath {
     will-change: auto !important;
   }
 }
 
-// Préférence pour les animations réduites
+// Accessibility - Reduced motion preference
 @media (prefers-reduced-motion: reduce) {
   .wavePath {
     will-change: auto !important;

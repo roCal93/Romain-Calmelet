@@ -1,3 +1,10 @@
+// Import design system variables
+@use '../../styles/variables.module.scss' as *;
+
+// Import Sass color module for modern color functions
+@use 'sass:color';
+
+// Main fullscreen game container
 .fullGame {
   position: absolute;
   top: 0;
@@ -8,83 +15,103 @@
   background: #f8f8f8;
 }
 
+// Accessible back navigation button
 .backButton {
   position: absolute;
   top: 20px;
   left: 20px;
-  background: #e74d3c98;
+  background: $primary;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
   z-index: 1000;
-  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-size: clamp(0.9rem, 2vw, 1rem); // Responsive font size
   font-weight: 500;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
 
+  // Add shadow for better visibility and depth
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  // Hover state with enhanced visual feedback
   &:hover {
-    background: #e74c3c;
-    transform: translateX(-2px);
+    background: color.adjust(
+      $primary,
+      $lightness: -5%
+    ); // Using modern Sass color function
+    transform: translateX(-2px); // Subtle movement to the left
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3); // Enhanced shadow on hover
   }
 
+  // Active/pressed state
   &:active {
-    transform: translateX(0);
+    transform: translateX(0); // Reset position when clicked
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); // Reduced shadow for pressed effect
   }
 
+  // Focus state for keyboard navigation (without visible outline)
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px color.adjust($primary, $alpha: -0.7); // Using color.adjust for transparency
   }
 
+  // Visible focus for keyboard users (enhanced accessibility)
   &:focus-visible {
-    outline: 3px solid #e74c3c;
+    outline: $focus-color; // Using focus color from variables
     outline-offset: 2px;
   }
 }
+
+// Full-screen orientation/screen size warning overlay
 .orientationMessage {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.95);
+  background-color: rgba(0, 0, 0, 0.95); // Dark semi-transparent overlay
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 
+  // Content container for the warning message
   .messageContent {
     text-align: center;
     color: white;
     padding: 2rem;
 
+    // Animated rotating phone icon
     .rotateIcon {
       font-size: 4rem;
       display: block;
       margin-bottom: 1rem;
-      animation: rotate 2s ease-in-out infinite;
+      animation: rotate 2s ease-in-out infinite; // Continuous rotation animation
     }
 
+    // Warning title
     h2 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
     }
 
+    // Warning description
     p {
       font-size: 1rem;
-      opacity: 0.8;
+      opacity: 0.8; // Slightly transparent for visual hierarchy
     }
   }
 }
 
+// Rotation animation for the phone icon
 @keyframes rotate {
   0%,
   100% {
-    transform: rotate(0deg);
+    transform: rotate(0deg); // Starting and ending position
   }
   50% {
-    transform: rotate(90deg);
+    transform: rotate(90deg); // Mid-point rotation (90 degrees)
   }
 }

@@ -1,54 +1,60 @@
-// notFound.module.scss
+// Import variables using @use with namespace
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
 
-// Container de page
+// Page container - Controls overall page visibility and transitions
 .pageContainer {
   width: 100%;
-  height: auto; // Explicitement auto
-  overflow: visible; // Force le scroll visible
+  height: auto; // Explicitly set to auto for proper content flow
+  overflow: visible; // Ensures content can scroll properly
   opacity: 0;
   transition: opacity 0.6s ease-out;
 
+  // Visible state triggered by JavaScript
   &.visible {
     opacity: 1;
   }
 }
 
-// Container principal
+// Main container - Centers content and provides full viewport coverage
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: auto; // Changé de min-height à height auto
-  min-height: 100vh; // min-height sans calc
+  height: auto; // Changed from min-height to auto for better responsiveness
+  min-height: 100vh; // Ensures full viewport height minimum
   padding: 2rem 0;
   position: relative;
-  overflow: visible; // Assure que le contenu peut déborder
+  overflow: visible; // Allows content to extend beyond container if needed
   animation: fadeInUp 0.8s ease-out forwards;
 
+  // Mobile responsive padding
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
 }
 
-// Contenu principal
+// Main 404 content wrapper
 .notFoundContent {
   display: flex;
-  justify-content: center; // Changé de space-between
+  justify-content: center; // Changed from space-between for better centering
   align-items: center;
-  padding: 2rem 5rem; // Ajout de padding vertical
+  padding: 2rem 5rem; // Added vertical padding for spacing
   width: 100%;
   max-width: 1200px;
   gap: 4rem;
-  margin: auto; // Centre le contenu
+  margin: auto; // Centers content horizontally
   animation: slideInFromTop 0.8s ease-out 0.2s both;
 
+  // Tablet responsive adjustments
   @media (max-width: 1024px) {
     padding: 2rem 3rem;
     gap: 3rem;
   }
 
+  // Mobile responsive - stack vertically
   @media (max-width: 768px) {
     flex-direction: column;
     padding: 2rem 1.5rem;
@@ -56,13 +62,14 @@
   }
 }
 
-// Section erreur
+// Error message section container
 .errorSection {
-  flex: 0 1 auto; // Changé de flex: 1
+  flex: 0 1 auto; // Changed from flex: 1 for better content sizing
   display: flex;
   flex-direction: column;
   gap: 2rem;
 
+  // Mobile centering
   @media (max-width: 768px) {
     width: 100%;
     text-align: center;
@@ -70,34 +77,41 @@
   }
 }
 
-// Code 404
+// Large 404 error code styling
 .errorCode {
   margin: 0;
   font-weight: 700;
-  font-size: clamp(4rem, 12vw, 8rem); // Réduit la taille max
+  font-size: clamp(4rem, 12vw, 8rem); // Responsive font sizing with limits
   line-height: 1;
   color: #333;
-  background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+  // Gradient text effect using primary color with transparency
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary, $alpha: -0.5) 0%,
+    $primary 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: pulse 2s ease-in-out infinite;
 }
 
+// Error message subheading
 .errorMessage {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(1.5rem, 3vw, 2rem); // Réduit
+  font-size: clamp(1.5rem, 3vw, 2rem); // Responsive sizing
   color: #333;
 }
 
-// Contenu textuel
+// Content section with descriptions
 .contentSection {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
+// Paragraph container
 .paragraphs {
   max-width: 500px;
 
@@ -113,62 +127,73 @@
   }
 }
 
-// Lien retour
+// Home navigation link button
 .homeLink {
   gap: 0.75rem;
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+  // Gradient background using primary color
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary, $alpha: -0.5) 0%,
+    $primary 100%
+  );
   color: white;
   text-decoration: none;
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.3s ease;
+  // Shadow using primary color for consistency
+  box-shadow: 0 4px 15px color.adjust($primary, $alpha: -0.8);
 
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
-
+  // Mobile centering
   @media (max-width: 768px) {
     align-self: center;
   }
 
+  // Hover state with elevation effect
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 6px 20px color.adjust($primary, $alpha: -0.7);
 
     .linkArrow {
       transform: translateX(5px);
     }
   }
 
+  // Active/pressed state
   &:active {
     transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 3px 10px color.adjust($primary, $alpha: -0.7);
   }
 }
 
+// Link text styling
 .linkText {
   font-size: clamp(0.95rem, 2vw, 1.05rem);
 }
 
+// Arrow icon with transition
 .linkArrow {
   font-size: 1.2em;
   transition: transform 0.3s ease;
 }
 
-// Engrenages décoratifs
+// Container for decorative gear animations
 .decorativeGears {
-  flex: 0 1 auto; // Changé de flex: 1
+  flex: 0 1 auto; // Changed from flex: 1 for better sizing
   position: relative;
   width: 100%;
   max-width: 400px;
   min-height: 350px;
 
+  // Mobile size reduction
   @media (max-width: 768px) {
     min-height: 250px;
     max-width: 300px;
   }
 }
 
-// Style des engrenages - Tailles réduites
+// Gear mixin - Creates rotating gear shapes with customizable size and color
 @mixin gear($size, $color) {
   width: $size;
   height: $size;
@@ -176,6 +201,7 @@
   border-radius: 50%;
   position: absolute;
 
+  // Cross pattern for gear teeth
   &::before {
     content: '';
     position: absolute;
@@ -186,6 +212,7 @@
     transform: rotate(45deg);
   }
 
+  // Center dot of gear
   &::after {
     content: '';
     position: absolute;
@@ -199,8 +226,9 @@
   }
 }
 
+// First gear - top left position
 .gear1 {
-  @include gear(140px, rgba(231, 76, 60, 0.3));
+  @include gear(140px, color.adjust($primary, $alpha: -0.7));
   top: 10%;
   left: 5%;
   animation: rotate 20s linear infinite;
@@ -211,8 +239,9 @@
   }
 }
 
+// Second gear - top right position, rotates opposite direction
 .gear2 {
-  @include gear(180px, rgba(231, 76, 60, 0.2));
+  @include gear(180px, color.adjust($primary, $alpha: -0.8));
   top: 30%;
   right: 10%;
   animation: rotate 15s linear infinite reverse;
@@ -223,8 +252,9 @@
   }
 }
 
+// Third gear - bottom left position
 .gear3 {
-  @include gear(100px, rgba(231, 76, 60, 0.4));
+  @include gear(100px, color.adjust($primary, $alpha: -0.6));
   bottom: 15%;
   left: 25%;
   animation: rotate 25s linear infinite;
@@ -235,7 +265,8 @@
   }
 }
 
-// Le reste des animations reste identique...
+// Animation keyframes
+// Fade in with upward movement
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -247,6 +278,7 @@
   }
 }
 
+// Slide in from top animation
 @keyframes slideInFromTop {
   from {
     opacity: 0;
@@ -258,6 +290,7 @@
   }
 }
 
+// Pulse animation for 404 text
 @keyframes pulse {
   0%,
   100% {
@@ -270,6 +303,7 @@
   }
 }
 
+// Continuous rotation for gears
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -279,14 +313,14 @@
   }
 }
 
-// Accessibilité
+// Accessibility - Focus visible state for keyboard navigation
 .homeLink:focus-visible {
-  outline: 3px solid #e74c3c;
+  outline: $focus-color;
   outline-offset: 4px;
   border-radius: 6px;
 }
 
-// Préférences de mouvement réduit
+// Reduced motion preferences - Respects user's motion settings
 @media (prefers-reduced-motion: reduce) {
   .pageContainer,
   .container,

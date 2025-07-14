@@ -1,3 +1,6 @@
+// Import variables using @use
+@use '../../styles/variables.module' as *;
+
 .logo {
   display: flex;
   width: 8rem;
@@ -7,12 +10,16 @@
   transition: transform 0.2s ease;
   overflow: hidden;
   cursor: pointer;
+  position: relative;
+
+  // Visible focus indicator for keyboard navigation
   &:focus-visible {
-    outline: 2px solid #e74c3c;
+    outline: 2px solid $primary;
     outline-offset: 1px;
     border-radius: 4px;
   }
 
+  // Subtle scale effect on hover
   &:hover {
     transform: scale(1.02);
   }
@@ -29,11 +36,13 @@
       font-weight: 400;
       font-family: 'Raleway', sans-serif;
       font-optical-sizing: auto;
-      color: #e74d3cc1;
+      color: rgba($primary, 0.76); // Using primary variable with opacity
       position: absolute;
       top: 50%;
       left: 30%;
-      transform: translate(-50%, -50%);
+      // Use transform3d for GPU acceleration
+      transform: translate3d(-50%, -50%, 0);
+      will-change: transform, opacity; // Performance optimization
       animation: rotateC 20s 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     }
 
@@ -41,71 +50,102 @@
       font-size: 40px;
       font-family: 'Raleway', sans-serif;
       font-weight: 500;
-      color: #e74d3cc1;
+      color: rgba($primary, 0.76); // Using primary variable with opacity
       position: absolute;
       top: 50%;
       left: 32%;
-      transform: translate(-50%, -50%);
+      // Use transform3d for GPU acceleration
+      transform: translate3d(-50%, -50%, 0);
+      will-change: transform; // Performance optimization
       animation: translateAndScale 20s 10s linear infinite;
     }
   }
 }
 
-// Animation pour la rotation du C
+// Rotation animation for the "C" letter with infinite loop
 @keyframes rotateC {
   0% {
-    transform: translate(-50%, -50%) rotate(0deg);
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
     opacity: 0.2;
   }
   8% {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-    opacity: 1; // Maintenir l'opacité à 1
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    opacity: 1; // Maintain opacity at 1
   }
 }
 
+// Translation and scale animation for the "R" letter with infinite loop
 @keyframes translateAndScale {
   0% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
   3% {
-    transform: translate(25%, -50%) scale(0.75);
+    transform: translate3d(25%, -50%, 0) scale(0.75);
   }
   6% {
-    transform: translate(120%, -50%) scale(1.3);
+    transform: translate3d(120%, -50%, 0) scale(1.3);
   }
   9% {
-    transform: translate(120%, -50%) scale(1.3);
+    transform: translate3d(120%, -50%, 0) scale(1.3);
   }
   12% {
-    transform: translate(25%, -50%) scale(0.75);
+    transform: translate3d(25%, -50%, 0) scale(0.75);
   }
   15% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
 }
 
-// Support pour prefers-reduced-motion
+// Accessibility support for users who prefer reduced motion
 @media (prefers-reduced-motion: reduce) {
   .bigC,
   .smallR {
     animation: none !important;
+    will-change: auto !important; // Reset performance optimization
   }
 
   .logo {
+    transition: none !important;
+
     &:hover {
       transform: none !important;
     }
   }
 
-  // État stable pour les animations désactivées
+  // Stable state for disabled animations
   .bigC {
     opacity: 1 !important;
+    transform: translate3d(-50%, -50%, 0) !important;
+  }
+
+  .smallR {
+    transform: translate3d(-50%, -50%, 0) !important;
+  }
+}
+
+// Additional responsive adjustments for very small screens
+@media (max-width: 375px) {
+  .logo {
+    width: 6rem;
+    height: 60px;
+  }
+
+  .cWithR {
+    height: 50px;
+
+    .bigC {
+      font-size: 60px;
+    }
+
+    .smallR {
+      font-size: 30px;
+    }
   }
 }

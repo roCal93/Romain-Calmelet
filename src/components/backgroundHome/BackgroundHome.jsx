@@ -7,31 +7,47 @@ import { getCachedColor } from './utils/colors'
 import { DEFAULT_CONFIG } from './constants/config'
 import styles from './styles/backgroundHome.module.scss'
 
+/**
+ * Background component with animated geometric particles
+ * Manages display and interactions with a particle system
+ */
 const GeometricBackgroundHome = ({
   config = DEFAULT_CONFIG,
   enableConnections = true,
   enableMouseInteraction = true,
 }) => {
+  // Hook to manage particles (creation, update)
   const { particles, initParticles } = useParticles(config)
+
+  // Hook to track mouse position with throttling
   const mouse = useMousePosition(enableMouseInteraction)
 
+  /**
+   * Main canvas render function
+   * Memoized with useCallback to avoid unnecessary re-renders
+   */
   const draw = useCallback(
     (ctx, canvas) => {
-      // Background
+      // === BACKGROUND RENDERING ===
+      // Create vertical gradient for background
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
       gradient.addColorStop(0.2, getCachedColor('--bg-gradient-start'))
       gradient.addColorStop(1, getCachedColor('--bg-gradient-end'))
       ctx.fillStyle = gradient
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Update et draw particles
+      // === PARTICLE RENDERING ===
       particles.forEach((particle) => {
+        // Update particle position and properties
         if (enableMouseInteraction) {
+          // With mouse interaction enabled
           particle.update(canvas, mouse, config)
         } else {
+          // Without mouse interaction (neutral position)
           particle.update(canvas, { x: 0, y: 0 }, config)
         }
 
+        // Prepare colors with dynamic opacity
         const colors = {
           fillCenter: getCachedColor(
             '--particle-fill-center',
@@ -39,15 +55,17 @@ const GeometricBackgroundHome = ({
           ),
           fillEdge: getCachedColor(
             '--particle-fill-edge',
-            particle.opacity * 0.7
+            particle.opacity * 0.7 // Edge slightly more transparent
           ),
           stroke: getCachedColor('--particle-stroke', particle.opacity),
         }
 
+        // Render geometric shape
         drawShape(ctx, particle, colors)
       })
 
-      // Connections
+      // === CONNECTION RENDERING ===
+      // Draw lines between nearby particles
       if (enableConnections) {
         drawConnections(ctx, particles, config, (opacity) =>
           getCachedColor('--particle-connections', opacity)
@@ -57,20 +75,23 @@ const GeometricBackgroundHome = ({
     [config, enableConnections, enableMouseInteraction, mouse, particles]
   )
 
+  // Hook to manage canvas and animation loop
   const canvasRef = useCanvas(draw)
 
-  // Initialiser les particules quand le canvas est prêt
+  // === PARTICLE INITIALIZATION ===
+  // Initialize particles when canvas is ready
   useEffect(() => {
     if (canvasRef.current) {
       initParticles(canvasRef.current)
     }
   }, [initParticles, canvasRef])
 
-  // Réinitialiser les particules lors du redimensionnement
+  // === RESIZE HANDLING ===
+  // Reinitialize particles on window resize
   useEffect(() => {
     const handleResize = () => {
       if (canvasRef.current) {
-        // Petit délai pour s'assurer que le canvas a été redimensionné
+        // Delay to ensure canvas has been resized
         setTimeout(() => {
           initParticles(canvasRef.current)
         }, 100)
@@ -81,6 +102,7 @@ const GeometricBackgroundHome = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [initParticles, canvasRef])
 
+  // Canvas positioned in background with negative z-index
   return <canvas ref={canvasRef} className={styles.canvas} />
 }
 

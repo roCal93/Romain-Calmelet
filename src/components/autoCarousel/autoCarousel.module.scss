@@ -32,14 +32,14 @@
 
 .carouselTrack {
   display: flex;
-  gap: var(--gap, 1.5rem);
+  gap: 1.5rem;
   width: max-content;
-  animation: scroll var(--speed, 20s) linear infinite;
+  animation: scroll 20s linear infinite;
   will-change: transform;
 
   // Améliore les performances sur mobile
   @media (max-width: 768px) {
-    animation-duration: calc(var(--speed, 20s) * 1.5);
+    animation-duration: 30s; // Vitesse plus lente sur mobile
   }
 }
 
@@ -58,7 +58,7 @@
   align-items: center;
   justify-content: center;
 
-  // Animation subtile au chargement - DÉPLACÉE ICI
+  // Animation subtile au chargement
   animation: fadeIn 0.5s ease-out backwards;
   animation-delay: calc(var(--index, 0) * 0.05s);
 

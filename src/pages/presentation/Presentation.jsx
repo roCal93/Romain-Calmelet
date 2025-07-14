@@ -1,4 +1,11 @@
-import { useEffect, useState, useContext, lazy, Suspense } from 'react'
+import {
+  useEffect,
+  useState,
+  useContext,
+  lazy,
+  Suspense,
+  useCallback,
+} from 'react'
 import { NavigationContext } from '../../app/navigationContext'
 import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
@@ -9,7 +16,7 @@ import portraitTablet from '../../assets/img/portraitRC/portraitTablet.webp'
 import portraitMobile from '../../assets/img/portraitRC/portraitMobile.webp'
 import BackgroundPresentation from '../../components/backgroundPresentation/BackgroundPresentation'
 
-// Lazy loading pour AutoCarousel
+// Lazy loading for AutoCarousel component
 const AutoCarousel = lazy(() =>
   import('../../components/autoCarousel/AutoCarousel')
 )
@@ -18,26 +25,47 @@ function Presentation() {
   const [isVisible, setIsVisible] = useState(false)
   const [imageErrorMobile, setImageErrorMobile] = useState(false)
   const [imageErrorDesktop, setImageErrorDesktop] = useState(false)
+
+  // Context optimization with useCallback to prevent unnecessary re-renders
   const { direction, resetNavigation } = useContext(NavigationContext)
-
-  useEffect(() => {
+  const memoizedResetNavigation = useCallback(() => {
     resetNavigation?.()
-    setIsVisible(true)
-
-    return () => {
-      setIsVisible(false)
-    }
   }, [resetNavigation])
 
-  // Gestionnaires d'erreur séparés pour mobile et desktop
+  useEffect(() => {
+    // Reset navigation state and trigger visibility
+    memoizedResetNavigation()
+    setIsVisible(true)
+
+    // Preload critical images based on viewport width
+    const criticalImage =
+      window.innerWidth > 768 ? portraitDesktop : portraitMobile
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = criticalImage
+    link.type = 'image/webp'
+    document.head.appendChild(link)
+
+    // Cleanup functions
+    return () => {
+      setIsVisible(false)
+      // Remove preload link when component unmounts
+      if (document.head.contains(link)) {
+        document.head.removeChild(link)
+      }
+    }
+  }, [memoizedResetNavigation])
+
+  // Separate error handlers for mobile and desktop images
   const handleMobileImageError = () => {
     setImageErrorMobile(true)
-    console.error("Erreur lors du chargement de l'image portrait mobile")
+    console.error('Error loading mobile portrait image')
   }
 
   const handleDesktopImageError = () => {
     setImageErrorDesktop(true)
-    console.error("Erreur lors du chargement de l'image portrait desktop")
+    console.error('Error loading desktop portrait image')
   }
 
   return (
@@ -52,9 +80,15 @@ function Presentation() {
     >
       <BackgroundPresentation />
 
+      {/* Skip link for keyboard navigation accessibility */}
+      <a href="#about-title" className={styles.skipLink}>
+        Skip to main content
+      </a>
+
       <main className={styles.container} role="main">
+        {/* Top navigation arrow */}
         <div className={styles.navUp}>
-          <ArrowUp aria-label="Naviguer vers la section précédente" />
+          <ArrowUp aria-label="Navigate to previous section" />
         </div>
 
         <article className={styles.aboutMe} aria-labelledby="about-title">
@@ -65,18 +99,20 @@ function Presentation() {
 
             <section
               className={styles.contentSection}
-              aria-label="Présentation personnelle"
+              aria-label="Personal presentation"
             >
-              {/* Image flottante pour mobile - Simplifiée */}
+              {/* Floating image for mobile - Simplified version */}
               <div className={styles.floatingImage}>
                 {imageErrorMobile ? (
                   <FallbackPortrait className={styles.fallbackMobile} />
                 ) : (
                   <img
                     src={portraitMobile}
-                    alt="Portrait de Romain Calmelet"
+                    alt="Portrait of Romain Calmelet"
                     loading="lazy"
                     onError={handleMobileImageError}
+                    width="300"
+                    height="300"
                   />
                 )}
               </div>
@@ -103,10 +139,11 @@ function Presentation() {
               </div>
             </section>
 
+            {/* Lazy loaded carousel with fallback */}
             <Suspense
               fallback={
                 <div className={styles.carouselLoader}>
-                  <span>Chargement...</span>
+                  <span>Loading content...</span>
                 </div>
               }
             >
@@ -114,7 +151,7 @@ function Presentation() {
             </Suspense>
           </div>
 
-          {/* Image pour desktop - Avec sources multiples */}
+          {/* Desktop image with multiple sources */}
           <aside className={styles.desktopImage} aria-label="Portrait">
             {imageErrorDesktop ? (
               <FallbackPortrait className={styles.fallbackDesktop} />
@@ -133,17 +170,20 @@ function Presentation() {
                 <img
                   className={styles.img}
                   src={portraitTablet}
-                  alt="Portrait de Romain Calmelet"
+                  alt="Portrait of Romain Calmelet"
                   loading="lazy"
                   onError={handleDesktopImageError}
+                  width="400"
+                  height="533"
                 />
               </picture>
             )}
           </aside>
         </article>
 
-        <nav className={styles.navDown} aria-label="Navigation entre sections">
-          <ArrowDown aria-label="Naviguer vers la section suivante" />
+        {/* Bottom navigation arrow */}
+        <nav className={styles.navDown} aria-label="Section navigation">
+          <ArrowDown aria-label="Navigate to next section" />
         </nav>
       </main>
     </div>

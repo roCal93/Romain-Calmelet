@@ -13,6 +13,7 @@ import scrumPng from '../../assets/img/logoTech/scrum.png'
 import seoPng from '../../assets/img/logoTech/seo.png'
 import swaggerPng from '../../assets/img/logoTech/Swagger.png'
 
+// Array of technology logos with their respective names
 const techLogos = [
   { src: html5Png, name: 'HTML5' },
   { src: css3Png, name: 'CSS3' },
@@ -28,29 +29,18 @@ const techLogos = [
   { src: swaggerPng, name: 'Swagger' },
 ]
 
-function AutoCarousel({
-  speed = 20,
-  gap = 1.5,
-  pauseOnHover = true,
-  className = '',
-}) {
+/**
+ * AutoCarousel Component
+ * An infinite scrolling carousel that displays technology logos
+ * Speed and gap are now defined directly in SCSS
+ **/
+function AutoCarousel() {
+  // Duplicate the logos array to create seamless infinite scroll effect
   const duplicatedLogos = useMemo(() => [...techLogos, ...techLogos], [])
 
   return (
-    <div
-      className={`${styles.container} ${className}`}
-      role="region"
-      aria-label="Technologies carousel"
-      data-pause-on-hover={pauseOnHover}
-    >
-      <div
-        className={styles.carouselTrack}
-        style={{
-          '--speed': `${speed}s`,
-          '--gap': `${gap}rem`,
-          '--item-count': techLogos.length,
-        }}
-      >
+    <div className={styles.container} aria-label="Technologies carousel">
+      <div className={styles.carouselTrack}>
         {duplicatedLogos.map((tech, index) => (
           <div
             key={`${tech.name}-${index}`}

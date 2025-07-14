@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import styles from './menuMobile.module.scss'
 import { useNavigate } from 'react-router'
 
-// Constantes pour la navigation
+// Navigation items configuration
 const NAVIGATION_ITEMS = [
   { path: '/presentation', label: 'PRESENTATION' },
   { path: '/portfolio', label: 'PORTFOLIO' },
@@ -16,6 +16,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
   const navigate = useNavigate()
   const isNavigatingRef = useRef(false)
 
+  // Toggle menu state with callback
   const toggleMenu = useCallback(() => {
     setIsOpen((prevState) => {
       const newState = !prevState
@@ -24,18 +25,20 @@ const MenuMobile = ({ onMenuStateChange }) => {
     })
   }, [onMenuStateChange])
 
+  // Close menu handler
   const closeMenu = useCallback(() => {
     setIsOpen(false)
     onMenuStateChange?.(false)
   }, [onMenuStateChange])
 
+  // Handle navigation link clicks
   const handleLinkClick = useCallback(
     (path) => {
       try {
         isNavigatingRef.current = true
         navigate(path)
 
-        // Utiliser requestAnimationFrame pour une meilleure performance
+        // Use requestAnimationFrame for better performance
         requestAnimationFrame(() => {
           closeMenu()
           isNavigatingRef.current = false
@@ -48,10 +51,29 @@ const MenuMobile = ({ onMenuStateChange }) => {
     [navigate, closeMenu]
   )
 
-  // Gestion du focus lors de l'ouverture/fermeture
+  // Memoized navigation items to prevent unnecessary re-renders
+  const navigationItems = useMemo(
+    () =>
+      NAVIGATION_ITEMS.map((item) => (
+        <li key={item.path} role="none">
+          <button
+            className={styles.link}
+            onClick={() => handleLinkClick(item.path)}
+            type="button"
+            role="menuitem"
+            aria-label={`Navigate to ${item.label.toLowerCase()}`}
+          >
+            {item.label}
+          </button>
+        </li>
+      )),
+    [handleLinkClick]
+  )
+
+  // Focus management when menu opens/closes
   useEffect(() => {
     if (isOpen) {
-      // Focus sur le premier lien du menu après l'animation
+      // Focus first menu item after animation
       const timeoutId = setTimeout(() => {
         const firstLink = menuRef.current?.querySelector(
           'button[role="menuitem"]'
@@ -60,15 +82,14 @@ const MenuMobile = ({ onMenuStateChange }) => {
       }, 100)
       return () => clearTimeout(timeoutId)
     } else {
-      // Retour du focus sur le bouton burger si le menu était ouvert
+      // Return focus to burger button if menu was previously open
       if (document.activeElement?.closest(`.${styles.menuPanel}`)) {
         buttonRef.current?.focus()
       }
     }
   }, [isOpen])
 
-  // Gestion des événements clavier et clics externes
-  // Gestion des événements clavier et clics externes
+  // Keyboard navigation and click outside handling
   useEffect(() => {
     if (!isOpen) return
 
@@ -87,7 +108,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
           break
         }
         case 'Tab': {
-          // Trap focus dans le menu
+          // Focus trap within menu
           if (event.shiftKey && document.activeElement === firstElement) {
             event.preventDefault()
             lastElement?.focus()
@@ -125,6 +146,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
     }
 
     const handleClickOutside = (event) => {
+      // Prevent closing during navigation
       if (isNavigatingRef.current) return
 
       if (
@@ -137,7 +159,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
       }
     }
 
-    // Délai pour éviter que le clic d'ouverture ferme immédiatement
+    // Delay to prevent immediate close on open click
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside)
       document.addEventListener('keydown', handleKeyDown)
@@ -152,12 +174,13 @@ const MenuMobile = ({ onMenuStateChange }) => {
 
   return (
     <div className={styles.burgerMenu}>
+      {/* Burger button */}
       <button
         ref={buttonRef}
         className={`${styles.burgerButton} ${isOpen ? styles.open : ''}`}
         onClick={toggleMenu}
         type="button"
-        aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+        aria-label={isOpen ? 'Close menu' : 'Open menu'}
         aria-expanded={isOpen}
         aria-controls="mobile-menu"
         aria-haspopup="true"
@@ -167,31 +190,18 @@ const MenuMobile = ({ onMenuStateChange }) => {
         <span className={styles.bar} aria-hidden="true"></span>
       </button>
 
+      {/* Navigation menu */}
       <nav
         ref={menuRef}
         id="mobile-menu"
         className={`${styles.menuPanel} ${isOpen ? styles.open : ''}`}
         role="navigation"
-        aria-label="Menu principal"
+        aria-label="Main navigation"
       >
-        <ul role="menu">
-          {NAVIGATION_ITEMS.map((item) => (
-            <li key={item.path} role="none">
-              <button
-                className={styles.link}
-                onClick={() => handleLinkClick(item.path)}
-                type="button"
-                role="menuitem"
-                aria-label={`Aller à ${item.label.toLowerCase()}`}
-              >
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <ul role="menu">{navigationItems}</ul>
       </nav>
 
-      {/* Backdrop pour mobile */}
+      {/* Backdrop for mobile */}
       {isOpen && (
         <div
           className={styles.backdrop}

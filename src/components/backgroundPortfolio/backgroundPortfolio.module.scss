@@ -1,107 +1,189 @@
+// Import necessary Sass modules
+@use 'sass:color'; // Module for color manipulation
+@use 'sass:math'; // Module for mathematical operations
+@use '../../styles/variables.module.scss' as *; // Import global project variables
+
+// ========================================
+// COLOR VARIANT CREATION
+// ========================================
+
+// Brightness variants of the primary color
+$local-primary-light: color.scale(
+  $primary,
+  $lightness: 30%
+); // Lighter version (+30%)
+$local-primary-lighter: color.scale(
+  $primary,
+  $lightness: 60%
+); // Much lighter version (+60%)
+$local-primary-dark: color.scale(
+  $primary,
+  $lightness: -20%
+); // Darker version (-20%)
+
+// Transparency (alpha) variants
+$local-primary-10: color.change($primary, $alpha: 0.1); // 10% opacity
+$local-primary-05: color.change($primary, $alpha: 0.05); // 5% opacity
+$local-primary-30: color.change($primary, $alpha: 0.3); // 30% opacity
+
+// Hue variants (color temperature)
+$local-primary-warm: color.adjust(
+  $primary,
+  $hue: 15deg
+); // Warm version (+15° on color wheel)
+$local-primary-cool: color.adjust(
+  $primary,
+  $hue: -15deg
+); // Cool version (-15° on color wheel)
+
+// ========================================
+// BACKGROUND CONTAINER
+// ========================================
 .backgroundContainer {
-  position: fixed;
+  position: fixed; // Fixed to viewport
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  z-index: -1;
-  background: radial-gradient(ellipse at center, #ffffff 0%, #f5f5f5 100%);
-  cursor: none; // Optionnel : masquer le curseur pour un effet plus immersif
+  overflow: hidden; // Hide overflowing content
+  z-index: -1; // Behind all other elements
+  background: radial-gradient(
+    ellipse at center,
+    #ffffff 0%,
+    #f5f5f5 100%
+  ); // Radial gradient from white to light gray
 }
 
+// ========================================
+// MOUSE-FOLLOWING GLOW EFFECT
+// ========================================
 .mouseGlow {
   position: absolute;
   width: 600px;
   height: 600px;
+  // Circular radial gradient with transparent primary colors
   background: radial-gradient(
     circle,
-    rgba(231, 76, 60, 0.1) 0%,
-    rgba(231, 76, 60, 0.05) 30%,
-    transparent 70%
+    $local-primary-10 0%,
+    // Center: 10% opacity
+    $local-primary-05 30%,
+    // Middle: 5% opacity
+    transparent 70% // Outer: transparent
   );
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-  animation: fadeIn 1s ease-out forwards;
+  border-radius: 50%; // Circular shape
+  pointer-events: none; // Doesn't intercept clicks
+  opacity: 0; // Initially invisible
+  animation: fadeIn 1s ease-out forwards; // Fade-in animation
   z-index: 1;
-  mix-blend-mode: multiply;
+  mix-blend-mode: multiply; // Blend mode for subtle effect
 
+  // Responsive: reduced size on mobile
   @media (max-width: 768px) {
     width: 400px;
     height: 400px;
   }
 }
 
+// Fade-in animation
 @keyframes fadeIn {
   to {
     opacity: 1;
   }
 }
 
+// ========================================
+// MORPHING SHAPES WRAPPER
+// ========================================
 .morphWrapper {
   position: absolute;
   width: 100%;
   height: 100%;
-  filter: blur(40px);
-  opacity: 0.4;
+  filter: blur(40px); // Heavy blur for soft effect
+  opacity: 0.4; // Semi-transparent
 }
 
+// ========================================
+// ANIMATED SHAPES (MORPHS)
+// ========================================
+// Common styles for all three shapes
 .morph1,
 .morph2,
 .morph3 {
   position: absolute;
   width: 400px;
   height: 400px;
-  border-radius: 50%;
-  transition: transform 0.3s ease-out; // Transition fluide pour le mouvement de la souris
-  will-change: transform; // Optimisation des performances
+  border-radius: 50%; // Base circular shape
+  transition: transform 0.3s ease-out; // Smooth transition
+  will-change: transform; // Performance optimization
 
+  // Responsive: reduced size on mobile
   @media (max-width: 768px) {
     width: 300px;
     height: 300px;
   }
 }
 
+// First morphing shape
 .morph1 {
-  background: linear-gradient(135deg, #e74c3c 0%, #ff6b6b 100%);
-  top: -20%;
+  // Gradient from primary color to its lighter version
+  background: linear-gradient(135deg, $primary 0%, $local-primary-light 100%);
+  top: -20%; // Positioned top-left (partially off-screen)
   left: -10%;
-  animation: morph1 10s ease-in-out infinite;
+  animation: morph1 10s ease-in-out infinite; // 10s looping animation
 }
 
+// Second morphing shape
 .morph2 {
-  background: linear-gradient(135deg, #ffa07a 0%, #ffb6c1 100%);
-  bottom: -20%;
+  // Gradient using color mixing
+  background: linear-gradient(
+    135deg,
+    $local-primary-light 0%,
+    color.mix($primary, white, 30%) 100% // Mix 30% primary + 70% white
+  );
+  bottom: -20%; // Positioned bottom-right (partially off-screen)
   right: -10%;
   animation: morph2 10s ease-in-out infinite;
 }
 
+// Third morphing shape
 .morph3 {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-  top: 50%;
+  // Gradient using warm color variant
+  background: linear-gradient(
+    135deg,
+    $local-primary-warm 0%,
+    color.scale($local-primary-warm, $lightness: 40%) 100%
+      // Lighter version of warm color
+  );
+  top: 50%; // Centered vertically and horizontally
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); // Perfect centering
   animation: morph3 10s ease-in-out infinite;
 }
 
-// Animations des morphs (inchangées)
+// ========================================
+// MORPHING SHAPE ANIMATIONS
+// ========================================
+
+// First shape animation: rotation and deformation
 @keyframes morph1 {
   0%,
   100% {
-    border-radius: 50% 50% 50% 50%;
+    border-radius: 50% 50% 50% 50%; // Perfect circle
     transform: translate(0, 0) rotate(0deg);
   }
   33% {
+    // Asymmetric deformation and movement
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
     transform: translate(100px, 50px) rotate(120deg);
   }
   66% {
+    // Different deformation and rotation
     border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
     transform: translate(-50px, 100px) rotate(240deg);
   }
 }
 
+// Second shape animation: rotation and scaling
 @keyframes morph2 {
   0%,
   100% {
@@ -109,11 +191,13 @@
     transform: translate(0, 0) rotate(0deg) scale(1);
   }
   50% {
+    // Deformation, movement and scaling up
     border-radius: 70% 30% 50% 50% / 50% 50% 30% 70%;
     transform: translate(-100px, -100px) rotate(180deg) scale(1.1);
   }
 }
 
+// Third shape animation: complex transformations
 @keyframes morph3 {
   0%,
   100% {
@@ -134,185 +218,94 @@
   }
 }
 
-// Points flottants avec positions prédéfinies
+// ========================================
+// FLOATING DOTS CONTAINER
+// ========================================
 .dotsContainer {
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
+// ========================================
+// ANIMATED DOTS
+// ========================================
 .dot {
   position: absolute;
   width: 4px;
   height: 4px;
-  background: rgba(231, 76, 60, 0.3);
-  border-radius: 50%;
-  transition: transform 0.2s ease-out; // Transition plus rapide pour les dots
-  will-change: transform;
+  background: $local-primary-30; // 30% opacity by default
+  border-radius: 50%; // Circular shape
+  transition: transform 0.2s ease-out;
+  will-change: transform; // Performance optimization
 
-  // Positions et animations prédéfinies pour chaque point
-  &.dot1 {
-    top: 15%;
-    left: 10%;
-    animation: dotFloat1 18s linear infinite;
+  // Variations for odd-numbered dots
+  &:nth-child(odd) {
+    background: color.change($primary, $alpha: 0.25); // 25% opacity
   }
 
-  &.dot2 {
-    top: 25%;
-    left: 85%;
-    animation: dotFloat2 22s linear infinite 2s;
+  // Variations for every 3rd dot
+  &:nth-child(3n) {
+    background: color.change($primary, $alpha: 0.35); // 35% opacity
+    width: 5px; // Slightly larger
+    height: 5px;
   }
 
-  &.dot3 {
-    top: 70%;
-    left: 20%;
-    animation: dotFloat3 20s linear infinite 1s;
+  // Variations for every 5th dot
+  &:nth-child(5n) {
+    background: color.change(
+      $local-primary-light,
+      $alpha: 0.3
+    ); // Light primary at 30% opacity
+    width: 3px; // Slightly smaller
+    height: 3px;
   }
 
-  &.dot4 {
-    top: 45%;
-    left: 60%;
-    animation: dotFloat4 24s linear infinite 3s;
-  }
-
-  &.dot5 {
-    top: 80%;
-    left: 75%;
-    animation: dotFloat5 19s linear infinite 1.5s;
-  }
-
-  &.dot6 {
-    top: 10%;
-    left: 45%;
-    animation: dotFloat6 21s linear infinite 2.5s;
-  }
-
-  &.dot7 {
-    top: 55%;
-    left: 90%;
-    animation: dotFloat7 23s linear infinite 0.5s;
-  }
-
-  &.dot8 {
-    top: 35%;
-    left: 30%;
-    animation: dotFloat8 17s linear infinite 4s;
-  }
-
-  &.dot9 {
-    top: 90%;
-    left: 50%;
-    animation: dotFloat9 20s linear infinite 1s;
-  }
-
-  &.dot10 {
-    top: 60%;
-    left: 15%;
-    animation: dotFloat10 18s linear infinite 3s;
-  }
-
-  &.dot11 {
-    top: 20%;
-    left: 70%;
-    animation: dotFloat11 22s linear infinite 2s;
-  }
-
-  &.dot12 {
-    top: 75%;
-    left: 40%;
-    animation: dotFloat12 19s linear infinite 0s;
+  // Generate positions for each dot (1-12)
+  @for $i from 1 through 12 {
+    &.dot#{$i} {
+      $top: math.random(80) + 10; // Random top position between 10-90%
+      $left: math.random(80) + 10; // Random left position between 10-90%
+      top: $top * 1%;
+      left: $left * 1%;
+      // Unique animation for each dot with random duration and delay
+      animation: dotFloat#{$i}
+        (17s + math.random(7))
+        // Duration: 17-24s
+        linear
+        infinite
+        (math.random(4) + s); // Delay: 0-4s
+    }
   }
 }
 
-// Animations individuelles pour chaque point
-@keyframes dotFloat1 {
-  0% {
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.3;
-  }
-  90% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(80px, -60px);
-    opacity: 0;
-  }
-}
-
-@keyframes dotFloat2 {
-  0% {
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.3;
-  }
-  90% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(-70px, 50px);
-    opacity: 0;
+// Generate floating animations for dots
+@for $i from 1 through 12 {
+  @keyframes dotFloat#{$i} {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0; // Start invisible
+    }
+    10% {
+      opacity: 1; // Fade in
+    }
+    90% {
+      opacity: 1; // Stay visible
+    }
+    100% {
+      // Random end position within 160px range
+      $x: (math.random(160) - 80) * 1px;
+      $y: (math.random(160) - 80) * 1px;
+      transform: translate($x, $y);
+      opacity: 0; // Fade out
+    }
   }
 }
 
-@keyframes dotFloat3 {
-  0% {
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.3;
-  }
-  90% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(60px, 70px);
-    opacity: 0;
-  }
-}
-
-// Continuer avec dotFloat4 à dotFloat12 avec des valeurs différentes...
-// Pour simplifier, vous pouvez utiliser une animation générique :
-
-@keyframes dotFloatGeneric {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.3;
-  }
-  50% {
-    transform: translate(30px, -30px) scale(1.2);
-  }
-  90% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(60px, -60px) scale(1);
-    opacity: 0;
-  }
-}
-
-// Appliquer l'animation générique aux points restants
-.dot4,
-.dot5,
-.dot6,
-.dot7,
-.dot8,
-.dot9,
-.dot10,
-.dot11,
-.dot12 {
-  animation-name: dotFloatGeneric !important;
-}
-
-// Performance et accessibilité
+// ========================================
+// PERFORMANCE AND ACCESSIBILITY
+// ========================================
+// Disable animations for users who prefer reduced motion
 @media (prefers-reduced-motion: reduce) {
   .morphWrapper,
   .dot {

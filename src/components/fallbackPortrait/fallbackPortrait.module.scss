@@ -1,3 +1,4 @@
+// Main container for the fallback portrait
 .fallbackPortrait {
   position: relative;
   width: 100%;
@@ -6,42 +7,47 @@
   align-items: center;
   justify-content: center;
   background: #fafafa;
-  border-radius: 50%;
-  overflow: hidden;
+  border-radius: 50%; // Make it circular
+  overflow: hidden; // Ensure content stays within circle
 
+  // SVG avatar styling
   .avatarSvg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-    animation: fadeIn 0.6s ease-out;
+    filter: drop-shadow(
+      0 2px 4px rgba(0, 0, 0, 0.1)
+    ); // Subtle shadow for depth
+    animation: fadeIn 0.6s ease-out; // Smooth entrance animation
 
+    // Initials text styling
     .initials {
       font-family: 'Arial', sans-serif;
       font-size: 20px;
       font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      letter-spacing: 2px; // Spacing between letters
+      text-transform: uppercase; // Force uppercase
     }
   }
 }
 
+// Fade in animation for smooth appearance
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.9); // Start slightly smaller
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1); // End at normal size
   }
 }
 
-// Adaptation responsive
+// Responsive adjustments for mobile devices
 @media (max-width: 768px) {
   .fallbackPortrait {
     .avatarSvg {
       .initials {
-        font-size: 16px;
+        font-size: 16px; // Smaller text on mobile
       }
     }
   }

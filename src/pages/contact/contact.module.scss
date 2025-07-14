@@ -1,5 +1,8 @@
+// contact.module.scss
+@use '../../styles/variables.module' as *;
+
 // ======================
-// CONTENEUR PRINCIPAL
+// MAIN CONTAINER
 // ======================
 .container {
   position: relative;
@@ -41,16 +44,16 @@
     transition: transform 0.2s ease-out;
   }
 
-  // Accessibilité
+  // Accessibility - using imported focus color
   > *:focus-visible {
-    outline: 2px solid #e74c3c;
+    outline: $focus-color;
     outline-offset: 4px;
     border-radius: 4px;
   }
 }
 
 // ======================
-// CONTENU PRINCIPAL
+// MAIN CONTENT
 // ======================
 .contactContent {
   display: flex;
@@ -69,7 +72,7 @@
 }
 
 // ======================
-// SECTION TITRE
+// TITLE SECTION
 // ======================
 .title {
   display: flex;
@@ -100,7 +103,8 @@
       font-weight: 700;
       line-height: 1.1;
       color: #333;
-      background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+      // Using primary color from variables
+      background: linear-gradient(135deg, #{$primary}7f 0%, $primary 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -125,7 +129,7 @@
 }
 
 // ======================
-// ZONE DE JEU
+// GAME AREA
 // ======================
 .gameWrapper {
   flex: 1;
@@ -207,58 +211,7 @@
 }
 
 // ======================
-// CONTENEUR PRINCIPAL
-// ======================
-.container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: calc(100vh - 140px);
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.8s ease-out forwards;
-
-  @media (max-width: 768px) {
-    min-height: calc(100dvh - 115px);
-    padding: 0;
-    animation-duration: 0.6s;
-  }
-}
-
-// ======================
-// NAVIGATION
-// ======================
-.navUp {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0;
-  opacity: 0;
-  transform: translateY(-20px);
-  flex-shrink: 0;
-  animation: bounceInDown 1s ease-out 0.8s forwards;
-
-  @media (max-width: 768px) {
-    padding: 0.5rem 0;
-    animation: bounceInDown 0.8s ease-out 0.5s forwards;
-  }
-
-  &:hover {
-    transform: translateY(2px);
-    transition: transform 0.2s ease-out;
-  }
-
-  // Accessibilité
-  > *:focus-visible {
-    outline: 2px solid #e74c3c;
-    outline-offset: 4px;
-    border-radius: 4px;
-  }
-}
-
-// ======================
-// PRÉFÉRENCES UTILISATEUR
+// USER PREFERENCES
 // ======================
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -281,7 +234,7 @@
 }
 
 // ======================
-// PRINT
+// PRINT STYLES
 // ======================
 @media print {
   .navUp {

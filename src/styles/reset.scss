@@ -1,12 +1,12 @@
 // reset.scss
 
-// Reset de base
+// Base reset
 * {
   margin: 0;
   padding: 0;
 }
 
-// Réinitialisation du HTML5
+// HTML5 reset
 article,
 aside,
 details,
@@ -21,13 +21,13 @@ section {
   display: block;
 }
 
-// Réinitialisation des éléments de liste
+// List elements reset
 ul,
 ol {
   list-style: none;
 }
 
-// Gestion des liens
+// Link handling
 a {
   text-decoration: none;
   color: inherit;
@@ -38,53 +38,55 @@ a:hover {
   text-decoration: none;
 }
 
-// Réinitialisation des formulaires
+// Form reset
 textarea {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
   outline: none;
   border: none;
-  appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; // Standard property should come last
 }
 
-// Boutons
+// Buttons
 button {
   cursor: pointer;
   background: none;
 }
 
-// Tableaux
+// Tables
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-// Correction de focus
+// Focus correction
 :focus {
   outline: 0;
 }
 
-// Accessibilité pour les éléments interactifs
+// Accessibility for interactive elements
 button,
 [type='button'],
 [type='reset'],
 [type='submit'] {
   -webkit-appearance: button;
+  appearance: button; // Standard property added
 }
 
-// Correction de style pour IE/Edge
+// Style fix for IE/Edge
 input[type='text'],
 input[type='email'],
 input[type='password'],
 textarea {
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
+  appearance: none; // Standard property should come last
 }
 
-// Suppression des marges et paddings par défaut sur mobile
+// Remove default margins and paddings on mobile
 @media (max-width: 768px) {
   body,
   h1,
@@ -103,15 +105,15 @@ textarea {
   }
 }
 
-// Variables de base
+// Base variables
 :root {
-  // Tailles de police
+  // Font sizes
   --font-small: 0.8rem;
   --font-normal: 1rem;
   --font-medium: 1.2rem;
   --font-large: 1.5rem;
 
-  // Couleurs neutres
+  // Neutral colors
   --color-white: #ffffff;
   --color-black: #000000;
   --color-gray-100: #f8f9fa;

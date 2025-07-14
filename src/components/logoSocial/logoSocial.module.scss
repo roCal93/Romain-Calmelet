@@ -1,34 +1,33 @@
+@use '../../styles/variables.module.scss' as *;
+@mixin initial-animation-state {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
 .staticLogo {
+  @include initial-animation-state;
+  animation: fadeInLogo 0.5s ease-out forwards;
   transition: all 0.3s ease;
-  opacity: 0.7;
-  animation: fadeInLogo 0.5s ease-out;
 
   @media (max-width: 767px) {
-    opacity: 0.8;
-
     &:hover {
-      transform: scale(1.05);
+      transform: scale(1.05) translateX(0);
     }
   }
 
   &:hover {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.1) translateX(0);
   }
 
-  &:focus {
-    outline: none;
-    opacity: 1;
-    transform: scale(1.1);
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  // Consistent focus-visible styling
+  &:focus-visible {
+    outline: $focus-color;
+    outline-offset: 2px;
     border-radius: 4px;
   }
 
-  &:focus-visible {
-    outline: 3px solid #e74c3c;
-    outline-offset: 2px;
-  }
-
+  // Animation delays for staggered effect
   &:nth-child(1) {
     animation-delay: 0.2s;
   }
@@ -47,13 +46,14 @@
   }
 }
 
+// Animations
 @keyframes fadeInLogo {
   from {
     opacity: 0;
     transform: translateX(50px);
   }
   to {
-    opacity: 0.7;
+    opacity: 1; // Changé à 1 pour une opacité complète
     transform: translateX(0);
   }
 }

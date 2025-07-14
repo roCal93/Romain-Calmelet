@@ -1,3 +1,6 @@
+// Import variables using @use
+@use '../../styles/variables.module' as *;
+
 .logo {
   display: flex;
   width: 600px;
@@ -7,14 +10,15 @@
   justify-content: flex-start;
   overflow: hidden;
   cursor: pointer;
-  position: relative; // Ajout pour le positionnement du focus
+  position: relative;
 
-  // Indicateur de focus visible
+  // Visible focus indicator for keyboard navigation
   &:focus-visible {
-    outline: 2px solid #e74c3c;
+    outline: 2px solid $primary;
     outline-offset: 1px;
     border-radius: 4px;
   }
+
   .cWithR {
     height: 70px;
     width: 100%;
@@ -23,9 +27,10 @@
     justify-content: flex-start;
     position: relative;
     transition: color 0.2s ease;
-    color: #e74d3ca9;
+    color: rgba($primary, 0.66); // Using primary variable with opacity
+
     &:hover {
-      color: #e74d3ccb;
+      color: rgba($primary, 0.8); // Slightly more opaque on hover
     }
 
     .bigC {
@@ -36,7 +41,9 @@
       position: absolute;
       top: 50%;
       left: 7%;
-      transform: translate(-50%, -50%);
+      // Use transform3d for GPU acceleration
+      transform: translate3d(-50%, -50%, 0);
+      will-change: transform, opacity; // Performance optimization
       animation: rotateC 2s 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
     }
 
@@ -47,7 +54,9 @@
       position: absolute;
       top: 50%;
       left: 7.5%;
-      transform: translate(-50%, -50%);
+      // Use transform3d for GPU acceleration
+      transform: translate3d(-50%, -50%, 0);
+      will-change: transform, font-weight; // Performance optimization
       animation: translateAndScale 2s 2.5s ease-in-out forwards;
     }
 
@@ -58,6 +67,7 @@
       top: 50%;
       transform: translateY(-50%);
     }
+
     .firstname {
       display: flex;
       position: absolute;
@@ -65,16 +75,19 @@
       top: 50%;
       transform: translateY(-50%);
     }
+
     .letter {
       font-size: 40px;
       font-family: 'Raleway', sans-serif;
       font-weight: 300;
       opacity: 0;
       transform: translateY(20px);
+      will-change: transform, opacity; // Performance optimization
       animation: appearLetter 2s ease-out forwards;
       margin-right: 2px;
     }
-    // Animation delays pour les lettres du nom de famille (ALMELET) - Version avec boucle
+
+    // Animation delays for surname letters (ALMELET) - Loop version
     .surname {
       @for $i from 1 through 7 {
         .letter:nth-child(#{$i}) {
@@ -82,6 +95,8 @@
         }
       }
     }
+
+    // Animation delays for firstname letters (OMAIN) - Loop version
     .firstname {
       @for $i from 1 through 5 {
         .letter:nth-child(#{$i}) {
@@ -92,78 +107,81 @@
   }
 }
 
-// Animation pour la rotation du C toutes les 5s en 0,5s
+// Rotation animation for the "C" letter
 @keyframes rotateC {
   0% {
-    transform: translate(-50%, -50%) rotate(0deg);
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
     opacity: 0.2;
   }
   60% {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
   }
 }
 
+// Translation and scale animation for the "R" letter
 @keyframes translateAndScale {
   0% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
   30% {
-    transform: translate(20%, -50%) scale(0.8);
+    transform: translate3d(20%, -50%, 0) scale(0.8);
   }
   100% {
-    transform: translate(790%, -50%) scale(1.2);
+    transform: translate3d(790%, -50%, 0) scale(1.2);
     font-weight: 400;
   }
 }
 
+// Letter appearance animation with fade and slide effect
 @keyframes appearLetter {
   0% {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translate3d(-20px, 0, 0);
   }
   10% {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translate3d(-20px, 0, 0);
   }
   20% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-// Support pour prefers-reduced-motion
+// Accessibility support for users who prefer reduced motion
 @media (prefers-reduced-motion: reduce) {
   .bigC,
   .smallR,
   .letter {
     animation: none !important;
+    will-change: auto !important; // Reset performance optimization
   }
 
   .cWithR {
     transition: none !important;
   }
 
-  // État final des animations pour que le logo reste lisible
+  // Final animation states to keep logo readable
   .bigC {
-    transform: translate(-50%, -50%) rotate(360deg) !important;
+    transform: translate3d(-50%, -50%, 0) rotate(360deg) !important;
     opacity: 1 !important;
   }
 
   .smallR {
-    transform: translate(790%, -50%) scale(1.2) !important;
+    transform: translate3d(790%, -50%, 0) scale(1.2) !important;
     font-weight: 400 !important;
   }
 
   .letter {
     opacity: 1 !important;
-    transform: translateY(0) !important;
+    transform: translate3d(0, 0, 0) !important;
   }
 }

@@ -1,43 +1,49 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import styles from './phoneDisplay.module.scss'
 
 const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
   const [isExiting, setIsExiting] = useState(false)
-  const [copiedItem, setCopiedItem] = useState(null) // Pour afficher le feedback
+  const [copiedItem, setCopiedItem] = useState(null) // To display copy feedback
   const modalRef = useRef(null)
   const firstFocusableElementRef = useRef(null)
 
-  // Gestion de la fermeture avec animation
-  const handleClose = () => {
+  // Handle close with animation - memoized with useCallback
+  const handleClose = useCallback(() => {
     setIsExiting(true)
     setTimeout(() => {
       setShowPhoneNumber(false)
       setIsExiting(false)
     }, 200)
-  }
+  }, [setShowPhoneNumber])
 
-  // Fonction pour copier dans le presse-papier
+  // Copy to clipboard function
   const copyToClipboard = async (text, type) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedItem(type)
-      // Retirer le message après 2 secondes
+      // Remove message after 2 seconds
       setTimeout(() => setCopiedItem(null), 2000)
     } catch (err) {
-      console.error('Erreur lors de la copie:', err)
-      // Fallback pour les navigateurs plus anciens
+      console.error('Copy error:', err)
+      // Fallback for older browsers
       const textArea = document.createElement('textarea')
       textArea.value = text
       document.body.appendChild(textArea)
       textArea.select()
-      document.execCommand('copy')
+      try {
+        document.execCommand('copy')
+        setCopiedItem(type)
+        setTimeout(() => setCopiedItem(null), 2000)
+      } catch (fallbackErr) {
+        console.error('Fallback copy error:', fallbackErr)
+        setCopiedItem('error')
+        setTimeout(() => setCopiedItem(null), 2000)
+      }
       document.body.removeChild(textArea)
-      setCopiedItem(type)
-      setTimeout(() => setCopiedItem(null), 2000)
     }
   }
 
-  // Gestion de la touche Echap
+  // Handle Escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
@@ -47,10 +53,10 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
 
     if (showPhoneNumber) {
       document.addEventListener('keydown', handleEscape)
-      // Empêcher le scroll en arrière-plan
+      // Prevent background scrolling
       document.body.style.overflow = 'hidden'
 
-      // Focus sur le premier élément focusable
+      // Focus on first focusable element
       setTimeout(() => {
         if (firstFocusableElementRef.current) {
           firstFocusableElementRef.current.focus()
@@ -62,9 +68,9 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'auto'
     }
-  }, [showPhoneNumber])
+  }, [showPhoneNumber, handleClose]) // Added handleClose to dependencies
 
-  // Gestion du focus trap
+  // Focus trap management
   useEffect(() => {
     if (!showPhoneNumber) return
 
@@ -99,6 +105,16 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
 
   if (!showPhoneNumber) return null
 
+  // Helper function to get screen reader message
+  const getScreenReaderMessage = () => {
+    if (copiedItem === 'phone')
+      return 'Numéro de téléphone copié dans le presse-papier'
+    if (copiedItem === 'email')
+      return 'Adresse email copiée dans le presse-papier' // Fixed: "copier" -> "copiée"
+    if (copiedItem === 'error') return 'Échec de la copie' // Fixed: "Echec du Copier" -> "Échec de la copie"
+    return ''
+  }
+
   return (
     <div
       className={`${styles.phoneDisplay} ${isExiting ? styles.exiting : ''}`}
@@ -119,34 +135,55 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
             onClick={() => copyToClipboard('0745229697', 'phone')}
             className={styles.contactLink}
             ref={firstFocusableElementRef}
-            aria-label="Copier le numéro 07 45 22 96 97"
+            aria-label="Copier le numéro de téléphone 07 45 22 96 97" // Fixed: "Copier le téléphone" -> "Copier le numéro de téléphone"
           >
             <span className={styles.icon}>📞</span>
             <span className={styles.text}>07 45 22 96 97</span>
             {copiedItem === 'phone' && (
-              <span className={styles.copiedMessage}>✓ Copié !</span>
+              <span className={styles.copiedMessage} aria-hidden="true">
+                ✓ Copié !
+              </span>
             )}
           </button>
 
           <button
             onClick={() => copyToClipboard('romaincalmelet@gmail.com', 'email')}
             className={styles.contactLink}
-            aria-label="Copier l'email romaincalmelet@gmail.com"
+            aria-label="Copier l'adresse email romaincalmelet@gmail.com" // Fixed: "Email" -> "email" (consistency)
           >
             <span className={styles.icon}>✉️</span>
             <span className={styles.text}>romaincalmelet@gmail.com</span>
             {copiedItem === 'email' && (
-              <span className={styles.copiedMessage}>✓ Copié !</span>
+              <span className={styles.copiedMessage} aria-hidden="true">
+                ✓ Copié !
+              </span>
             )}
           </button>
+
+          {/* Error message for copy failure */}
+          {copiedItem === 'error' && (
+            <span className={styles.errorMessage} aria-hidden="true">
+              ❌ Erreur lors de la copie
+            </span>
+          )}
 
           <button
             onClick={handleClose}
             className={styles.closeButton}
-            aria-label="Fermer la modal"
+            aria-label="Fermer la fenêtre" // Fixed: "Close modal" -> "Fermer la fenêtre" (consistency with French)
           >
             Fermer
           </button>
+        </div>
+
+        {/* Screen reader announcements */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className={styles.srOnly}
+        >
+          {getScreenReaderMessage()}
         </div>
       </div>
     </div>

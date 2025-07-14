@@ -1,32 +1,57 @@
 import { useEffect, useRef } from 'react'
 
+/**
+ * Custom hook to track mouse position in an optimized way
+ * Uses requestAnimationFrame to throttle updates
+ *
+ * @param {boolean} enabled - Enable/disable mouse tracking
+ * @returns {Object} - Current mouse position {x, y}
+ */
 export const useMousePosition = (enabled = true) => {
-    const mouseRef = useRef({ x: 0, y: 0 })
-    const rafRef = useRef(null)
+  // Persistent storage of mouse position
+  const mouseRef = useRef({ x: 0, y: 0 })
 
-    useEffect(() => {
-        if (!enabled) return
+  // Reference for RAF throttling
+  const rafRef = useRef(null)
 
-        const handleMouseMove = (e) => {
-            // Throttle avec RAF pour de meilleures performances
-            if (rafRef.current) return
+  useEffect(() => {
+    // If disabled, don't listen to events
+    if (!enabled) return
 
-            rafRef.current = requestAnimationFrame(() => {
-                mouseRef.current.x = e.clientX
-                mouseRef.current.y = e.clientY
-                rafRef.current = null
-            })
-        }
+    /**
+     * Mousemove event handler with throttling
+     * Uses requestAnimationFrame to limit updates
+     * and improve performance
+     */
+    const handleMouseMove = (e) => {
+      // If a frame is already pending, ignore this update
+      if (rafRef.current) return
 
-        window.addEventListener('mousemove', handleMouseMove)
+      // Schedule update for next frame
+      rafRef.current = requestAnimationFrame(() => {
+        // Update position with client coordinates
+        mouseRef.current.x = e.clientX
+        mouseRef.current.y = e.clientY
 
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove)
-            if (rafRef.current) {
-                cancelAnimationFrame(rafRef.current)
-            }
-        }
-    }, [enabled])
+        // Reset RAF reference
+        rafRef.current = null
+      })
+    }
 
-    return mouseRef.current
+    // Listen to mouse movements on entire window
+    window.addEventListener('mousemove', handleMouseMove)
+
+    // Cleanup on unmount or when enabled changes
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+
+      // Cancel pending frame if it exists
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [enabled])
+
+  // Return current position object (not the ref)
+  return mouseRef.current
 }

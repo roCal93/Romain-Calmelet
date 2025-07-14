@@ -1,3 +1,6 @@
+// menuMobile.module.scss
+@use '../../styles/variables.module' as *;
+
 .burgerMenu {
   position: relative;
   padding: 1rem;
@@ -15,9 +18,9 @@
     z-index: 1001;
     position: relative;
 
-    // Focus visible
+    // Focus visible state
     &:focus-visible {
-      outline: 2px solid #e74c3c;
+      outline: 2px solid $primary;
       outline-offset: 4px;
       border-radius: 4px;
     }
@@ -25,7 +28,7 @@
     .bar {
       height: 4px;
       width: 100%;
-      background-color: #e74d3c87;
+      background-color: rgba($primary, 0.53); // Using primary with opacity
       border-radius: 4px;
       transition: all 0.3s ease;
       transform-origin: center;
@@ -33,40 +36,40 @@
   }
 }
 
-// Animations hover du burger avec délais
+// Burger hover animations with delays
 .burgerButton {
   &:hover .bar {
     &:nth-child(1) {
       transition-delay: 0s;
-      background-color: #e74d3c;
+      background-color: $primary;
     }
     &:nth-child(2) {
       transition-delay: 0.1s;
-      background-color: #e74d3c;
+      background-color: $primary;
     }
     &:nth-child(3) {
       transition-delay: 0.2s;
-      background-color: #e74d3c;
+      background-color: $primary;
     }
   }
 
   &:not(:hover) .bar {
     &:nth-child(1) {
       transition-delay: 0.2s;
-      background-color: #e74d3c87;
+      background-color: rgba($primary, 0.53);
     }
     &:nth-child(2) {
       transition-delay: 0.1s;
-      background-color: #e74d3c87;
+      background-color: rgba($primary, 0.53);
     }
     &:nth-child(3) {
       transition-delay: 0s;
-      background-color: #e74d3c87;
+      background-color: rgba($primary, 0.53);
     }
   }
 }
 
-// Animation du burger vers X
+// Burger to X animation
 .burgerButton.open {
   .bar {
     &:nth-child(1) {
@@ -92,7 +95,7 @@
   border-radius: 8px;
   z-index: 1000;
 
-  // État fermé
+  // Closed state
   opacity: 0;
   transform: translateX(20px) translateY(-10px);
   pointer-events: none;
@@ -109,7 +112,7 @@
       justify-content: center;
       margin-bottom: 1.5rem;
 
-      // Animation initiale des items
+      // Initial item animation
       opacity: 0;
       transform: translateX(30px);
       transition: all 0.3s ease;
@@ -122,23 +125,26 @@
         width: 10rem;
         font-size: 1.1rem;
         color: #333;
-        background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+        background: linear-gradient(
+          135deg,
+          rgba($primary, 0.5) 0%,
+          $primary 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         padding: 12px 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         border: none;
-
         cursor: pointer;
         border-radius: 4px;
         text-align: center;
         font-weight: 500;
         transition: all 0.2s ease;
 
-        // Focus visible
+        // Focus visible state
         &:focus-visible {
-          outline: 2px solid #e74c3c;
+          outline: 2px solid $primary;
           outline-offset: -2px;
         }
 
@@ -155,7 +161,7 @@
   }
 }
 
-// État ouvert du menu
+// Open menu state
 .menuPanel.open {
   opacity: 1;
   transform: translateX(0) translateY(0);
@@ -166,7 +172,7 @@
     opacity: 1;
     transform: translateX(0);
 
-    // Animation décalée pour chaque item
+    // Staggered animation for each item
     @for $i from 1 through 3 {
       &:nth-child(#{$i}) {
         transition-delay: #{0.1 * $i}s;
@@ -197,7 +203,7 @@
   }
 }
 
-// Support pour prefers-reduced-motion
+// Support for prefers-reduced-motion
 @media (prefers-reduced-motion: reduce) {
   .bar,
   .menuPanel,
@@ -208,7 +214,7 @@
     animation: none !important;
   }
 
-  // États finaux pour l'accessibilité
+  // Final states for accessibility
   .burgerButton.open {
     .bar {
       &:nth-child(1) {
@@ -234,7 +240,7 @@
   }
 }
 
-// Responsive
+// Responsive styles
 @media (max-width: 480px) {
   .menuPanel {
     width: 200px;
@@ -247,7 +253,7 @@
   }
 }
 
-// Pour les écrans tactiles, augmenter les zones de tap
+// Touch screen optimization
 @media (hover: none) and (pointer: coarse) {
   .burgerButton {
     width: 44px;

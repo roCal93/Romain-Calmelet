@@ -1,125 +1,95 @@
-// Mixins
+// Import your variables
+@use '../../styles/variables.module.scss' as *;
+
+// Import Sass color module
+@use 'sass:color';
+@use 'sass:math';
+
+// ========== COLOR CONFIGURATION ==========
+/**
+ * Particle color system based on primary color
+ * Uses HSL for easy manipulation of lightness and saturation
+ */
+
+// Extract HSL values from primary using new Sass syntax
+$primary-hue: color.channel($primary, 'hue', $space: hsl);
+$primary-saturation: color.channel($primary, 'saturation', $space: hsl);
+$primary-lightness: color.channel($primary, 'lightness', $space: hsl);
+
+// Particle color configuration
+$particle-hue-base: $primary-hue; // Base hue from primary color
+$particle-hue-range: 30; // Hue variation range (+/- 15 degrees)
+$particle-saturation: math.max(
+  60%,
+  $primary-saturation
+); // Minimum 60% saturation for vibrant colors
+$particle-lightness-base: 50%; // Base lightness
+$particle-lightness-range: 20%; // Lightness variation
+
+// ========== EXPORT FOR JAVASCRIPT ==========
+/**
+ * Export color values for use in React component
+ * This allows dynamic particle generation with consistent theming
+ */
+:export {
+  particleHueBase: #{$particle-hue-base};
+  particleHueRange: #{$particle-hue-range};
+  particleSaturation: #{$particle-saturation};
+  particleLightnessBase: #{$particle-lightness-base};
+  particleLightnessRange: #{$particle-lightness-range};
+  primaryColor: #{$primary};
+}
+
+// ========== MIXINS ==========
+/**
+ * Centers an element using absolute positioning and transform
+ */
 @mixin absolute-center {
   position: absolute;
   transform: translate(-50%, -50%);
 }
 
-// ✅ NOUVEAU : Mixin optimisé pour remplacer will-change
+/**
+ * GPU optimization mixin
+ * Forces GPU acceleration without using will-change
+ * translate3d creates a new layer, backface-visibility prevents flickering
+ */
 @mixin gpu-optimized {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
 }
 
-// ✅ NOUVEAU : Mixin pour will-change conditionnel
-@mixin will-change-conditional {
-  will-change: auto; // Par défaut
-
-  &:hover,
-  &.animating {
-    will-change: transform, opacity;
-  }
-}
-
-// Container principal
+// ========== CONTAINER ==========
+/**
+ * Main container for the particle system
+ * Fixed positioning covers entire viewport
+ * z-index -1 keeps it behind all content
+ * pointer-events: none allows clicks to pass through
+ */
 .container {
   position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: -1;
-  pointer-events: none;
+  inset: 0; // Shorthand for top/right/bottom/left: 0
+  overflow: hidden; // Hide particles that move off-screen
+  z-index: -1; // Behind all other content
+  pointer-events: none; // Allow interaction with content above
 }
 
-// ✅ MODIFIÉ : Particules optimisées
+// ========== PARTICLES ==========
+/**
+ * Individual particle styling
+ * Absolutely positioned circles with glow effects
+ * Performance optimized with conditional will-change
+ */
 .particle {
-  @include absolute-center;
-  @include gpu-optimized; // Remplace will-change-optimized
+  @include absolute-center; // Center on coordinates
+  @include gpu-optimized; // Force GPU acceleration
   position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
+  border-radius: 50%; // Perfect circle
+  pointer-events: none; // Non-interactive
 
-  // Optionnel : will-change seulement pour les premières particules
+  // Performance optimization: only first 20 particles get will-change
+  // This prevents GPU memory exhaustion with many particles
   &:nth-child(-n + 20) {
     will-change: transform, opacity;
-  }
-}
-
-// ✅ MODIFIÉ : Cercle suiveur optimisé
-.mouseFollower {
-  @include absolute-center;
-  @include gpu-optimized;
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  filter: blur(15px);
-  pointer-events: none;
-  will-change: auto; // Géré par JavaScript
-  z-index: 1;
-}
-
-// ✅ MODIFIÉ : Curseur ring optimisé
-.cursorRing {
-  @include absolute-center;
-  @include gpu-optimized;
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: pulse 1.5s infinite;
-  will-change: auto; // Géré par JavaScript
-  z-index: 2;
-}
-
-// ✅ MODIFIÉ : Animation optimisée
-@keyframes pulse {
-  0% {
-    transform: translate(-50%, -50%) scale(0) translate3d(0, 0, 0);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(4) translate3d(0, 0, 0);
-    opacity: 0;
-  }
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .contentBox {
-    padding: 1.5rem;
-    margin: 1rem;
-  }
-
-  .title {
-    font-size: 2rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .mouseFollower {
-    width: 120px;
-    height: 120px;
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .subtitle {
-    font-size: 0.875rem;
-  }
-
-  .mouseFollower {
-    width: 80px;
-    height: 80px;
-  }
-
-  .cursorRing {
-    width: 30px;
-    height: 30px;
   }
 }

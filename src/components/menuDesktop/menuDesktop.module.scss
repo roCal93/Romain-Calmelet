@@ -1,3 +1,6 @@
+// menuDesktop.module.scss
+@use '../../styles/variables.module' as *;
+
 .menu {
   display: flex;
   align-items: center;
@@ -6,6 +9,7 @@
   list-style: none;
   margin: 0;
 
+  // List item with entrance animation
   li {
     opacity: 0;
     transform: translateX(30px);
@@ -13,33 +17,43 @@
     animation-delay: var(--animation-delay, 0.7s);
   }
 
+  // Navigation link styles
   .link {
     display: block;
     position: relative;
     transition: all 0.2s ease;
     text-decoration: none;
-    color: #333;
-    background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+
+    // Fallback color for browsers that don't support text gradients
+    color: $primary;
+
+    // Gradient text effect
+    background: linear-gradient(135deg, rgba($primary, 0.5) 0%, $primary 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+
     padding: 0.5rem 0;
     font-size: 18px;
 
+    // Hover state
     &:hover {
       transform: scale(1.07);
     }
 
+    // Focus state for keyboard navigation
     &:focus-visible {
-      outline: 2px solid #e74c3c;
+      outline: $focus-color;
       outline-offset: 4px;
       border-radius: 4px;
     }
 
-    // Indicateur de lien actif
+    // Active link styles
     &.active {
-      color: #e74d3c87;
+      // Using primary color with opacity
+      color: rgba($primary, 0.87);
 
+      // Active indicator underline
       &::after {
         content: '';
         position: absolute;
@@ -47,31 +61,33 @@
         left: 0;
         right: 0;
         height: 2px;
-        background-color: #e74d3c87;
+        background-color: rgba($primary, 0.87);
         transform: scaleX(1);
         transition: transform 0.3s ease;
       }
     }
 
-    // Animation de soulignement au hover
-    &:not(.active)::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: #e74d3c87;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
+    // Hover underline animation for non-active links
+    &:not(.active) {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: rgba($primary, 0.87);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
 
-    &:not(.active):hover::after {
-      transform: scaleX(1);
+      &:hover::after {
+        transform: scaleX(1);
+      }
     }
   }
 
-  // Respect des préférences d'accessibilité
+  // Accessibility: Respect user's motion preferences
   @media (prefers-reduced-motion: reduce) {
     li {
       animation: none;
@@ -89,6 +105,7 @@
   }
 }
 
+// Fade in from right animation
 @keyframes fadeInFromRight {
   to {
     opacity: 1;

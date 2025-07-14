@@ -1,11 +1,14 @@
-// Variables CSS pour les couleurs
+@use '../../../styles/variables.module.scss' as *;
+@use 'sass:color';
+
+// CSS variables for colors
 :root {
   --bg-gradient-start: #ffffff;
   --bg-gradient-end: #cdcdcd;
-  --particle-fill-center: rgba(191, 54, 12, 1);
-  --particle-fill-edge: rgba(255, 87, 34, 1);
-  --particle-stroke: rgba(230, 74, 25, 1);
-  --particle-connections: rgba(244, 81, 30, 1);
+  --particle-fill-center: #{$primary};
+  --particle-fill-edge: #{color.scale($primary, $lightness: 30%)};
+  --particle-stroke: #{color.scale($primary, $lightness: -10%)};
+  --particle-connections: #{color.change($primary, $alpha: 0.7)};
 }
 
 .canvas {

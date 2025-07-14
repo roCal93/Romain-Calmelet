@@ -1,57 +1,77 @@
-// components/arrow.module.scss
+// components/navigationArrows.module.scss
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
+
+// Base arrow button styles
 .arrow {
+  // Dimensions
   width: 45px;
   height: 45px;
+
+  // Shape and appearance
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
   background: rgba(0, 0, 0, 0.05);
   color: white;
+
+  // Interaction
   cursor: pointer;
   transition: all 0.3s ease;
+
+  // Layout
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
 
+  // SVG icon styles
   svg {
     width: 40px;
     height: 40px;
     transition: transform 0.3s ease;
   }
 
-  // Effet hover
+  // Hover state (when not disabled)
   &:hover:not(.disabled) {
     background: rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 255, 255, 0.6);
     transform: scale(1.1);
   }
 
+  // Specific hover effect for up arrow
   &.up:hover:not(.disabled) svg {
     transform: translateY(-2px);
   }
 
+  // Specific hover effect for down arrow
   &.down:hover:not(.disabled) svg {
     transform: translateY(2px);
   }
 
-  // Effet de clic
+  // Active/click state
   &:active:not(.disabled) {
     transform: scale(0.95);
   }
 
-  // État désactivé
+  // Focus state for accessibility
+  &:focus-visible {
+    outline: $focus-color;
+    outline-offset: 2px;
+  }
+
+  // Disabled state
   &.disabled {
     opacity: 0.3;
     cursor: not-allowed;
   }
 
-  // État en navigation
+  // Navigating state with pulse animation
   &.navigating {
     animation: pulse 0.8s;
   }
 
-  // Animation d'onde au clic
+  // Ripple effect on click
   &::before {
     content: '';
     position: absolute;
@@ -60,17 +80,18 @@
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba($wave-color, 0.4);
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
   }
 
+  // Expand ripple on active state
   &:active:not(.disabled)::before {
     width: 100px;
     height: 100px;
   }
 
-  // Responsive
+  // Mobile responsive styles
   @media (max-width: 768px) {
     width: 35px;
     height: 35px;
@@ -82,19 +103,22 @@
   }
 }
 
+// Pulse animation for navigating state
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 0 rgba($primary, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 15px rgba($primary, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 0 rgba($primary, 0);
   }
 }
 
-// Variantes de style
+// Style variants
+
+// Minimal style variant
 .minimal {
   background: transparent;
   border: 2px solid #ddd;
@@ -107,16 +131,19 @@
   }
 }
 
+// Primary style variant using primary color
 .primary {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: $primary;
+  border-color: $primary;
 
   &:hover:not(.disabled) {
-    background: #1d4ed8;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    // Using color.adjust to darken the primary color by 10%
+    background: color.adjust($primary, $lightness: -10%);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
   }
 }
 
+// Ghost style variant
 .ghost {
   background: transparent;
   border: none;

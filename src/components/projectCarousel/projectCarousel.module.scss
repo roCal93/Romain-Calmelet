@@ -1,3 +1,11 @@
+// ProjectCarousel.module.scss
+@use '../../styles/variables.module.scss' as *;
+@use 'sass:color';
+
+// ===================================
+// Container and Wrapper Styles
+// ===================================
+
 .carouselWrapper {
   width: 100%;
   overflow: hidden;
@@ -10,17 +18,22 @@
   gap: 2rem;
   overflow-x: scroll;
   scroll-behavior: smooth;
-  -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; // Hide scrollbar for IE/Edge
+  scrollbar-width: none; // Hide scrollbar for Firefox
   user-select: none;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
   padding: 1rem;
 
+  // Hide scrollbar for Chrome/Safari/Opera
   &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
   }
 }
+
+// ===================================
+// Carousel Item Styles
+// ===================================
 
 .carouselItem {
   flex: 0 0 auto;
@@ -35,44 +48,47 @@
   box-sizing: border-box;
   cursor: pointer;
 
+  // Responsive width adjustment
   @media (max-width: 1200px) {
     width: 90%;
   }
 
+  // Active state - slightly scaled
   &[aria-selected='true'] {
     transform: scale(1.04);
   }
 
-  &:hover {
-    transform: scale(1.04);
-  }
-
-  // Focus styles améliorés
-  &:focus {
-    outline: 3px solid #e74c3c;
-    outline-offset: 4px;
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-  }
-
-  // Pour les utilisateurs qui préfèrent moins de focus visible
-  @media (prefers-reduced-motion: no-preference) {
-    &:focus {
-      animation: focusPulse 1s ease-in-out;
+  // Hover effect for desktop
+  @media (hover: hover) {
+    &:hover {
+      transform: scale(1.04);
     }
   }
 
-  // Focus visible uniquement au clavier
+  // Enhanced focus styles using primary color
+  &:focus {
+    outline: $focus-color;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px color.adjust($primary, $alpha: -0.9);
+  }
+
+  // Remove focus styles for mouse users
   &:focus:not(:focus-visible) {
     outline: none;
     box-shadow: none;
   }
 
+  // Keyboard-only focus styles
   &:focus-visible {
-    outline: 3px solid #e74c3c;
+    outline: $focus-color;
     outline-offset: 4px;
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    box-shadow: 0 0 0 4px color.adjust($primary, $alpha: -0.9);
   }
 }
+
+// ===================================
+// Navigation Components
+// ===================================
 
 .navigationWrapper {
   display: flex;
@@ -82,6 +98,7 @@
   margin: 0.5rem 0;
   position: relative;
 
+  // Responsive gap adjustments
   @media (max-width: 768px) {
     gap: 12px;
   }
@@ -102,6 +119,10 @@
   margin-top: 0.2rem;
 }
 
+// ===================================
+// Arrow Button Styles
+// ===================================
+
 .arrowButton {
   background: white;
   border: 1px solid #e0e0e0;
@@ -117,46 +138,54 @@
   color: #333;
   flex-shrink: 0;
 
+  // Hover state
   &:hover:not(:disabled) {
     background: #f5f5f5;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: scale(1.1);
   }
 
+  // Active/pressed state
   &:active:not(:disabled) {
     transform: scale(0.95);
   }
 
+  // Disabled state
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
+  // Hidden state with fade animation
   &.hidden {
     opacity: 0;
     pointer-events: none;
     animation: fadeOut 0.3s ease;
   }
 
+  // Visible state with fade animation
   &:not(.hidden) {
     animation: fadeIn 0.3s ease;
   }
 
-  // Focus styles pour les boutons
+  // Focus styles using primary color
   &:focus {
-    outline: 2px solid #e74d3cc1;
+    outline: 2px solid color.adjust($primary, $lightness: -5%);
     outline-offset: 2px;
   }
 
+  // Remove focus for mouse users
   &:focus:not(:focus-visible) {
     outline: none;
   }
 
+  // Icon sizing
   svg {
     width: 16px;
     height: 16px;
   }
 
+  // Responsive sizing
   @media (max-width: 768px) {
     width: 32px;
     height: 32px;
@@ -178,6 +207,7 @@
   }
 }
 
+// Navigation bar specific arrow button styles
 .navigationBar .arrowButton {
   box-shadow: none;
   border: none;
@@ -188,11 +218,16 @@
   }
 }
 
+// Hidden state utility
 .hidden {
   opacity: 0;
   pointer-events: none;
   animation: fadeOut 0.3s ease;
 }
+
+// ===================================
+// Carousel Indicators (Dots)
+// ===================================
 
 .carouselIndicator {
   display: flex;
@@ -209,29 +244,37 @@
   cursor: pointer;
   transition: all 0.2s;
 
+  // Active dot using primary color
   &.active {
-    background-color: #e74c3c;
+    background-color: $primary;
     transform: scale(1.2);
   }
 
+  // Hover state
   &:hover {
     background-color: #999;
   }
 
-  // Focus styles pour les dots
+  // Focus styles using primary color
   &:focus {
-    outline: 2px solid #e74c3c;
+    outline: 2px solid $primary;
     outline-offset: 2px;
   }
 
+  // Remove focus for mouse users
   &:focus:not(:focus-visible) {
     outline: none;
   }
 }
 
+// Active state class
 .active {
-  background-color: #e74c3c;
+  background-color: $primary;
 }
+
+// ===================================
+// Modal Styles
+// ===================================
 
 .modal {
   position: fixed;
@@ -249,16 +292,19 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
+// Modal open state
 .modalOpen {
   opacity: 1;
   visibility: visible;
 }
 
+// Modal content wrapper
 .modalContent {
   position: relative;
   animation: modalZoomIn 0.4s ease;
 }
 
+// Modal card container
 .modalCard {
   background: white;
   border-radius: 16px;
@@ -269,18 +315,20 @@
   transform-origin: center;
   animation: bounceIn 0.5s ease;
 
+  // Responsive sizing
   @media (max-width: 1050px) {
     max-width: 85vw;
   }
 }
 
+// Modal close button
 .closeButton {
   position: absolute;
   top: 0;
   right: -50px;
   width: 40px;
   height: 40px;
-  background: linear-gradient(180deg, #ffffff 0%, rgb(231, 77, 60) 600%);
+  background: linear-gradient(180deg, #ffffff 0%, $primary 600%);
   border: none;
   border-radius: 50%;
   font-size: 24px;
@@ -291,17 +339,19 @@
   transition: transform 0.2s ease;
   z-index: 1;
 
+  // Hover effect
   &:hover {
     transform: scale(1.1);
   }
 
-  // Focus style pour le bouton de fermeture
+  // Focus style using primary color
   &:focus {
-    outline: 3px solid #e74c3c;
+    outline: $focus-color;
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
   }
 
+  // Mobile styles
   @media (max-width: 768px) {
     top: 20px;
     right: 20px;
@@ -313,19 +363,11 @@
   }
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+// ===================================
+// Animations
+// ===================================
 
-// Animations existantes...
+// Fade in animation
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -337,6 +379,7 @@
   }
 }
 
+// Fade out animation
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -348,6 +391,7 @@
   }
 }
 
+// Card focus animation
 @keyframes cardFocus {
   0% {
     transform: scale(1);
@@ -360,6 +404,7 @@
   }
 }
 
+// Modal zoom in animation
 @keyframes modalZoomIn {
   from {
     transform: scale(0.8);
@@ -371,6 +416,7 @@
   }
 }
 
+// Bounce in animation for modal card
 @keyframes bounceIn {
   0% {
     transform: scale(0.9);
@@ -385,6 +431,7 @@
   }
 }
 
+// Slide up animation (unused but available)
 @keyframes slideUp {
   from {
     transform: translateY(100vh);
@@ -396,6 +443,7 @@
   }
 }
 
+// Fade in with rotation animation (unused but available)
 @keyframes fadeInRotate {
   from {
     transform: scale(0.8) rotate(-5deg);

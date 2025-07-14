@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import styles from './backgroundContact.module.scss'
+import variables from '../../styles/variables.module.scss'
 
-// Fonction de debounce
+/**
+ * Debounce utility function to limit the rate of function calls
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Delay in milliseconds
+ * @returns {Function} Debounced function
+ */
 const debounce = (func, wait) => {
   let timeout
   return function executedFunction(...args) {
@@ -14,29 +20,37 @@ const debounce = (func, wait) => {
   }
 }
 
+/**
+ * BackgroundContact Component
+ *
+ * Renders an animated wave background that responds to mouse movement.
+ **/
 const BackgroundContact = () => {
-  // Détection des capacités de l'appareil
+  // Device capability detection
   const devicePixelRatio = window.devicePixelRatio || 1
   const isHighDensity = devicePixelRatio > 1.5
 
-  // ✅ PARAMÈTRES OPTIMISÉS pour le budget will-change
-  const WAVE_COUNT = isHighDensity ? 2 : 3 // Réduit de 3/5 à 2/3
-  const MAX_OPTIMIZED_WAVES = 2 // Limite will-change
+  // Get wave color from SCSS variables
+  const waveColor = variables.waveColor || '#e74c3c'
+
+  // Performance-optimized parameters
+  const WAVE_COUNT = isHighDensity ? 2 : 3 // Fewer waves on high-density displays
+  const MAX_OPTIMIZED_WAVES = 2 // Limit will-change to first 2 waves
   const WAVE_AMPLITUDE = 80
   const WAVE_FREQUENCY = 0.02
   const WAVE_SPEED = 0.005
   const MOUSE_INFLUENCE = 50
   const MOUSE_DISTANCE_EFFECT = 150
   const MOUSE_DISTANCE_EFFECT_SQUARED = MOUSE_DISTANCE_EFFECT ** 2
-  const WAVE_STEP = isHighDensity ? 16 : 8
+  const WAVE_STEP = isHighDensity ? 16 : 8 // Larger steps for performance on retina
 
-  // Vérifier la préférence pour les animations réduites
+  // Check user's motion preference
   const prefersReducedMotion = useMemo(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     []
   )
 
-  // États
+  // State management
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -48,7 +62,7 @@ const BackgroundContact = () => {
   const [waves, setWaves] = useState([])
   const [isMouseMoving, setIsMouseMoving] = useState(false)
 
-  // ✅ NOUVEAUX REFS pour l'optimisation will-change
+  // Performance optimization refs
   const animationRef = useRef()
   const mousePosRef = useRef(mousePos)
   const mouseTimeoutRef = useRef()
@@ -56,16 +70,19 @@ const BackgroundContact = () => {
   const waveRefs = useRef([])
   const willChangeTimeoutRef = useRef()
 
-  // ✅ NOUVELLE FONCTION : Gestion optimisée du will-change
+  /**
+   * Optimizes will-change property usage to improve performance
+   * Only applies will-change to priority waves and removes it after animation
+   */
   const optimizeWillChange = useCallback(() => {
-    // Activer will-change seulement sur les vagues prioritaires
+    // Apply will-change only to priority waves
     waveRefs.current.forEach((wave, index) => {
       if (wave && index < MAX_OPTIMIZED_WAVES) {
         wave.style.willChange = 'transform, filter'
       }
     })
 
-    // Désactiver après l'animation
+    // Remove will-change after animation completes
     clearTimeout(willChangeTimeoutRef.current)
     willChangeTimeoutRef.current = setTimeout(() => {
       waveRefs.current.forEach((wave) => {
@@ -73,10 +90,12 @@ const BackgroundContact = () => {
           wave.style.willChange = 'auto'
         }
       })
-    }, 1000) // Durée d'une animation complète
-  }, [])
+    }, 1000)
+  }, [MAX_OPTIMIZED_WAVES])
 
-  // Gestion du redimensionnement de la fenêtre
+  /**
+   * Handle window resize with debouncing
+   */
   useEffect(() => {
     const handleResize = debounce(() => {
       setWindowSize({
@@ -89,7 +108,9 @@ const BackgroundContact = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Initialisation des vagues
+  /**
+   * Initialize wave data with random variations
+   */
   useEffect(() => {
     const initialWaves = Array.from({ length: WAVE_COUNT }, (_, i) => ({
       id: i,
@@ -97,16 +118,22 @@ const BackgroundContact = () => {
       amplitude: WAVE_AMPLITUDE * (0.5 + Math.random() * 0.5),
       frequency: WAVE_FREQUENCY * (0.8 + Math.random() * 0.4),
       speed: WAVE_SPEED * (0.5 + Math.random() * 1.5),
-      hue: 0,
       opacity: 0.15 + Math.random() * 0.25,
       offset: Math.random() * 100,
-      // ✅ NOUVEAU : Priorité pour l'optimisation
       isPriority: i < MAX_OPTIMIZED_WAVES,
     }))
     setWaves(initialWaves)
-  }, [WAVE_COUNT])
+  }, [
+    WAVE_COUNT,
+    WAVE_AMPLITUDE,
+    WAVE_FREQUENCY,
+    WAVE_SPEED,
+    MAX_OPTIMIZED_WAVES,
+  ])
 
-  // ✅ MODIFIÉ : Gestion du mouvement de la souris avec optimisation
+  /**
+   * Handle mouse movement with performance optimizations
+   */
   const handleMouseMove = useCallback(
     (e) => {
       const newPos = { x: e.clientX, y: e.clientY }
@@ -114,9 +141,10 @@ const BackgroundContact = () => {
       setMousePos(newPos)
       setIsMouseMoving(true)
 
-      // Optimiser will-change pendant le mouvement
+      // Optimize will-change during movement
       optimizeWillChange()
 
+      // Reset mouse moving state after inactivity
       clearTimeout(mouseTimeoutRef.current)
       mouseTimeoutRef.current = setTimeout(() => {
         setIsMouseMoving(false)
@@ -125,6 +153,9 @@ const BackgroundContact = () => {
     [optimizeWillChange]
   )
 
+  /**
+   * Set up mouse event listener
+   */
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
     return () => {
@@ -134,7 +165,9 @@ const BackgroundContact = () => {
     }
   }, [handleMouseMove])
 
-  // Animation principale optimisée
+  /**
+   * Main animation loop with frame skipping for performance
+   */
   useEffect(() => {
     if (prefersReducedMotion) return
 
@@ -143,6 +176,7 @@ const BackgroundContact = () => {
     const animate = () => {
       frameCountRef.current++
 
+      // Skip frames on high-density displays
       if (frameCountRef.current % frameSkip === 0) {
         setWaves((prev) =>
           prev.map((wave) => ({
@@ -157,7 +191,7 @@ const BackgroundContact = () => {
 
     animationRef.current = requestAnimationFrame(animate)
 
-    // ✅ NOUVEAU : Optimisation périodique
+    // Periodic optimization when mouse is idle
     const optimizationInterval = setInterval(() => {
       if (!isMouseMoving) {
         optimizeWillChange()
@@ -172,24 +206,31 @@ const BackgroundContact = () => {
     }
   }, [prefersReducedMotion, isHighDensity, isMouseMoving, optimizeWillChange])
 
-  // Génération optimisée des points de vague
+  /**
+   * Generate SVG path points for wave animation
+   * Includes mouse interaction effects
+   */
   const generateWavePoints = useCallback(
     (wave) => {
       const points = []
       const { width, height } = windowSize
       const centerY = height / 2.5
 
+      // Generate wave points along x-axis
       for (let x = 0; x <= width; x += WAVE_STEP) {
+        // Calculate base wave position
         const baseY =
           centerY + Math.sin(x * wave.frequency + wave.phase) * wave.amplitude
 
         let mouseEffect = 0
 
+        // Apply mouse influence if mouse is moving
         if (isMouseMoving) {
           const dx = x - mousePosRef.current.x
           const dy = baseY - mousePosRef.current.y
           const distanceSquared = dx * dx + dy * dy
 
+          // Calculate mouse effect based on distance
           if (distanceSquared < MOUSE_DISTANCE_EFFECT_SQUARED) {
             const distance = Math.sqrt(distanceSquared)
             const influence = 1 - distance / MOUSE_DISTANCE_EFFECT
@@ -201,6 +242,7 @@ const BackgroundContact = () => {
         points.push(`${x},${finalY}`)
       }
 
+      // Close the path
       points.push(`${width},${height}`)
       points.push(`0,${height}`)
 
@@ -210,12 +252,13 @@ const BackgroundContact = () => {
       windowSize,
       isMouseMoving,
       MOUSE_INFLUENCE,
+      MOUSE_DISTANCE_EFFECT,
       MOUSE_DISTANCE_EFFECT_SQUARED,
       WAVE_STEP,
     ]
   )
 
-  // Si l'utilisateur préfère des animations réduites
+  // Render static background for reduced motion preference
   if (prefersReducedMotion) {
     return (
       <div className={styles.container} aria-hidden="true">
@@ -224,10 +267,11 @@ const BackgroundContact = () => {
     )
   }
 
-  // ✅ MODIFIÉ : Version SVG optimisée avec refs et will-change conditionnel
+  // Main render
   return (
     <div className={styles.container} aria-hidden="true">
       <svg className={styles.waveSvg}>
+        {/* Define gradients for each wave */}
         <defs>
           {waves.map((wave) => (
             <linearGradient
@@ -238,17 +282,18 @@ const BackgroundContact = () => {
               x2="0%"
               y2="100%"
             >
-              <stop offset="0%" stopColor="#e74c3c" stopOpacity="0" />
+              <stop offset="0%" stopColor={waveColor} stopOpacity="0" />
               <stop
                 offset="50%"
-                stopColor="#e74c3c"
+                stopColor={waveColor}
                 stopOpacity={wave.opacity}
               />
-              <stop offset="100%" stopColor="#e74c3c" stopOpacity="0" />
+              <stop offset="100%" stopColor={waveColor} stopOpacity="0" />
             </linearGradient>
           ))}
         </defs>
 
+        {/* Render animated wave paths */}
         {waves.map((wave, index) => (
           <path
             key={`wave-${wave.id}`}
@@ -257,8 +302,9 @@ const BackgroundContact = () => {
             fill={`url(#gradient-${wave.id})`}
             className={styles.wavePath}
             style={{
+              // Progressive blur for depth effect
               filter: `blur(${1 + wave.id * 0.5}px)`,
-              // ✅ NOUVEAU : will-change conditionnel géré par JavaScript
+              // will-change managed by JavaScript for performance
               willChange: 'auto',
             }}
           />

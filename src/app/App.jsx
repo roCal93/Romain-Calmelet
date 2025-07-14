@@ -5,7 +5,7 @@ import Header from '../components/header/Header'
 import '../styles/reset.scss'
 import '../styles/global.scss'
 
-// Configuration des sections de navigation
+// Navigation sections configuration
 const SECTIONS = [
   { path: '/', id: 'home' },
   { path: '/presentation', id: 'presentation' },
@@ -13,27 +13,27 @@ const SECTIONS = [
   { path: '/contact', id: 'contact' },
 ]
 
-// ==================== PARAMÈTRES DE SENSIBILITÉ ====================
+// ==================== SENSITIVITY PARAMETERS ====================
 const SENSITIVITY_CONFIG = {
-  // Molette de souris
+  // Mouse wheel
   wheel: {
-    debounceTime: 50, // Délai minimum entre les événements wheel (ms)
-    deltaThreshold: 50, // Quantité de scroll nécessaire pour navigation (plus bas = plus sensible)
-    resetTimeout: 1500, // Temps avant réinitialisation de l'état (ms)
+    debounceTime: 50, // Minimum delay between wheel events (ms)
+    deltaThreshold: 50, // Scroll amount needed for navigation (lower = more sensitive)
+    resetTimeout: 1500, // Time before state reset (ms)
   },
 
-  // Navigation tactile
+  // Touch navigation
   touch: {
-    minSwipeDistance: 30, // Distance minimale pour détecter un swipe (px)
-    resetTimeout: 2000, // Temps avant réinitialisation de l'état (ms)
+    minSwipeDistance: 30, // Minimum distance to detect a swipe (px)
+    resetTimeout: 2000, // Time before state reset (ms)
   },
 
-  // Détection de scroll
+  // Scroll detection
   scroll: {
-    epsilon: 5, // Marge d'erreur pour détecter les extrémités (px)
-    navigationCooldown: 800, // Délai de blocage après navigation (ms)
-    initDelay: 200, // Délai d'initialisation des événements (ms)
-    animationDuration: 1900, // Durée de l'animation de transition (ms) - AJOUTÉ
+    epsilon: 5, // Error margin for detecting edges (px)
+    navigationCooldown: 800, // Blocking delay after navigation (ms)
+    initDelay: 200, // Event initialization delay (ms)
+    animationDuration: 1900, // Transition animation duration (ms)
   },
 }
 
@@ -41,7 +41,7 @@ function App() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Références pour la gestion de la navigation
+  // References for navigation management
   const mainRef = useRef(null)
   const isNavigatingRef = useRef(false)
   const lastWheelTimeRef = useRef(0)
@@ -49,33 +49,33 @@ function App() {
   const touchEndRef = useRef({ x: 0, y: 0 })
   const timeoutRef = useRef(null)
 
-  // NOUVELLES RÉFÉRENCES: Gestion du scroll aux extrémités
+  // NEW REFERENCES: Scroll edge management
   const scrollEndReachedRef = useRef(false)
   const scrollEndTimeoutRef = useRef(null)
   const wheelDeltaAccumulatorRef = useRef(0)
 
-  // AJOUTÉ: Référence pour le timer d'activation du scroll
+  // ADDED: Reference for scroll activation timer
   const enableScrollTimerRef = useRef(null)
 
-  // État pour la direction de navigation
+  // State for navigation direction
   const [direction, setDirection] = useState('down')
 
   /**
-   * Obtient l'index de la section actuelle basé sur l'URL
+   * Gets the current section index based on URL
    */
   const getCurrentSectionIndex = useCallback(() => {
     return SECTIONS.findIndex((section) => section.path === location.pathname)
   }, [location.pathname])
 
   /**
-   * Réinitialise le flag de navigation
+   * Resets the navigation flag
    */
   const resetNavigation = useCallback(() => {
     isNavigatingRef.current = false
   }, [])
 
   /**
-   * Réinitialise l'état de fin de scroll
+   * Resets the scroll end state
    */
   const resetScrollEndState = useCallback(() => {
     scrollEndReachedRef.current = false
@@ -83,8 +83,8 @@ function App() {
   }, [])
 
   /**
-   * Navigue vers la section suivante ou précédente
-   * @param {string} direction - 'up' ou 'down'
+   * Navigates to the next or previous section
+   * @param {string} direction - 'up' or 'down'
    */
   const navigateToSection = useCallback(
     (direction) => {
@@ -111,7 +111,7 @@ function App() {
 
       navigate(SECTIONS[nextIndex].path)
 
-      // Réinitialise l'état de fin de scroll après navigation
+      // Reset scroll end state after navigation
       resetScrollEndState()
 
       timeoutRef.current = setTimeout(() => {
@@ -123,14 +123,14 @@ function App() {
   )
 
   /**
-   * Vérifie si l'élément cible est dans une zone scrollable
+   * Checks if the target element is within a scrollable area
    */
   const isScrollableArea = (target) => {
     return target.closest('.allowScroll, .features, .scrollable')
   }
 
   /**
-   * Obtient les informations de scroll d'un élément
+   * Gets scroll information for an element
    */
   const getScrollInfo = (element) => {
     const scrollTop = element.scrollTop
@@ -149,16 +149,16 @@ function App() {
   }
 
   /**
-   * Réinitialise l'état de navigation à chaque changement de route
+   * Resets navigation state on each route change
    */
   useEffect(() => {
-    // Désactive le scroll pendant la transition
+    // Disable scroll during transition
     if (mainRef.current) {
       mainRef.current.style.overflowY = 'hidden'
       mainRef.current.scrollTop = 0
     }
 
-    // Réinitialise l'état de fin de scroll lors du changement de page
+    // Reset scroll end state on page change
     resetScrollEndState()
 
     if (timeoutRef.current) {
@@ -171,12 +171,12 @@ function App() {
       scrollEndTimeoutRef.current = null
     }
 
-    // Annule le timer précédent si il existe
+    // Cancel previous timer if it exists
     if (enableScrollTimerRef.current) {
       clearTimeout(enableScrollTimerRef.current)
     }
 
-    // Réactive le scroll après l'animation
+    // Re-enable scroll after animation
     enableScrollTimerRef.current = setTimeout(() => {
       if (mainRef.current) {
         mainRef.current.style.overflowY = 'auto'
@@ -197,7 +197,7 @@ function App() {
   }, [location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation par molette de souris avec scroll fluide
+   * Handles mouse wheel navigation with smooth scrolling
    */
   useEffect(() => {
     const handleWheel = (e) => {
@@ -220,7 +220,7 @@ function App() {
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
-      // Si pas de scroll possible, navigation directe
+      // If no scroll possible, direct navigation
       if (!canScroll) {
         e.preventDefault()
         lastWheelTimeRef.current = now
@@ -229,26 +229,26 @@ function App() {
         return
       }
 
-      // Si on peut scroller et qu'on n'est pas aux extrémités, permettre le scroll normal
+      // If scrollable and not at edges, allow normal scroll
       if (!atBottom && !atTop) {
-        // Réinitialise l'état si on scroll dans le contenu
+        // Reset state if scrolling within content
         resetScrollEndState()
         return
       }
 
-      // Si on est aux extrémités
+      // If at edges
       if ((e.deltaY > 0 && atBottom) || (e.deltaY < 0 && atTop)) {
         e.preventDefault()
         lastWheelTimeRef.current = now
 
         const direction = e.deltaY > 0 ? 'down' : 'up'
 
-        // Si on n'a pas encore atteint la fin, marquer comme atteint
+        // If end not yet reached, mark as reached
         if (!scrollEndReachedRef.current) {
           scrollEndReachedRef.current = true
           wheelDeltaAccumulatorRef.current = 0
 
-          // Réinitialise après un délai si pas d'autre scroll
+          // Reset after delay if no other scroll
           if (scrollEndTimeoutRef.current) {
             clearTimeout(scrollEndTimeoutRef.current)
           }
@@ -259,10 +259,10 @@ function App() {
           return
         }
 
-        // Si on a déjà atteint la fin, accumuler le delta
+        // If already at end, accumulate delta
         wheelDeltaAccumulatorRef.current += Math.abs(e.deltaY)
 
-        // Navigue si assez de delta accumulé (équivalent à un scroll supplémentaire)
+        // Navigate if enough delta accumulated (equivalent to additional scroll)
         if (
           wheelDeltaAccumulatorRef.current >=
           SENSITIVITY_CONFIG.wheel.deltaThreshold
@@ -270,7 +270,7 @@ function App() {
           navigateToSection(direction)
         }
 
-        // Réinitialise le timeout
+        // Reset timeout
         if (scrollEndTimeoutRef.current) {
           clearTimeout(scrollEndTimeoutRef.current)
         }
@@ -299,7 +299,7 @@ function App() {
   }, [navigateToSection, location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation tactile avec scroll fluide
+   * Handles touch navigation with smooth scrolling
    */
   useEffect(() => {
     const handleTouchStart = (e) => {
@@ -333,28 +333,28 @@ function App() {
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
-      // Si pas de scroll possible, navigation directe
+      // If no scroll possible, direct navigation
       if (!canScroll) {
         const direction = deltaY < 0 ? 'down' : 'up'
         navigateToSection(direction)
         return
       }
 
-      // Si on peut scroller et qu'on n'est pas aux extrémités, permettre le scroll normal
+      // If scrollable and not at edges, allow normal scroll
       if (!atBottom && !atTop) {
         resetScrollEndState()
         return
       }
 
-      // Si on est aux extrémités
+      // If at edges
       const direction = deltaY < 0 ? 'down' : 'up'
 
       if ((deltaY < 0 && atBottom) || (deltaY > 0 && atTop)) {
-        // Si on n'a pas encore atteint la fin, marquer comme atteint
+        // If end not yet reached, mark as reached
         if (!scrollEndReachedRef.current) {
           scrollEndReachedRef.current = true
 
-          // Réinitialise après un délai si pas d'autre geste
+          // Reset after delay if no other gesture
           if (scrollEndTimeoutRef.current) {
             clearTimeout(scrollEndTimeoutRef.current)
           }
@@ -365,7 +365,7 @@ function App() {
           return
         }
 
-        // Si on a déjà atteint la fin, naviguer
+        // If already at end, navigate
         navigateToSection(direction)
       } else {
         resetScrollEndState()
@@ -387,13 +387,13 @@ function App() {
   }, [navigateToSection, location.pathname, resetScrollEndState])
 
   /**
-   * Gestion de la navigation par clavier (modifiée pour éviter les conflits avec les modales)
+   * Handles keyboard navigation (modified to avoid conflicts with modals)
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (isNavigatingRef.current) return
 
-      // Vérifier si l'élément actif est dans une zone scrollable ou une modale
+      // Check if active element is in a scrollable area or modal
       const activeElement = document.activeElement
       const isInScrollableArea =
         activeElement &&
@@ -405,7 +405,7 @@ function App() {
           activeElement.hasAttribute('tabindex') ||
           activeElement.closest('[tabindex]'))
 
-      // Si on est dans une zone scrollable ou une modale, ne pas intercepter les flèches
+      // If in scrollable area or modal, don't intercept arrow keys
       if (isInScrollableArea) {
         return
       }

@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import styles from './phoneGame.module.scss'
 import littleWheel from '../../assets/img/imgPhoneGame/rouePetite.png'
 import averageWheel from '../../assets/img/imgPhoneGame/roueMoyenne.png'
 import bigWheel from '../../assets/img/imgPhoneGame/roueGrande.png'
 import PhoneMessage from '../phoneMessage/PhoneMessage'
 
-// Constantes
+// Constants
 const PHONE_NUMBER = '07 45 22 96 97'
 const RESET_DELAY = 2000
 const CORRECT_SEQUENCE = [2, 1, 3]
@@ -17,10 +17,10 @@ const IMAGES = [
   { id: 3, src: bigWheel, name: 'Grande roue' },
 ]
 
-// Utilitaire pour les classes CSS
+// Utility for CSS classes
 const classNames = (...classes) => classes.filter(Boolean).join(' ')
 
-// Composant pour un slot individuel
+// Individual slot component
 const GameSlot = ({
   index,
   slot,
@@ -29,9 +29,15 @@ const GameSlot = ({
   onClick,
   getImageById,
   styles,
+  isDragOver,
 }) => (
   <div
-    className={classNames(styles.slot, 'slot', slot !== null && styles.filled)}
+    className={classNames(
+      styles.slot,
+      'slot',
+      slot !== null && styles.filled,
+      isDragOver && styles.dragOver
+    )}
     data-slot={index}
     role="button"
     tabIndex={0}
@@ -57,7 +63,7 @@ const GameSlot = ({
   </div>
 )
 
-// Composant pour une image draggable
+// Draggable image component
 const DraggableImage = ({
   image,
   index,
@@ -82,6 +88,11 @@ const DraggableImage = ({
     onKeyDown={(e) =>
       !placed && e.key === 'Enter' && console.log('Image sélectionnée')
     }
+    style={{
+      touchAction: 'manipulation',
+      WebkitTouchCallout: 'none',
+      WebkitUserSelect: 'none',
+    }}
   >
     <img
       src={image.src}
@@ -91,7 +102,7 @@ const DraggableImage = ({
   </div>
 )
 
-// Composant pour la barre de statut
+// Status bar component
 const StatusBar = ({ isCompleted, showError, styles }) => {
   const statusText = isCompleted
     ? '✓ SÉQUENCE CORRECTE'
@@ -119,20 +130,69 @@ function PhoneGame({ backButton }) {
   const [isCompleted, setIsCompleted] = useState(false)
   const [showError, setShowError] = useState(false)
   const [slots, setSlots] = useState(Array(SLOT_COUNT).fill(null))
-  const [draggedItem, setDraggedItem] = useState(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [touchStart, setTouchStart] = useState(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [draggedElement, setDraggedElement] = useState(null)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [dragOverSlot, setDragOverSlot] = useState(null)
+
+  // Grouped drag state for better management
+  const [dragState, setDragState] = useState({
+    isDragging: false,
+    draggedItem: null,
+    draggedElement: null,
+    touchStart: null,
+    dragOffset: { x: 0, y: 0 },
+  })
 
   const draggableRefs = useRef([])
+
+  // Utility function to reset drag state
+  const resetDragState = useCallback(() => {
+    setDragState({
+      isDragging: false,
+      draggedItem: null,
+      draggedElement: null,
+      touchStart: null,
+      dragOffset: { x: 0, y: 0 },
+    })
+    setDragOverSlot(null)
+  }, [])
+
+  // Provide haptic feedback (if supported)
+  const provideHapticFeedback = useCallback((type) => {
+    if ('vibrate' in navigator) {
+      if (type === 'success') {
+        // Success pattern: short-pause-short
+        navigator.vibrate([100, 50, 100])
+      } else if (type === 'error') {
+        // Error: single longer vibration
+        navigator.vibrate(200)
+      } else if (type === 'drop') {
+        // Drop feedback: very short vibration
+        navigator.vibrate(50)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     setIsLoaded(true)
   }, [])
 
-  // Vérifier si la séquence est correcte
+  // Enhanced cleanup for ghost elements
+  useEffect(() => {
+    return () => {
+      // Remove all possible ghost elements
+      document.querySelectorAll('#dragGhost').forEach((el) => el.remove())
+      // Reset drag state on unmount
+      resetDragState()
+    }
+  }, [resetDragState])
+
+  // Memoize placed images for performance
+  const placedImages = useMemo(
+    () => new Set(slots.filter((slot) => slot !== null)),
+    [slots]
+  )
+
+  // Check sequence when slots change
   useEffect(() => {
     if (slots.every((slot) => slot !== null) && !isCompleted) {
       const isCorrect = slots.every(
@@ -141,162 +201,218 @@ function PhoneGame({ backButton }) {
 
       if (isCorrect) {
         setIsCompleted(true)
+        provideHapticFeedback('success')
         setTimeout(() => setShowSuccessModal(true), 2000)
       } else {
         setShowError(true)
+        provideHapticFeedback('error')
         setTimeout(() => {
           setSlots(Array(SLOT_COUNT).fill(null))
           setShowError(false)
         }, RESET_DELAY)
       }
     }
-  }, [slots, isCompleted])
+  }, [slots, isCompleted, provideHapticFeedback])
 
-  // Fonctions utilitaires
+  // Utility functions
   const getImageById = useCallback((id) => {
     return IMAGES.find((img) => img.id === id)
   }, [])
 
+  // Optimized image placement check
   const isImagePlaced = useCallback(
-    (imageId) => slots.includes(imageId),
-    [slots]
+    (imageId) => placedImages.has(imageId),
+    [placedImages]
   )
 
-  // Gestion du drag avec la souris
+  // Mouse drag handlers
   const handleDragStart = useCallback((e, imageId) => {
-    setDraggedItem(imageId)
-    setIsDragging(true)
+    setDragState((prev) => ({
+      ...prev,
+      isDragging: true,
+      draggedItem: imageId,
+    }))
   }, [])
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault()
+    const slotElement = e.currentTarget.closest('[data-slot]')
+    if (slotElement) {
+      const slotIndex = parseInt(slotElement.dataset.slot)
+      setDragOverSlot(slotIndex)
+    }
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverSlot(null)
   }, [])
 
   const handleDrop = useCallback(
     (e, slotIndex) => {
       e.preventDefault()
-      if (draggedItem !== null) {
+      setDragOverSlot(null)
+
+      if (dragState.draggedItem !== null) {
+        provideHapticFeedback('drop')
         setSlots((prevSlots) => {
           const newSlots = [...prevSlots]
-          const previousIndex = newSlots.indexOf(draggedItem)
+          const previousIndex = newSlots.indexOf(dragState.draggedItem)
           if (previousIndex !== -1) {
             newSlots[previousIndex] = null
           }
-          newSlots[slotIndex] = draggedItem
+          newSlots[slotIndex] = dragState.draggedItem
           return newSlots
         })
-        setDraggedItem(null)
-        setIsDragging(false)
+        resetDragState()
       }
     },
-    [draggedItem]
+    [dragState.draggedItem, resetDragState, provideHapticFeedback]
   )
 
-  // Gestion du tactile (code simplifié - logique identique)
+  // Touch handlers with inline error handling
   const handleTouchStart = useCallback(
     (e, imageId) => {
-      if (isImagePlaced(imageId)) {
-        e.preventDefault()
-        return
+      try {
+        if (isImagePlaced(imageId)) {
+          e.preventDefault()
+          return
+        }
+
+        const touch = e.touches[0]
+        const rect = e.currentTarget.getBoundingClientRect()
+
+        setDragState({
+          isDragging: true,
+          draggedItem: imageId,
+          draggedElement: e.currentTarget,
+          touchStart: { x: touch.clientX, y: touch.clientY },
+          dragOffset: {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top,
+          },
+        })
+      } catch (error) {
+        console.error('Touch start error:', error)
+        resetDragState()
       }
-
-      const touch = e.touches[0]
-      const rect = e.currentTarget.getBoundingClientRect()
-
-      setTouchStart({ x: touch.clientX, y: touch.clientY })
-      setDraggedItem(imageId)
-      setIsDragging(true)
-      setDraggedElement(e.currentTarget)
-      setDragOffset({
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-      })
     },
-    [isImagePlaced]
+    [isImagePlaced, resetDragState]
   )
 
   const handleTouchMove = useCallback(
     (e) => {
-      if (!isDragging || !touchStart || !draggedElement) return
+      try {
+        if (
+          !dragState.isDragging ||
+          !dragState.touchStart ||
+          !dragState.draggedElement
+        )
+          return
 
-      const touch = e.touches[0]
-      let ghostElement = document.getElementById('dragGhost')
+        const touch = e.touches[0]
+        let ghostElement = document.getElementById('dragGhost')
 
-      if (ghostElement) {
-        ghostElement.style.left = `${touch.clientX - dragOffset.x}px`
-        ghostElement.style.top = `${touch.clientY - dragOffset.y}px`
-        ghostElement.style.display = 'block'
-      } else {
-        ghostElement = document.createElement('div')
-        ghostElement.id = 'dragGhost'
-        Object.assign(ghostElement.style, {
-          position: 'fixed',
-          left: `${touch.clientX - dragOffset.x}px`,
-          top: `${touch.clientY - dragOffset.y}px`,
-          pointerEvents: 'none',
-          zIndex: '9999',
-          opacity: '0.8',
-          transform: 'scale(1.1)',
-          transition: 'none',
-        })
-        ghostElement.innerHTML = draggedElement.innerHTML
-        ghostElement.className = draggedElement.className
-        document.body.appendChild(ghostElement)
+        if (ghostElement) {
+          ghostElement.style.left = `${
+            touch.clientX - dragState.dragOffset.x
+          }px`
+          ghostElement.style.top = `${touch.clientY - dragState.dragOffset.y}px`
+          ghostElement.style.display = 'block'
+        } else {
+          ghostElement = document.createElement('div')
+          ghostElement.id = 'dragGhost'
+          Object.assign(ghostElement.style, {
+            position: 'fixed',
+            left: `${touch.clientX - dragState.dragOffset.x}px`,
+            top: `${touch.clientY - dragState.dragOffset.y}px`,
+            pointerEvents: 'none',
+            zIndex: '9999',
+            opacity: '0.8',
+            transform: 'scale(1.1)',
+            transition: 'none',
+          })
+          ghostElement.innerHTML = dragState.draggedElement.innerHTML
+          ghostElement.className = dragState.draggedElement.className
+          document.body.appendChild(ghostElement)
+        }
+
+        dragState.draggedElement.style.opacity = '0.3'
+
+        // Check for drag over slot
+        const elementBelow = document.elementFromPoint(
+          touch.clientX,
+          touch.clientY
+        )
+        const slotElement = elementBelow?.closest('[data-slot]')
+        if (slotElement) {
+          const slotIndex = parseInt(slotElement.dataset.slot)
+          setDragOverSlot(slotIndex)
+        } else {
+          setDragOverSlot(null)
+        }
+      } catch (error) {
+        console.error('Touch move error:', error)
+        resetDragState()
       }
-
-      draggedElement.style.opacity = '0.3'
     },
-    [isDragging, touchStart, draggedElement, dragOffset]
+    [dragState, resetDragState]
   )
 
   const handleTouchEnd = useCallback(
     (e) => {
-      if (!isDragging || !touchStart || draggedItem === null) return
-
-      const touch = e.changedTouches[0]
-
-      // Nettoyage
-      const ghostElement = document.getElementById('dragGhost')
-      ghostElement?.remove()
-
-      if (draggedElement) {
-        draggedElement.style.opacity = '1'
-      }
-
-      // Détection du drop
-      const elementBelow = document.elementFromPoint(
-        touch.clientX,
-        touch.clientY
-      )
-      const slotElement =
-        elementBelow?.closest('[data-slot]') || elementBelow?.closest('.slot')
-
-      if (slotElement) {
-        const slotIndex = Array.from(slotElement.parentNode.children).indexOf(
-          slotElement
+      try {
+        if (
+          !dragState.isDragging ||
+          !dragState.touchStart ||
+          dragState.draggedItem === null
         )
-        setSlots((prevSlots) => {
-          const newSlots = [...prevSlots]
-          const previousIndex = newSlots.indexOf(draggedItem)
-          if (previousIndex !== -1) {
-            newSlots[previousIndex] = null
-          }
-          newSlots[slotIndex] = draggedItem
-          return newSlots
-        })
-      }
+          return
 
-      // Reset
-      setDraggedItem(null)
-      setIsDragging(false)
-      setTouchStart(null)
-      setDraggedElement(null)
-      setDragOffset({ x: 0, y: 0 })
+        const touch = e.changedTouches[0]
+
+        // Cleanup ghost element
+        const ghostElement = document.getElementById('dragGhost')
+        ghostElement?.remove()
+
+        if (dragState.draggedElement) {
+          dragState.draggedElement.style.opacity = '1'
+        }
+
+        // Detect drop target
+        const elementBelow = document.elementFromPoint(
+          touch.clientX,
+          touch.clientY
+        )
+        const slotElement =
+          elementBelow?.closest('[data-slot]') || elementBelow?.closest('.slot')
+
+        if (slotElement) {
+          const slotIndex = Array.from(slotElement.parentNode.children).indexOf(
+            slotElement
+          )
+          provideHapticFeedback('drop')
+          setSlots((prevSlots) => {
+            const newSlots = [...prevSlots]
+            const previousIndex = newSlots.indexOf(dragState.draggedItem)
+            if (previousIndex !== -1) {
+              newSlots[previousIndex] = null
+            }
+            newSlots[slotIndex] = dragState.draggedItem
+            return newSlots
+          })
+        }
+
+        // Reset all drag state
+        resetDragState()
+      } catch (error) {
+        console.error('Touch end error:', error)
+        resetDragState()
+      }
     },
-    [isDragging, touchStart, draggedItem, draggedElement]
+    [dragState, resetDragState, provideHapticFeedback]
   )
 
-  // Event listeners pour le tactile
+  // Touch event listeners
   useEffect(() => {
     const refs = draggableRefs.current.filter(Boolean)
 
@@ -309,14 +425,14 @@ function PhoneGame({ backButton }) {
         }
       },
       touchMove: (e) => {
-        if (isDragging) {
+        if (dragState.isDragging) {
           e.preventDefault()
           e.stopPropagation()
           handleTouchMove(e)
         }
       },
       touchEnd: (e) => {
-        if (isDragging) {
+        if (dragState.isDragging) {
           e.preventDefault()
           e.stopPropagation()
           handleTouchEnd(e)
@@ -351,7 +467,7 @@ function PhoneGame({ backButton }) {
       })
     }
   }, [
-    isDragging,
+    dragState.isDragging,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -366,7 +482,7 @@ function PhoneGame({ backButton }) {
     })
   }, [])
 
-  // Cleanup
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       const ghostElement = document.getElementById('dragGhost')
@@ -380,10 +496,15 @@ function PhoneGame({ backButton }) {
         className={classNames(
           styles.container,
           isLoaded && styles.loaded,
-          isDragging && styles.dragging
+          dragState.isDragging && styles.dragging
         )}
+        style={{
+          touchAction: 'manipulation',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+        }}
       >
-        {/* Modal de succès */}
+        {/* Success modal */}
         {showSuccessModal && (
           <PhoneMessage phoneNumber={PHONE_NUMBER} onClose={backButton} />
         )}
@@ -394,11 +515,12 @@ function PhoneGame({ backButton }) {
           </header>
 
           <div className={styles.gameContainer}>
-            {/* Zone des emplacements */}
+            {/* Slots container */}
             <div
               className={styles.slotsContainer}
               role="group"
               aria-label="Emplacements pour les roues"
+              onDragLeave={handleDragLeave}
             >
               {slots.map((slot, index) => (
                 <GameSlot
@@ -410,11 +532,12 @@ function PhoneGame({ backButton }) {
                   onClick={handleSlotClick}
                   getImageById={getImageById}
                   styles={styles}
+                  isDragOver={dragOverSlot === index}
                 />
               ))}
             </div>
 
-            {/* Barre de statut */}
+            {/* Status bar */}
             <StatusBar
               isCompleted={isCompleted}
               showError={showError}
@@ -422,7 +545,7 @@ function PhoneGame({ backButton }) {
             />
           </div>
 
-          {/* Images disponibles */}
+          {/* Available images */}
           <section>
             <h2 className="sr-only">Roues disponibles</h2>
             <div aria-label="Roues disponibles">Roues disponibles :</div>
@@ -434,7 +557,7 @@ function PhoneGame({ backButton }) {
               {IMAGES.map((image, index) => {
                 const placed = isImagePlaced(image.id)
                 const isCurrentlyDragging =
-                  draggedItem === image.id && isDragging
+                  dragState.draggedItem === image.id && dragState.isDragging
 
                 return (
                   <DraggableImage

@@ -1,19 +1,35 @@
+// textIntro.module.scss
+@use '../../styles/variables.module.scss' as *;
+@use 'sass:color';
+
 .typingEffect {
   display: inline-block;
   min-width: 180px;
+  // Prevents layout shift when text changes
+  min-height: 1.2em;
   font-weight: bold;
-  color: #e74c3c; // Vous pouvez adapter cette couleur
+  // Using primary color from variables
+  color: $primary;
+
+  // Optional: Add subtle text shadow for better readability
+  text-shadow: 0 1px 2px color.adjust($primary, $alpha: -0.8);
 }
 
 .typingCursor {
   &::after {
     content: '|';
-    animation: blink 1s infinite;
-    color: #e74c3c; // Même couleur que le texte ou différente
+    // Cursor uses slightly lighter version of primary color
+    color: color.scale($primary, $lightness: 20%);
     margin-left: 2px;
+    // Blinking animation for cursor
+    animation: blink 1s infinite;
+
+    // Make cursor slightly thinner for better aesthetics
+    font-weight: 300;
   }
 }
 
+// Blinking animation for cursor effect
 @keyframes blink {
   0%,
   50% {
@@ -23,4 +39,11 @@
   100% {
     opacity: 0;
   }
+}
+
+// Optional: Add hover effect for interactivity
+.typingEffect:hover {
+  // Subtle color change on hover
+  color: color.scale($primary, $lightness: -10%);
+  transition: color 0.3s ease;
 }

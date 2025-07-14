@@ -1,4 +1,32 @@
-// Container principal
+// Import variables using @use
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
+
+// Generate color variations using sass:color
+$primary-light: color.adjust($primary, $lightness: 10%);
+$primary-dark: color.adjust($primary, $lightness: -10%);
+$primary-transparent: color.adjust($primary, $alpha: -0.5);
+
+// Skip link for accessibility (hidden by default)
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: 0.5rem 1rem;
+  background-color: $primary;
+  color: white;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+
+  &:focus {
+    left: 0;
+    outline: $focus-color;
+    outline-offset: 2px;
+  }
+}
+
+// Main container with optimized animations
 .container {
   display: flex;
   flex-direction: column;
@@ -16,7 +44,7 @@
   }
 }
 
-// Navigation
+// Navigation arrows with hover states
 .navUp {
   display: flex;
   align-items: center;
@@ -33,6 +61,13 @@
   &:hover {
     transform: translateY(2px);
     transition: transform 0.2s ease-out;
+  }
+
+  // Focus styles for accessibility
+  > *:focus-visible {
+    outline: $focus-color;
+    outline-offset: 4px;
+    border-radius: 4px;
   }
 }
 
@@ -56,9 +91,16 @@
     transform: translateY(-2px);
     transition: transform 0.2s ease-out;
   }
+
+  // Focus styles for accessibility
+  > *:focus-visible {
+    outline: $focus-color;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
 }
 
-// Section principale
+// Main content section
 .aboutMe {
   display: flex;
   justify-content: space-between;
@@ -85,7 +127,7 @@
   }
 }
 
-// Contenu texte
+// Text content with gradient title
 .text {
   width: 50%;
   display: flex;
@@ -104,7 +146,7 @@
     font-weight: 700;
     line-height: 1.1;
     color: #333;
-    background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+    background: linear-gradient(135deg, $primary-transparent 0%, $primary 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -116,7 +158,7 @@
   }
 }
 
-// Section de contenu avec image flottante
+// Content section with floating image
 .contentSection {
   position: relative;
 
@@ -127,11 +169,13 @@
   }
 }
 
+// Floating image with GPU-accelerated animation
 .floatingImage {
   will-change: transform;
   transition: transform 0.3s ease;
+  transform: translate3d(0, 0, 0); // Enable GPU acceleration
 
-  // Caché sur desktop
+  // Hidden on desktop
   @media (min-width: 769px) {
     display: none;
   }
@@ -142,7 +186,7 @@
     max-width: 300px;
     margin: 0 0 1rem 1rem;
     shape-outside: circle(50%);
-    animation: float 6s ease-in-out infinite;
+    animation: float3d 6s ease-in-out infinite;
 
     img,
     picture {
@@ -160,10 +204,11 @@
   }
 
   &:hover {
-    transform: scale(1.05);
+    transform: scale3d(1.05, 1.05, 1);
   }
 }
 
+// Paragraphs with responsive typography
 .paragraphs {
   p {
     font-size: clamp(1rem, 2vw, 1.125rem);
@@ -175,10 +220,10 @@
     text-align: justify;
     -webkit-hyphens: auto;
     -ms-hyphens: auto;
+    hyphens: auto;
 
     p {
       margin-bottom: 1rem;
-
       &:first-of-type {
         min-height: 100px;
       }
@@ -196,7 +241,7 @@
   }
 }
 
-// Image desktop
+// Desktop image with hover effects
 .desktopImage {
   width: 50%;
   display: flex;
@@ -222,17 +267,18 @@
     object-fit: cover;
     border-radius: 8px;
     will-change: transform;
+    transform: translate3d(0, 0, 0); // GPU acceleration
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: fadeIn 0.5s ease-in;
 
     &:hover {
-      transform: scale(1.02);
+      transform: scale3d(1.02, 1.02, 1);
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     }
   }
 }
 
-// Styles pour le loader du carousel
+// Carousel loader styles
 .carouselLoader {
   display: flex;
   align-items: center;
@@ -247,7 +293,7 @@
   }
 }
 
-// Styles Fallback améliorés
+// Enhanced fallback styles with sass:color
 .fallbackMobile {
   width: 100%;
   height: 100%;
@@ -255,7 +301,11 @@
   max-height: 150px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary, $lightness: 40%, $saturation: -30%) 0%,
+    color.adjust($primary, $lightness: 30%, $saturation: -20%) 100%
+  );
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -264,98 +314,93 @@
   max-width: 400px;
   max-height: 60vh;
   aspect-ratio: 3/4;
-  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary, $lightness: 40%, $saturation: -30%) 0%,
+    color.adjust($primary, $lightness: 30%, $saturation: -20%) 100%
+  );
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.6s ease-out;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: translate3d(0, 0, 0); // GPU acceleration
 
   &:hover {
-    transform: scale(1.02);
+    transform: scale3d(1.02, 1.02, 1);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
   }
 }
 
-// Support pour les écrans haute densité
-@media (-webkit-min-device-pixel-ratio: 2),
-  (min-resolution: 192dpi),
-  (min-resolution: 2dppx) {
-  img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
-}
-
-// Animations
+// GPU-accelerated animations
 @keyframes fadeInUp {
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes slideInFromTop {
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes bounceInDown {
   0% {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: translate3d(0, -30px, 0);
   }
   60% {
     opacity: 1;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   80% {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes bounceInUp {
   0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translate3d(0, 30px, 0);
   }
   60% {
     opacity: 1;
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
   80% {
-    transform: translateY(2px);
+    transform: translate3d(0, 2px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-// Nouvelles animations ajoutées
-@keyframes float {
+// GPU-accelerated float animation
+@keyframes float3d {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
@@ -369,15 +414,7 @@
   }
 }
 
-// Accessibilité améliorée
-.navUp > *:focus-visible,
-.navDown > *:focus-visible {
-  outline: 2px solid #e74c3c;
-  outline-offset: 4px;
-  border-radius: 4px;
-}
-
-// Performance
+// Performance optimizations
 .floatingImage,
 .desktopImage img,
 .fallbackMobile,
@@ -385,9 +422,10 @@
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
-// Animations responsives
+// Responsive animations
 @media (max-width: 768px) {
   .container {
     .navUp {
@@ -404,7 +442,7 @@
   }
 }
 
-// Préférences de mouvement réduit
+// Reduced motion preferences
 @media (prefers-reduced-motion: reduce) {
   .container,
   .navUp,
@@ -419,17 +457,18 @@
     transition: none !important;
   }
 
-  // Désactive l'indicateur de scroll animé
+  // Disable animated scroll indicator
   .container::after {
     animation: none !important;
     opacity: 0.4;
   }
 }
 
-// Print
+// Print styles
 @media print {
   .navUp,
-  .navDown {
+  .navDown,
+  .skipLink {
     display: none;
   }
 
@@ -439,7 +478,7 @@
     opacity: 1;
     transform: none;
 
-    // Cache l'indicateur de scroll
+    // Hide scroll indicator
     &::after {
       display: none;
     }
@@ -475,4 +514,23 @@
   .carouselLoader {
     display: none;
   }
+
+  // Use primary color for headings in print
+  h1 {
+    background: none !important;
+    -webkit-text-fill-color: $primary !important;
+    color: $primary !important;
+  }
+}
+
+// Custom focus states using variables
+*:focus-visible {
+  outline: $focus-color;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Utility class for smooth transitions
+.smooth-transition {
+  transition: all 0.3s ease;
 }

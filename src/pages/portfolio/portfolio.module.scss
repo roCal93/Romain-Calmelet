@@ -1,3 +1,6 @@
+// portfolio.module.scss
+@use '../../styles/variables.module.scss' as *;
+
 // Container principal
 .container {
   display: flex;
@@ -13,6 +16,43 @@
 
   @media (max-width: 768px) {
     min-height: calc(100dvh - 65px);
+  }
+
+  // Loading state
+  &.isLoading {
+    pointer-events: none;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 10;
+      opacity: 0;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+  }
+}
+
+// Empty state styling
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+
+  h1 {
+    color: $primary;
+    margin-bottom: 1rem;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+
+  p {
+    color: #666;
+    font-size: clamp(1rem, 2vw, 1.125rem);
   }
 }
 
@@ -86,12 +126,17 @@
       text-align: center;
       margin-top: 1rem;
     }
+
     h1 {
       margin: 0 0 0.5rem 0;
       font-weight: 700;
       line-height: 1.1;
       color: #333;
-      background: linear-gradient(135deg, #e74d3c7f 0%, #e74c3c 100%);
+      background: linear-gradient(
+        135deg,
+        rgba($primary, 0.5) 0%,
+        $primary 100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -127,6 +172,19 @@
 
   @media (max-width: 768px) {
     gap: 1.5rem;
+  }
+}
+
+// Carousel wrapper
+.carouselWrapper {
+  position: relative;
+  width: 100%;
+
+  // Keyboard focus indicator
+  &:focus-within {
+    outline: $focus-color solid 2px;
+    outline-offset: 8px;
+    border-radius: 8px;
   }
 }
 
@@ -195,9 +253,22 @@
 // Accessibilité améliorée
 .navUp > *:focus-visible,
 .navDown > *:focus-visible {
-  outline: 2px solid #e74c3c;
+  outline: $focus-color solid 2px;
   outline-offset: 4px;
   border-radius: 4px;
+}
+
+// Screen reader only class
+:global(.sr-only) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 // Animations responsives
