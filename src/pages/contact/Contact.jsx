@@ -39,23 +39,22 @@ function Contact() {
 
   // Gestion du bouton retour du navigateur pour les jeux
   useEffect(() => {
-    if (!activeGame) return
+    if (activeGame) {
+      // Ajouter un état fictif à l'historique quand un jeu est lancé
+      window.history.pushState({ game: activeGame }, '', window.location.href)
 
-    // Fonction pour gérer le retour
-    const handlePopState = (e) => {
-      // Si un jeu est actif, fermer le jeu au lieu de naviguer
-      if (activeGame) {
-        e.preventDefault()
-        setActiveGame(null)
+      const handlePopState = (e) => {
+        // Si on revient en arrière et qu'un jeu est actif
+        if (!e.state?.game && activeGame) {
+          setActiveGame(null)
+        }
       }
-    }
 
-    // Ajouter un listener pour le bouton retour
-    window.addEventListener('popstate', handlePopState)
+      window.addEventListener('popstate', handlePopState)
 
-    // Nettoyer
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
+      return () => {
+        window.removeEventListener('popstate', handlePopState)
+      }
     }
   }, [activeGame])
 
@@ -65,7 +64,8 @@ function Contact() {
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && activeGame) {
-        setActiveGame(null)
+        // Simuler un retour en arrière pour maintenir la cohérence de l'historique
+        window.history.back()
       }
     }
 
@@ -99,7 +99,8 @@ function Contact() {
   }, [])
 
   const backToMenu = useCallback(() => {
-    setActiveGame(null)
+    // Retirer l'état du jeu de l'historique
+    window.history.back()
   }, [])
 
   const handleLogoClick = useCallback((type) => {
