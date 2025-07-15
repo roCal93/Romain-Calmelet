@@ -11,6 +11,9 @@ const DRAG_THRESHOLD = 5 // Minimum movement to consider as drag
 const TAP_DURATION = 300 // Maximum duration for a tap (vs drag)
 const FOCUS_DELAY = 50 // Delay before focusing element
 
+// Safari detection
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
 /**
  * Custom hook for implementing focus trap within modal
  * Ensures keyboard navigation stays within modal boundaries
@@ -248,14 +251,50 @@ export default function ProjectCarousel({
       const targetItem = items[Math.max(0, Math.min(index, cards.length - 1))]
 
       if (targetItem) {
-        const scrollLeft =
-          targetItem.offsetLeft -
-          (container.clientWidth - targetItem.offsetWidth) / 2
+        const containerWidth = container.clientWidth
+        const itemWidth = targetItem.offsetWidth
 
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth',
-        })
+        // Calculate scroll position to center the item
+        let scrollLeft =
+          targetItem.offsetLeft - (containerWidth - itemWidth) / 2
+
+        // Safari fix: ensure we don't scroll past the maximum scroll position
+        const maxScrollLeft = container.scrollWidth - containerWidth
+        scrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft))
+
+        // For Safari, use a more reliable scroll method
+        if (isSafari) {
+          // Use requestAnimationFrame for smoother scrolling in Safari
+          const startScrollLeft = container.scrollLeft
+          const distance = scrollLeft - startScrollLeft
+          const duration = 300 // ms
+          let startTime = null
+
+          const animateScroll = (currentTime) => {
+            if (startTime === null) startTime = currentTime
+            const timeElapsed = currentTime - startTime
+            const progress = Math.min(timeElapsed / duration, 1)
+
+            // Easing function for smooth animation
+            const easeProgress =
+              progress < 0.5
+                ? 2 * progress * progress
+                : -1 + (4 - 2 * progress) * progress
+
+            container.scrollLeft = startScrollLeft + distance * easeProgress
+
+            if (progress < 1) {
+              requestAnimationFrame(animateScroll)
+            }
+          }
+
+          requestAnimationFrame(animateScroll)
+        } else {
+          container.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth',
+          })
+        }
       }
     },
     [cards.length]
@@ -373,8 +412,12 @@ export default function ProjectCarousel({
     lastMoveTime.current = currentTime
     lastMoveX.current = currentX
 
-    // Update scroll position
-    containerRef.current.scrollLeft = scrollStartX.current + deltaX
+    // Update scroll position with Safari boundary check
+    const container = containerRef.current
+    const newScrollLeft = scrollStartX.current + deltaX
+    const maxScrollLeft = container.scrollWidth - container.clientWidth
+
+    container.scrollLeft = Math.max(0, Math.min(newScrollLeft, maxScrollLeft))
   }
 
   /**
@@ -548,7 +591,7 @@ export default function ProjectCarousel({
       }
     }
 
-    container.addEventListener('scroll', handleScroll)
+    container.addEventListener('scroll', handleScroll, { passive: true })
     return () => {
       container.removeEventListener('scroll', handleScroll)
       clearTimeout(scrollTimeout)
@@ -654,8 +697,11 @@ export default function ProjectCarousel({
       lastMoveTime.current = currentTime
       lastMoveX.current = currentX
 
-      // Update scroll position
-      container.scrollLeft = scrollStartX.current + deltaX * SCROLL_SENSITIVITY
+      // Update scroll position with Safari boundary check
+      const newScrollLeft = scrollStartX.current + deltaX * SCROLL_SENSITIVITY
+      const maxScrollLeft = container.scrollWidth - container.clientWidth
+
+      container.scrollLeft = Math.max(0, Math.min(newScrollLeft, maxScrollLeft))
     }
 
     /**
@@ -731,6 +777,13 @@ export default function ProjectCarousel({
       // Add margins to first and last items
       items[0].style.marginLeft = `${margin}px`
       items[items.length - 1].style.marginRight = `${margin}px`
+
+      // Safari specific: Force reflow to ensure proper layout
+      if (isSafari) {
+        container.style.display = 'none'
+        container.offsetHeight // Force reflow
+        container.style.display = ''
+      }
     }
   }, [cards])
 
@@ -749,10 +802,16 @@ export default function ProjectCarousel({
           role="region"
           aria-label="Project carousel"
           aria-roledescription="carousel"
+          tabIndex={-1}
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerUp}
           onMouseLeave={handlePointerUp}
+          style={{
+            // Safari specific styles
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: isSafari ? 'none' : 'x mandatory',
+          }}
         >
           {/* Render carousel items */}
           {cardsTitle.map((title, index) => (
@@ -767,6 +826,11 @@ export default function ProjectCarousel({
               onClick={(e) => handleCardClick(index, e)}
               onKeyDown={(e) => handleCardKeyDown(index, e)}
               onFocus={() => handleCardFocus(index)}
+              style={{
+                // Safari specific: Ensure proper flex behavior
+                flexShrink: 0,
+                scrollSnapAlign: isSafari ? 'none' : 'center',
+              }}
             >
               {title}
             </div>

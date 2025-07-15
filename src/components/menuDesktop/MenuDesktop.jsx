@@ -34,6 +34,7 @@ const MenuDesktop = () => {
               }
               // Accessibility: indicates current page in navigation
               aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
+              tabIndex={0}
             >
               {item.label}
             </NavLink>

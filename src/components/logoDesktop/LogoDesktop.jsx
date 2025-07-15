@@ -8,7 +8,7 @@ const FIRSTNAME_LETTERS = ['O', 'M', 'A', 'I', 'N']
 const LogoDesktop = () => {
   return (
     <div>
-      <Link to="/" className={styles.logo} aria-label="Home">
+      <Link to="/" className={styles.logo} aria-label="Home" tabIndex={0}>
         {/* Screen reader only text for accessibility */}
         <span className="sr-only">Calmelet Romain</span>
 

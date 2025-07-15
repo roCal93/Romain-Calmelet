@@ -59,6 +59,7 @@ const GameMenu = ({ startGame, isLoading = false }) => {
               aria-describedby="desc-contact" // Associates button with description
               disabled={isLoading}
               aria-busy={isLoading} // Indicates loading state to screen readers
+              tabIndex={0}
             >
               {isLoading ? 'Chargement...' : "C'est parti !"}
             </button>
@@ -78,6 +79,7 @@ const GameMenu = ({ startGame, isLoading = false }) => {
               aria-describedby="desc-phone"
               disabled={isLoading}
               aria-busy={isLoading}
+              tabIndex={0}
             >
               {isLoading ? 'Chargement...' : "C'est parti !"}
             </button>

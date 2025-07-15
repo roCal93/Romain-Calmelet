@@ -3,9 +3,10 @@ import styles from './phoneDisplay.module.scss'
 
 const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
   const [isExiting, setIsExiting] = useState(false)
-  const [copiedItem, setCopiedItem] = useState(null) // To display copy feedback
+  const [copiedItem, setCopiedItem] = useState(null)
   const modalRef = useRef(null)
   const firstFocusableElementRef = useRef(null)
+  const lastFocusableElementRef = useRef(null)
 
   // Handle close with animation - memoized with useCallback
   const handleClose = useCallback(() => {
@@ -21,7 +22,6 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedItem(type)
-      // Remove message after 2 seconds
       setTimeout(() => setCopiedItem(null), 2000)
     } catch (err) {
       console.error('Copy error:', err)
@@ -43,65 +43,60 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
     }
   }
 
-  // Handle Escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        handleClose()
-      }
-    }
-
-    if (showPhoneNumber) {
-      document.addEventListener('keydown', handleEscape)
-      // Prevent background scrolling
-      document.body.style.overflow = 'hidden'
-
-      // Focus on first focusable element
-      setTimeout(() => {
-        if (firstFocusableElementRef.current) {
-          firstFocusableElementRef.current.focus()
-        }
-      }, 100)
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'auto'
-    }
-  }, [showPhoneNumber, handleClose]) // Added handleClose to dependencies
-
-  // Focus trap management
+  // Handle keyboard navigation
   useEffect(() => {
     if (!showPhoneNumber) return
 
-    const modal = modalRef.current
-    if (!modal) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleClose()
+        return
+      }
 
-    const focusableElements = modal.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    )
-    const firstElement = focusableElements[0]
-    const lastElement = focusableElements[focusableElements.length - 1]
-
-    const handleTabKey = (e) => {
       if (e.key === 'Tab') {
+        e.preventDefault() // Empêche le comportement par défaut
+
+        const modal = modalRef.current
+        if (!modal) return
+
+        const focusableElements = modal.querySelectorAll(
+          'button:not([disabled]), [href]:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+        )
+
+        const focusableArray = Array.from(focusableElements)
+        const currentIndex = focusableArray.indexOf(document.activeElement)
+        let nextIndex
+
         if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            lastElement.focus()
-            e.preventDefault()
-          }
+          // Shift + Tab (navigation vers l'arrière)
+          nextIndex =
+            currentIndex > 0 ? currentIndex - 1 : focusableArray.length - 1
         } else {
-          if (document.activeElement === lastElement) {
-            firstElement.focus()
-            e.preventDefault()
-          }
+          // Tab (navigation vers l'avant)
+          nextIndex =
+            currentIndex < focusableArray.length - 1 ? currentIndex + 1 : 0
         }
+
+        focusableArray[nextIndex].focus()
       }
     }
 
-    document.addEventListener('keydown', handleTabKey)
-    return () => document.removeEventListener('keydown', handleTabKey)
-  }, [showPhoneNumber])
+    document.addEventListener('keydown', handleKeyDown)
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden'
+
+    // Focus on first focusable element with a slight delay
+    setTimeout(() => {
+      if (firstFocusableElementRef.current) {
+        firstFocusableElementRef.current.focus()
+      }
+    }, 150)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'auto'
+    }
+  }, [showPhoneNumber, handleClose])
 
   if (!showPhoneNumber) return null
 
@@ -110,8 +105,8 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
     if (copiedItem === 'phone')
       return 'Numéro de téléphone copié dans le presse-papier'
     if (copiedItem === 'email')
-      return 'Adresse email copiée dans le presse-papier' // Fixed: "copier" -> "copiée"
-    if (copiedItem === 'error') return 'Échec de la copie' // Fixed: "Echec du Copier" -> "Échec de la copie"
+      return 'Adresse email copiée dans le presse-papier'
+    if (copiedItem === 'error') return 'Échec de la copie'
     return ''
   }
 
@@ -135,7 +130,8 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
             onClick={() => copyToClipboard('0745229697', 'phone')}
             className={styles.contactLink}
             ref={firstFocusableElementRef}
-            aria-label="Copier le numéro de téléphone 07 45 22 96 97" // Fixed: "Copier le téléphone" -> "Copier le numéro de téléphone"
+            aria-label="Copier le numéro de téléphone 07 45 22 96 97"
+            tabIndex="0"
           >
             <span className={styles.icon}>📞</span>
             <span className={styles.text}>07 45 22 96 97</span>
@@ -149,7 +145,8 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
           <button
             onClick={() => copyToClipboard('romaincalmelet@gmail.com', 'email')}
             className={styles.contactLink}
-            aria-label="Copier l'adresse email romaincalmelet@gmail.com" // Fixed: "Email" -> "email" (consistency)
+            aria-label="Copier l'adresse email romaincalmelet@gmail.com"
+            tabIndex="0"
           >
             <span className={styles.icon}>✉️</span>
             <span className={styles.text}>romaincalmelet@gmail.com</span>
@@ -170,7 +167,9 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
           <button
             onClick={handleClose}
             className={styles.closeButton}
-            aria-label="Fermer la fenêtre" // Fixed: "Close modal" -> "Fermer la fenêtre" (consistency with French)
+            ref={lastFocusableElementRef}
+            aria-label="Fermer la fenêtre"
+            tabIndex="0"
           >
             Fermer
           </button>

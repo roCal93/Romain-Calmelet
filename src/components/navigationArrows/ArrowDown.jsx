@@ -48,6 +48,7 @@ const ArrowDown = ({ className = '', ...props }) => {
       onClick={handleClick}
       disabled={!canGoDown || isNavigating}
       aria-label="Next page"
+      tabIndex={0}
       {...props}
     >
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -74,8 +74,9 @@ function Home() {
             className={styles.button}
             aria-label={getButtonAriaLabel()}
             type="button"
+            tabIndex={0}
           >
-            {getButtonText()}
+            <span aria-hidden="true">{getButtonText()}</span>
           </button>
         </div>
       </div>

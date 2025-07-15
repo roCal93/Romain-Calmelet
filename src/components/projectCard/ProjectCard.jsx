@@ -116,6 +116,7 @@ function ProjectCard({ project, variant = VARIANTS.DETAILED }) {
             rel="noopener noreferrer"
             className={styles.githubLink}
             aria-label={`View ${name} source code on GitHub`}
+            tabIndex={0}
           >
             GitHub
           </a>
@@ -127,6 +128,7 @@ function ProjectCard({ project, variant = VARIANTS.DETAILED }) {
             rel="noopener noreferrer"
             className={styles.demoLink}
             aria-label={`View ${name} live demo`}
+            tabIndex={0}
           >
             Live Demo
           </a>
