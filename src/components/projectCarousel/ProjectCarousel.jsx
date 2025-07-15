@@ -51,6 +51,44 @@ const useFocusTrap = (isActive, modalRef) => {
 }
 
 /**
+ * Custom hook for managing browser history with modal state
+ * Handles back button to close modal instead of navigating away
+ */
+const useModalHistory = (isModalOpen, closeModal) => {
+  const modalHistoryPushed = useRef(false)
+
+  useEffect(() => {
+    if (isModalOpen && !modalHistoryPushed.current) {
+      // Push a new history entry when modal opens
+      window.history.pushState({ modalOpen: true }, '', window.location.href)
+      modalHistoryPushed.current = true
+    } else if (!isModalOpen && modalHistoryPushed.current) {
+      // Reset flag when modal closes
+      modalHistoryPushed.current = false
+    }
+  }, [isModalOpen])
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (isModalOpen && modalHistoryPushed.current) {
+        // If modal is open and user hits back, close modal
+        event.preventDefault()
+        closeModal()
+        modalHistoryPushed.current = false
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [isModalOpen, closeModal])
+
+  return modalHistoryPushed
+}
+
+/**
  * ProjectCarousel Component
  * A horizontal scrolling carousel with modal view, keyboard navigation,
  * and touch/mouse drag support
@@ -96,8 +134,32 @@ export default function ProjectCarousel({
   const dragStartTime = useRef(0) // Drag start timestamp
   const hasMoved = useRef(false) // Whether user has moved during drag
 
+  /**
+   * Close modal and restore focus to triggering element
+   */
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false)
+
+    // Delay cleanup to allow animation
+    setTimeout(() => {
+      setSelectedCard(null)
+      document.body.style.overflow = 'unset' // Restore body scroll
+
+      // Restore focus to last focused element
+      if (
+        lastFocusedElement.current &&
+        lastFocusedElement.current.tabIndex === 0
+      ) {
+        lastFocusedElement.current.focus({ preventScroll: true })
+      }
+    }, 300)
+  }, [])
+
   // Apply focus trap hook
   useFocusTrap(isModalOpen, modalRef)
+
+  // Apply modal history management hook
+  useModalHistory(isModalOpen, closeModal)
 
   // ===================================
   // Focus Management
@@ -444,27 +506,6 @@ export default function ProjectCarousel({
         break
       }
     }
-  }
-
-  /**
-   * Close modal and restore focus to triggering element
-   */
-  const closeModal = () => {
-    setIsModalOpen(false)
-
-    // Delay cleanup to allow animation
-    setTimeout(() => {
-      setSelectedCard(null)
-      document.body.style.overflow = 'unset' // Restore body scroll
-
-      // Restore focus to last focused element
-      if (
-        lastFocusedElement.current &&
-        lastFocusedElement.current.tabIndex === 0
-      ) {
-        lastFocusedElement.current.focus({ preventScroll: true })
-      }
-    }, 300)
   }
 
   /**

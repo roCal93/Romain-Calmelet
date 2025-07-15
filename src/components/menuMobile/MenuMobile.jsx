@@ -94,6 +94,15 @@ const MenuMobile = ({ onMenuStateChange }) => {
     if (!isOpen) return
 
     const handleKeyDown = (event) => {
+      // ISOLATION : Vérifier si l'événement provient du menu mobile
+      const isInsideMenu =
+        menuRef.current?.contains(event.target) ||
+        buttonRef.current?.contains(event.target)
+
+      if (!isInsideMenu) {
+        return // Ignorer les événements clavier externes
+      }
+
       const focusableElements = menuRef.current?.querySelectorAll(
         'button[role="menuitem"]'
       )
@@ -103,6 +112,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
       switch (event.key) {
         case 'Escape': {
           event.preventDefault()
+          event.stopPropagation() // Empêcher la propagation
           closeMenu()
           buttonRef.current?.focus()
           break
@@ -111,18 +121,21 @@ const MenuMobile = ({ onMenuStateChange }) => {
           // Focus trap within menu
           if (event.shiftKey && document.activeElement === firstElement) {
             event.preventDefault()
+            event.stopPropagation()
             lastElement?.focus()
           } else if (
             !event.shiftKey &&
             document.activeElement === lastElement
           ) {
             event.preventDefault()
+            event.stopPropagation()
             firstElement?.focus()
           }
           break
         }
         case 'ArrowDown': {
           event.preventDefault()
+          event.stopPropagation()
           const currentIndex = Array.from(focusableElements).indexOf(
             document.activeElement
           )
@@ -133,6 +146,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
         }
         case 'ArrowUp': {
           event.preventDefault()
+          event.stopPropagation()
           const currIndex = Array.from(focusableElements).indexOf(
             document.activeElement
           )
@@ -159,18 +173,50 @@ const MenuMobile = ({ onMenuStateChange }) => {
       }
     }
 
+    // Utiliser capture: true pour intercepter les événements plus tôt
+    document.addEventListener('keydown', handleKeyDown, true)
+
     // Delay to prevent immediate close on open click
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside)
-      document.addEventListener('keydown', handleKeyDown)
     }, 100)
 
     return () => {
       clearTimeout(timeoutId)
       document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleKeyDown, true)
     }
   }, [isOpen, closeMenu])
+
+  // Effet pour désactiver la navigation clavier globale quand le menu est ouvert
+  useEffect(() => {
+    if (isOpen) {
+      // Désactiver la navigation clavier globale
+      const handleGlobalKeyDown = (event) => {
+        // Vérifier si l'événement provient du menu mobile
+        const isInsideMenu =
+          menuRef.current?.contains(event.target) ||
+          buttonRef.current?.contains(event.target)
+
+        if (!isInsideMenu) {
+          // Bloquer les touches de navigation globales
+          if (
+            ['ArrowDown', 'ArrowUp', 'Tab', 'Enter', ' '].includes(event.key)
+          ) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        }
+      }
+
+      // Ajouter l'écouteur avec capture pour intercepter plus tôt
+      document.addEventListener('keydown', handleGlobalKeyDown, true)
+
+      return () => {
+        document.removeEventListener('keydown', handleGlobalKeyDown, true)
+      }
+    }
+  }, [isOpen])
 
   return (
     <div className={styles.burgerMenu}>
@@ -197,6 +243,12 @@ const MenuMobile = ({ onMenuStateChange }) => {
         className={`${styles.menuPanel} ${isOpen ? styles.open : ''}`}
         role="navigation"
         aria-label="Main navigation"
+        // Attributs pour améliorer l'isolation
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          // Empêcher la propagation des événements clavier
+          e.stopPropagation()
+        }}
       >
         <ul role="menu">{navigationItems}</ul>
       </nav>

@@ -380,15 +380,13 @@
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 14px;
-  animation: pulse 2s infinite;
   z-index: 100;
   max-width: calc(100% - 20px);
-  margin-top: 1rem;
   border: 1px solid color.adjust($primary, $alpha: -0.8);
 
   @media (max-width: 840px), (max-height: 780px) {
     font-size: 12px;
-    padding: 6px 12px;
+    padding: 2px 12px;
   }
 }
 
@@ -415,18 +413,6 @@
 @keyframes rotateCounterClockwise {
   to {
     transform: rotate(-360deg);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.9;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateY(-2px);
   }
 }
 

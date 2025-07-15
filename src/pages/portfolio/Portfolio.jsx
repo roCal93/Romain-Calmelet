@@ -19,7 +19,6 @@ const VARIANTS = {
 function Portfolio() {
   const [isVisible, setIsVisible] = useState(false)
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
   const { direction, resetNavigation } = useContext(NavigationContext)
 
   // Store projects length in a variable
@@ -89,12 +88,6 @@ function Portfolio() {
     [projectsCount]
   )
 
-  // Loading state handler
-  const handleNavigationStart = useCallback(() => {
-    setIsLoading(true)
-    setTimeout(() => setIsLoading(false), ANIMATION_DELAY)
-  }, [])
-
   // Handle empty projects case
   if (!projects || projectsCount === 0) {
     return (
@@ -116,7 +109,7 @@ function Portfolio() {
             ? 'page-enter-down'
             : 'page-enter-up'
           : ''
-      } ${isLoading ? styles.isLoading : ''}`}
+      } `}
       onKeyDown={handleKeyDown}
     >
       <BackgroundPortfolio />
@@ -124,10 +117,7 @@ function Portfolio() {
       <main className={styles.container} role="main">
         {/* Navigation up arrow */}
         <div className={styles.navUp}>
-          <ArrowUp
-            aria-label="Navigate to previous section"
-            onClick={handleNavigationStart}
-          />
+          <ArrowUp aria-label="Navigate to previous section" />
         </div>
 
         <article
@@ -174,10 +164,7 @@ function Portfolio() {
           className={styles.navDown}
           aria-label="Navigation between sections"
         >
-          <ArrowDown
-            aria-label="Navigate to next section"
-            onClick={handleNavigationStart}
-          />
+          <ArrowDown aria-label="Navigate to next section" />
         </nav>
       </main>
     </div>

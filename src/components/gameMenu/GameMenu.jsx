@@ -31,7 +31,7 @@ const GameMenu = ({ startGame, isLoading = false }) => {
         <ul role="list">
           <li>
             <strong>Mode simple :</strong> Cliquez directement sur les logos en
-            bas à droite
+            bas à droite.
           </li>
           <li>
             <strong>Mode jeu :</strong> Réussissez les deux jeux pour accéder à

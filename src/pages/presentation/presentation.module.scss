@@ -7,25 +7,6 @@ $primary-light: color.adjust($primary, $lightness: 10%);
 $primary-dark: color.adjust($primary, $lightness: -10%);
 $primary-transparent: color.adjust($primary, $alpha: -0.5);
 
-// Skip link for accessibility (hidden by default)
-.skipLink {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 999;
-  padding: 0.5rem 1rem;
-  background-color: $primary;
-  color: white;
-  text-decoration: none;
-  border-radius: 0 0 4px 0;
-
-  &:focus {
-    left: 0;
-    outline: $focus-color;
-    outline-offset: 2px;
-  }
-}
-
 // Main container with optimized animations
 .container {
   display: flex;

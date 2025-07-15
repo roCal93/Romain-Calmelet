@@ -29,7 +29,7 @@ export const projects = [
     {
         id: 2,
         name: "Portfolio d'architecte",
-        description: "Dans ce projet, J’ai développé une page web dynamique pour une architecte d’intérieur en JavaScript, avec une galerie de projets, une interface de connexion admin et une modale d’upload, tout en interagissant avec une API et en manipulant le DOM. Ce projet a renforcé mes compétences en JavaScript et en communication avec une API.",
+        description: "Dans ce projet, j’ai développé une page web dynamique pour une architecte d’intérieur en JavaScript, avec une galerie de projets, une interface de connexion admin et une modale d’upload, tout en interagissant avec une API et en manipulant le DOM. Ce projet a renforcé mes compétences en JavaScript et en communication avec une API.",
         technologies: ["HTML5", "CSS3", "JavaScript(ES6+)", "APIs REST"],
         image: sophieBluelCover,
         logo: sophieBluelLogo,
@@ -73,13 +73,13 @@ export const projects = [
         logo: portfolioLogo,
         githubLink: "https://github.com/roCal93/Romain-Calmelet",
         features: [
-            "Navigation entre différentes sections du site grâce à React Router.",
-            "Scroll, drag & drop, navigation au clavier et avec la molette.",
+            "Navigation entre différentes sections du site grâce à React Router",
+            "Scroll, drag & drop, navigation au clavier et avec la molette",
             "Affichage détaillé d’un projet dans une modale (popup) au clic",
-            "Design responsive pour s’adapter à tous les écrans.",
-            "Navigation fluide entre les pages/sections du portfolio.",
-            "Expérience utilisateur améliorée par des transitions et animations modernes.",
-            "Accessibilité : navigation possible au clavier, organisation sémantique."
+            "Design responsive pour s’adapter à tous les écrans",
+            "Navigation fluide entre les pages/sections du portfolio",
+            "Expérience utilisateur améliorée par des transitions et animations modernes",
+            "Accessibilité : navigation possible au clavier, organisation sémantique"
         ]
     },
 

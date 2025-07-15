@@ -80,11 +80,6 @@ function Presentation() {
     >
       <BackgroundPresentation />
 
-      {/* Skip link for keyboard navigation accessibility */}
-      <a href="#about-title" className={styles.skipLink}>
-        Skip to main content
-      </a>
-
       <main className={styles.container} role="main">
         {/* Top navigation arrow */}
         <div className={styles.navUp}>
