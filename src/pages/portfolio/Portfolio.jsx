@@ -10,7 +10,6 @@ import ProjectCard from '../../components/projectCard/ProjectCard'
 import { projects } from '../../assets/data/projects'
 
 // Constants
-const ANIMATION_DELAY = 800
 const VARIANTS = {
   FRONT: 'front',
   DETAILED: 'detailed',
@@ -22,7 +21,7 @@ function Portfolio() {
   const { direction, resetNavigation } = useContext(NavigationContext)
 
   // Store projects length in a variable
-  const projectsCount = projects.length
+  const projectsCount = projects.length || 0
 
   useEffect(() => {
     // Reset navigation and show page
