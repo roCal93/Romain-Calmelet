@@ -41,9 +41,44 @@ const throttle = (func, delay) => {
   }
 }
 
-const isSafari = () => {
-  const ua = navigator.userAgent.toLowerCase()
-  return ua.includes('safari') && !ua.includes('chrome')
+// Fonction améliorée pour détecter si un popup a été bloqué
+const detectPopupBlocked = (popupWindow) => {
+  try {
+    // Vérifier immédiatement si la fenêtre est null
+    if (!popupWindow) {
+      return Promise.resolve(true)
+    }
+
+    // Vérifier si la fenêtre est fermée immédiatement
+    if (popupWindow.closed) {
+      return Promise.resolve(true)
+    }
+
+    // Pour une détection plus fiable
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        try {
+          // Vérifier plusieurs conditions pour être sûr
+          if (
+            !popupWindow ||
+            popupWindow.closed ||
+            popupWindow.innerHeight === 0
+          ) {
+            resolve(true)
+          } else {
+            // Si on peut accéder à innerHeight et qu'elle n'est pas 0,
+            // le popup est probablement ouvert
+            resolve(false)
+          }
+        } catch {
+          // Si on ne peut pas accéder aux propriétés, c'est bloqué
+          resolve(true)
+        }
+      }, 250) // Augmenter le délai pour une détection plus fiable
+    })
+  } catch {
+    return Promise.resolve(true)
+  }
 }
 
 const getRandomPosition = (max, logoSize) =>
@@ -77,6 +112,11 @@ const Notification = ({ url, type, onAction, onClose }) => (
               Annuler
             </button>
           </div>
+        </>
+      ) : type === 'success' ? (
+        <>
+          <p>Lien ouvert avec succès !</p>
+          <p className={styles.notificationUrl}>{url}</p>
         </>
       ) : (
         <p className={styles.successMessage}>{url}</p>
@@ -158,15 +198,33 @@ function ContactGame() {
   }, [initializeLogos])
 
   // ==================== EVENT HANDLERS ====================
-  const openLink = useCallback((url, logoId) => {
+  const openLink = useCallback(async (url, logoId) => {
     try {
-      window.open(url, '_blank', 'noopener,noreferrer')
+      // Tentative d'ouverture du popup
+      const popupWindow = window.open(url, '_blank', 'noopener,noreferrer')
 
-      if (isSafari()) {
+      // Vérification immédiate
+      if (!popupWindow) {
+        console.log('Popup immédiatement bloqué')
         setNotification({ show: true, url, type: 'error' })
+        return
+      }
+
+      // Donner focus au popup (aide à la détection)
+      popupWindow.focus()
+
+      // Vérification différée
+      const isBlocked = await detectPopupBlocked(popupWindow)
+
+      if (isBlocked) {
+        console.log('Popup détecté comme bloqué après vérification')
+        setNotification({ show: true, url, type: 'error' })
+      } else {
+        console.log('Popup ouvert avec succès')
+        // Ne pas afficher de notification si succès
       }
     } catch (error) {
-      console.error(`Error opening ${logoId}:`, error)
+      console.error(`Erreur lors de l'ouverture de ${logoId}:`, error)
       setNotification({ show: true, url, type: 'error' })
     }
   }, [])
@@ -177,7 +235,6 @@ function ContactGame() {
         window.open(notification.url, '_blank', 'noopener,noreferrer')
         setNotification({ show: false, url: null, type: 'error' })
       } catch {
-        // Removed unused 'error' variable
         if (
           window.confirm(
             "Impossible d'ouvrir le lien. Ouvrir dans la fenêtre actuelle ?"

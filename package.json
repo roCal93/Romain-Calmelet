@@ -1,12 +1,13 @@
 {
   "name": "portfolio",
   "private": true,
-  "homepage": "https://roCal93.github.io/Romain-Calmelet/",
+  "homepage": "https://romaincalmelet.fr",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "echo 'romaincalmelet.fr' > dist/CNAME",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
