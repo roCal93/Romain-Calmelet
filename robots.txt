@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://roCal93.github.io/Romain-Calmelet/sitemap.xml
