@@ -17,23 +17,29 @@ const SECTIONS = [
 const SENSITIVITY_CONFIG = {
   // Mouse wheel
   wheel: {
-    debounceTime: 50, // Minimum delay between wheel events (ms)
-    deltaThreshold: 50, // Scroll amount needed for navigation (lower = more sensitive)
-    resetTimeout: 1500, // Time before state reset (ms)
+    debounceTime: 250,
+    deltaThreshold: 150,
+    resetTimeout: 2000,
+    trackpadMultiplier: 0.1,
+    // NEW: Trackpad-specific settings to prevent page jumping
+    trackpadDebounceTime: 600, // Longer debounce for trackpad
+    trackpadDeltaThreshold: 400, // Higher threshold for trackpad
+    velocityThreshold: 80, // Minimum velocity to trigger navigation
+    velocityWindowTime: 150, // Time window to calculate velocity
   },
 
   // Touch navigation
   touch: {
-    minSwipeDistance: 30, // Minimum distance to detect a swipe (px)
-    resetTimeout: 2000, // Time before state reset (ms)
+    minSwipeDistance: 30,
+    resetTimeout: 2000,
   },
 
   // Scroll detection
   scroll: {
-    epsilon: 5, // Error margin for detecting edges (px)
-    navigationCooldown: 800, // Blocking delay after navigation (ms)
-    initDelay: 200, // Event initialization delay (ms)
-    animationDuration: 1900, // Transition animation duration (ms)
+    epsilon: 5,
+    navigationCooldown: 1200,
+    initDelay: 200,
+    animationDuration: 1900,
   },
 }
 
@@ -49,13 +55,35 @@ function App() {
   const touchEndRef = useRef({ x: 0, y: 0 })
   const timeoutRef = useRef(null)
 
-  // NEW REFERENCES: Scroll edge management
+  // Scroll edge management
   const scrollEndReachedRef = useRef(false)
   const scrollEndTimeoutRef = useRef(null)
   const wheelDeltaAccumulatorRef = useRef(0)
 
-  // ADDED: Reference for scroll activation timer
+  // Scroll direction tracking
+  const wheelDirectionRef = useRef(null)
+
+  // Trackpad detection
+  const isTrackpadRef = useRef(false)
+  const trackpadDetectionRef = useRef(0)
+
+  // Reference for scroll activation timer
   const enableScrollTimerRef = useRef(null)
+
+  // NEW: References to prevent multiple wheel events processing
+  const wheelEventQueueRef = useRef([])
+  const isProcessingWheelRef = useRef(false)
+
+  // NEW: Velocity tracking to prevent accidental navigation
+  const velocityTrackerRef = useRef({
+    lastTime: 0,
+    lastDelta: 0,
+    velocity: 0,
+    samples: [],
+  })
+
+  // NEW: Last navigation time to prevent rapid consecutive navigations
+  const lastNavigationTimeRef = useRef(0)
 
   // State for navigation direction
   const [direction, setDirection] = useState('down')
@@ -75,19 +103,98 @@ function App() {
   }, [])
 
   /**
+   * Enhanced trackpad detection using deltaMode and patterns
+   */
+  const detectTrackpad = useCallback((e) => {
+    const deltaY = Math.abs(e.deltaY)
+    const deltaMode = e.deltaMode
+
+    // deltaMode: 0 = pixels (trackpad), 1 = lines (mouse wheel), 2 = pages
+    if (deltaMode === 0) {
+      // Pixel mode is typically trackpad
+      if (deltaY > 0 && deltaY < 80) {
+        trackpadDetectionRef.current = Math.min(
+          5,
+          trackpadDetectionRef.current + 1
+        )
+      }
+    } else if (deltaMode === 1) {
+      // Line mode is typically mouse wheel
+      trackpadDetectionRef.current = Math.max(
+        0,
+        trackpadDetectionRef.current - 2
+      )
+    }
+
+    // Consider as trackpad if we had 3+ pixel-mode events
+    isTrackpadRef.current = trackpadDetectionRef.current >= 3
+
+    // Reset counter gradually
+    setTimeout(() => {
+      trackpadDetectionRef.current = Math.max(
+        0,
+        trackpadDetectionRef.current - 1
+      )
+    }, 1000)
+  }, [])
+
+  /**
+   * Calculates scroll velocity to prevent accidental navigation
+   */
+  const calculateVelocity = useCallback((deltaY, currentTime) => {
+    const tracker = velocityTrackerRef.current
+
+    // Add new sample
+    tracker.samples.push({
+      delta: Math.abs(deltaY),
+      time: currentTime,
+    })
+
+    // Keep only recent samples (within velocity window)
+    tracker.samples = tracker.samples.filter(
+      (sample) =>
+        currentTime - sample.time < SENSITIVITY_CONFIG.wheel.velocityWindowTime
+    )
+
+    // Calculate average velocity
+    if (tracker.samples.length >= 2) {
+      const totalDelta = tracker.samples.reduce(
+        (sum, sample) => sum + sample.delta,
+        0
+      )
+      const timeSpan = currentTime - tracker.samples[0].time
+      return timeSpan > 0 ? totalDelta / timeSpan : 0
+    }
+
+    return 0
+  }, [])
+
+  /**
    * Resets the scroll end state
    */
   const resetScrollEndState = useCallback(() => {
     scrollEndReachedRef.current = false
     wheelDeltaAccumulatorRef.current = 0
+    wheelDirectionRef.current = null
+    velocityTrackerRef.current.samples = []
   }, [])
 
   /**
-   * Navigates to the next or previous section
-   * @param {string} direction - 'up' or 'down'
+   * Navigates to the next or previous section with protection against rapid calls
    */
   const navigateToSection = useCallback(
     (direction) => {
+      const now = Date.now()
+
+      // Prevent navigation if too soon after last navigation
+      if (
+        now - lastNavigationTimeRef.current <
+        SENSITIVITY_CONFIG.scroll.navigationCooldown
+      ) {
+        return
+      }
+
+      // Double check to prevent multiple navigations
       if (isNavigatingRef.current) return
 
       const currentIndex = getCurrentSectionIndex()
@@ -102,8 +209,15 @@ function App() {
         return
       }
 
+      // Update navigation state
       setDirection(direction)
       isNavigatingRef.current = true
+      lastNavigationTimeRef.current = now
+
+      // Reset all wheel-related states immediately
+      wheelDeltaAccumulatorRef.current = 0
+      isProcessingWheelRef.current = false
+      velocityTrackerRef.current.samples = []
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
@@ -111,9 +225,14 @@ function App() {
 
       navigate(SECTIONS[nextIndex].path)
 
-      // Reset scroll end state after navigation
+      // Immediate and complete reset after navigation
       resetScrollEndState()
+      if (scrollEndTimeoutRef.current) {
+        clearTimeout(scrollEndTimeoutRef.current)
+        scrollEndTimeoutRef.current = null
+      }
 
+      // Extended cooldown period
       timeoutRef.current = setTimeout(() => {
         isNavigatingRef.current = false
         timeoutRef.current = null
@@ -197,26 +316,46 @@ function App() {
   }, [location.pathname, resetScrollEndState])
 
   /**
-   * Handles mouse wheel navigation with smooth scrolling
+   * Enhanced wheel handler with better trackpad support
    */
   useEffect(() => {
     const handleWheel = (e) => {
+      // Block immediately if navigation is in progress
       if (isNavigatingRef.current) {
         e.preventDefault()
+        wheelEventQueueRef.current = []
         return
       }
 
       const el = mainRef.current
       if (!el || isScrollableArea(e.target)) return
 
+      // Enhanced trackpad detection
+      detectTrackpad(e)
+
       const now = Date.now()
-      if (
-        now - lastWheelTimeRef.current <
-        SENSITIVITY_CONFIG.wheel.debounceTime
-      ) {
+
+      // Use different debounce times for trackpad vs mouse wheel
+      const debounceTime = isTrackpadRef.current
+        ? SENSITIVITY_CONFIG.wheel.trackpadDebounceTime
+        : SENSITIVITY_CONFIG.wheel.debounceTime
+
+      // Check debounce
+      if (now - lastWheelTimeRef.current < debounceTime) {
         e.preventDefault()
         return
       }
+
+      // Prevent simultaneous processing of wheel events
+      if (isProcessingWheelRef.current) {
+        e.preventDefault()
+        return
+      }
+
+      isProcessingWheelRef.current = true
+
+      // Calculate velocity to detect intentional scrolls
+      const velocity = calculateVelocity(e.deltaY, now)
 
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
 
@@ -226,13 +365,14 @@ function App() {
         lastWheelTimeRef.current = now
         const direction = e.deltaY > 0 ? 'down' : 'up'
         navigateToSection(direction)
+        isProcessingWheelRef.current = false
         return
       }
 
       // If scrollable and not at edges, allow normal scroll
       if (!atBottom && !atTop) {
-        // Reset state if scrolling within content
         resetScrollEndState()
+        isProcessingWheelRef.current = false
         return
       }
 
@@ -243,10 +383,11 @@ function App() {
 
         const direction = e.deltaY > 0 ? 'down' : 'up'
 
-        // If end not yet reached, mark as reached
+        // If first event at edge
         if (!scrollEndReachedRef.current) {
           scrollEndReachedRef.current = true
           wheelDeltaAccumulatorRef.current = 0
+          wheelDirectionRef.current = direction
 
           // Reset after delay if no other scroll
           if (scrollEndTimeoutRef.current) {
@@ -256,18 +397,60 @@ function App() {
             resetScrollEndState()
           }, SENSITIVITY_CONFIG.wheel.resetTimeout)
 
+          isProcessingWheelRef.current = false
           return
         }
 
-        // If already at end, accumulate delta
-        wheelDeltaAccumulatorRef.current += Math.abs(e.deltaY)
+        // Check that direction is consistent
+        if (wheelDirectionRef.current !== direction) {
+          resetScrollEndState()
+          wheelDirectionRef.current = direction
+          scrollEndReachedRef.current = true
+          wheelDeltaAccumulatorRef.current = 0
 
-        // Navigate if enough delta accumulated (equivalent to additional scroll)
-        if (
-          wheelDeltaAccumulatorRef.current >=
-          SENSITIVITY_CONFIG.wheel.deltaThreshold
-        ) {
-          navigateToSection(direction)
+          if (scrollEndTimeoutRef.current) {
+            clearTimeout(scrollEndTimeoutRef.current)
+          }
+          scrollEndTimeoutRef.current = setTimeout(() => {
+            resetScrollEndState()
+          }, SENSITIVITY_CONFIG.wheel.resetTimeout)
+
+          isProcessingWheelRef.current = false
+          return
+        }
+
+        // Adjust delta based on input type
+        let adjustedDelta = Math.abs(e.deltaY)
+        if (isTrackpadRef.current) {
+          adjustedDelta *= SENSITIVITY_CONFIG.wheel.trackpadMultiplier
+        }
+
+        // Accumulate delta
+        wheelDeltaAccumulatorRef.current += adjustedDelta
+
+        // Use different thresholds for trackpad vs mouse
+        const threshold = isTrackpadRef.current
+          ? SENSITIVITY_CONFIG.wheel.trackpadDeltaThreshold
+          : SENSITIVITY_CONFIG.wheel.deltaThreshold
+
+        // Check velocity threshold for trackpad (prevents accidental navigation)
+        const velocityCheck =
+          !isTrackpadRef.current ||
+          velocity > SENSITIVITY_CONFIG.wheel.velocityThreshold
+
+        // Navigate if enough delta accumulated AND velocity check passes
+        if (wheelDeltaAccumulatorRef.current >= threshold && velocityCheck) {
+          // Block navigation immediately
+          isNavigatingRef.current = true
+          wheelDeltaAccumulatorRef.current = 0
+
+          // Small delay to ensure all queued events are blocked
+          setTimeout(() => {
+            navigateToSection(direction)
+          }, 10)
+
+          isProcessingWheelRef.current = false
+          return
         }
 
         // Reset timeout
@@ -278,6 +461,8 @@ function App() {
           resetScrollEndState()
         }, SENSITIVITY_CONFIG.wheel.resetTimeout)
       }
+
+      isProcessingWheelRef.current = false
     }
 
     const el = mainRef.current
@@ -296,7 +481,13 @@ function App() {
         el.removeEventListener('wheel', handleWheel)
       }
     }
-  }, [navigateToSection, location.pathname, resetScrollEndState])
+  }, [
+    navigateToSection,
+    location.pathname,
+    resetScrollEndState,
+    detectTrackpad,
+    calculateVelocity,
+  ])
 
   /**
    * Handles touch navigation with smooth scrolling
