@@ -16,9 +16,9 @@ const SECTIONS = [
 // Configuration simple
 const CONFIG = {
   navigationCooldown: 800,
-  gestureGroupTimeout: 100, // Temps pour considérer que c'est le même geste continu
-  edgeIntentionTimeout: 1000, // Temps max pour faire le geste après avoir atteint le bord
+  edgeConfirmationTimeout: 1500, // Temps max pour confirmer la navigation après avoir atteint le bord
   scrollThreshold: 50,
+  touchThreshold: 50,
   animationDuration: 1000,
 }
 
@@ -32,8 +32,8 @@ function App() {
   const edgeStateRef = useRef({
     atEdge: false,
     edgeDirection: null,
-    lastEventTime: 0,
-    isInGestureGroup: false,
+    lastEdgeTime: 0,
+    waitingForConfirmation: false,
   })
 
   // État pour la direction de navigation
@@ -89,8 +89,8 @@ function App() {
       edgeStateRef.current = {
         atEdge: false,
         edgeDirection: null,
-        lastEventTime: 0,
-        isInGestureGroup: false,
+        lastEdgeTime: 0,
+        waitingForConfirmation: false,
       }
 
       // Navigation
@@ -115,7 +115,8 @@ function App() {
    * Gestionnaire de wheel unifié et simple
    */
   useEffect(() => {
-    let gestureGroupTimer = null
+    let wheelGestureTimer = null
+    let isInWheelGesture = false
 
     const handleWheel = (e) => {
       // Bloquer si navigation en cours
@@ -149,63 +150,86 @@ function App() {
         (scrollDirection === 'down' && atBottom) ||
         (scrollDirection === 'up' && atTop)
 
-      // Gestion du groupe de gestes (scroll continu)
-      const timeSinceLastEvent = now - edgeStateRef.current.lastEventTime
-      const isNewGesture =
-        timeSinceLastEvent > CONFIG.gestureGroupTimeout ||
-        !edgeStateRef.current.isInGestureGroup
-
-      // Si on est dans un groupe de gestes continus au bord
-      if (!isNewGesture && currentlyAtEdge) {
-        e.preventDefault()
-        edgeStateRef.current.lastEventTime = now
-
-        // Reset le timer de fin de groupe
-        if (gestureGroupTimer) clearTimeout(gestureGroupTimer)
-        gestureGroupTimer = setTimeout(() => {
-          edgeStateRef.current.isInGestureGroup = false
-        }, CONFIG.gestureGroupTimeout)
-
-        return
-      }
-
-      // Si on était au bord et qu'on fait un nouveau geste dans la même direction
-      if (
-        edgeStateRef.current.atEdge &&
-        edgeStateRef.current.edgeDirection === scrollDirection &&
-        isNewGesture &&
-        now - edgeStateRef.current.lastEventTime < CONFIG.edgeIntentionTimeout
-      ) {
-        e.preventDefault()
-        navigateToSection(scrollDirection)
-        return
-      }
-
-      // Si on arrive au bord pour la première fois
+      // Cas 2: Page scrollable
       if (currentlyAtEdge) {
-        e.preventDefault()
-        edgeStateRef.current = {
-          atEdge: true,
-          edgeDirection: scrollDirection,
-          lastEventTime: now,
-          isInGestureGroup: true,
+        // Si on est déjà dans un geste wheel continu au bord, on ignore
+        if (isInWheelGesture) {
+          e.preventDefault()
+          return
         }
 
-        // Démarrer le timer de fin de groupe
-        if (gestureGroupTimer) clearTimeout(gestureGroupTimer)
-        gestureGroupTimer = setTimeout(() => {
-          edgeStateRef.current.isInGestureGroup = false
-        }, CONFIG.gestureGroupTimeout)
+        // Si on attend déjà une confirmation dans la même direction
+        if (
+          edgeStateRef.current.waitingForConfirmation &&
+          edgeStateRef.current.edgeDirection === scrollDirection &&
+          now - edgeStateRef.current.lastEdgeTime <=
+            CONFIG.edgeConfirmationTimeout
+        ) {
+          // Confirmation reçue → navigation
+          e.preventDefault()
+
+          // Reset complètement les états avant navigation
+          edgeStateRef.current = {
+            atEdge: false,
+            edgeDirection: null,
+            lastEdgeTime: 0,
+            waitingForConfirmation: false,
+          }
+
+          isInWheelGesture = false
+          if (wheelGestureTimer) {
+            clearTimeout(wheelGestureTimer)
+            wheelGestureTimer = null
+          }
+
+          navigateToSection(scrollDirection)
+          return
+        }
+
+        // Si on vient d'arriver au bord ou c'est une nouvelle direction
+        if (
+          !edgeStateRef.current.atEdge ||
+          edgeStateRef.current.edgeDirection !== scrollDirection ||
+          now - edgeStateRef.current.lastEdgeTime >
+            CONFIG.edgeConfirmationTimeout
+        ) {
+          // Première fois au bord → attendre confirmation
+          e.preventDefault()
+          edgeStateRef.current = {
+            atEdge: true,
+            edgeDirection: scrollDirection,
+            lastEdgeTime: now,
+            waitingForConfirmation: true,
+          }
+
+          // Marquer qu'on est dans un geste continu
+          isInWheelGesture = true
+          if (wheelGestureTimer) clearTimeout(wheelGestureTimer)
+          wheelGestureTimer = setTimeout(() => {
+            isInWheelGesture = false
+          }, 300)
+          return
+        }
+
+        // Sinon on bloque le scroll au bord
+        e.preventDefault()
       } else {
-        // On n'est pas au bord, on laisse scroller normalement
-        // Si on quitte le bord, on reset l'état
+        // On n'est pas au bord, on peut scroller normalement
+        // Reset l'état si on quitte le bord
         if (edgeStateRef.current.atEdge) {
           edgeStateRef.current = {
             atEdge: false,
             edgeDirection: null,
-            lastEventTime: 0,
-            isInGestureGroup: false,
+            lastEdgeTime: 0,
+            waitingForConfirmation: false,
           }
+        }
+
+        // Reset le geste wheel
+        isInWheelGesture = false
+        if (wheelGestureTimer) {
+          clearTimeout(wheelGestureTimer)
+          wheelGestureTimer = null
         }
       }
     }
@@ -217,7 +241,9 @@ function App() {
 
     return () => {
       el.removeEventListener('wheel', handleWheel)
-      if (gestureGroupTimer) clearTimeout(gestureGroupTimer)
+      if (wheelGestureTimer) {
+        clearTimeout(wheelGestureTimer)
+      }
     }
   }, [navigateToSection])
 
@@ -252,7 +278,10 @@ function App() {
       const deltaX = touchEnd.x - touchStart.x
 
       // Ignorer si pas un swipe vertical ou trop petit
-      if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) < 50) {
+      if (
+        Math.abs(deltaY) <= Math.abs(deltaX) ||
+        Math.abs(deltaY) < CONFIG.touchThreshold
+      ) {
         isSwiping = false
         return
       }
@@ -260,9 +289,9 @@ function App() {
       const el = mainRef.current
       if (!el) return
 
+      const now = Date.now()
       const { canScroll, atBottom, atTop } = getScrollInfo(el)
       const swipeDirection = deltaY < 0 ? 'down' : 'up'
-      const now = Date.now()
 
       // Page non scrollable → navigation directe
       if (!canScroll) {
@@ -276,20 +305,25 @@ function App() {
         (swipeDirection === 'down' && atBottom) ||
         (swipeDirection === 'up' && atTop)
 
-      // Si on était déjà au bord et qu'on swipe dans la même direction
-      if (
-        edgeStateRef.current.atEdge &&
-        edgeStateRef.current.edgeDirection === swipeDirection &&
-        now - edgeStateRef.current.lastEventTime < CONFIG.edgeIntentionTimeout
-      ) {
-        navigateToSection(swipeDirection)
-      } else if (currentlyAtEdge) {
-        // On arrive au bord pour la première fois
-        edgeStateRef.current = {
-          atEdge: true,
-          edgeDirection: swipeDirection,
-          lastEventTime: now,
-          isInGestureGroup: false,
+      // Page scrollable
+      if (currentlyAtEdge) {
+        // Si on attend déjà une confirmation dans la même direction
+        if (
+          edgeStateRef.current.waitingForConfirmation &&
+          edgeStateRef.current.edgeDirection === swipeDirection &&
+          now - edgeStateRef.current.lastEdgeTime <=
+            CONFIG.edgeConfirmationTimeout
+        ) {
+          // Confirmation reçue → navigation
+          navigateToSection(swipeDirection)
+        } else {
+          // Première fois au bord ou nouvelle direction → attendre confirmation
+          edgeStateRef.current = {
+            atEdge: true,
+            edgeDirection: swipeDirection,
+            lastEdgeTime: now,
+            waitingForConfirmation: true,
+          }
         }
       } else {
         // Pas au bord, reset si nécessaire
@@ -297,8 +331,8 @@ function App() {
           edgeStateRef.current = {
             atEdge: false,
             edgeDirection: null,
-            lastEventTime: 0,
-            isInGestureGroup: false,
+            lastEdgeTime: 0,
+            waitingForConfirmation: false,
           }
         }
       }
@@ -384,8 +418,8 @@ function App() {
     edgeStateRef.current = {
       atEdge: false,
       edgeDirection: null,
-      lastEventTime: 0,
-      isInGestureGroup: false,
+      lastEdgeTime: 0,
+      waitingForConfirmation: false,
     }
 
     const timer = setTimeout(() => {
