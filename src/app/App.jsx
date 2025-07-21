@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { NavigationContext } from './navigationContext'
 import Header from '../components/header/Header'
 import '../styles/reset.scss'
@@ -13,353 +13,401 @@ const SECTIONS = [
   { path: '/contact', id: 'contact' },
 ]
 
-// Configuration simple
+// Configuration optimisée
 const CONFIG = {
-  navigationCooldown: 800,
-  edgeConfirmationTimeout: 1500, // Temps max pour confirmer la navigation après avoir atteint le bord
-  scrollThreshold: 50,
+  navigationCooldown: 800, // Augmenté pour éviter les sauts multiples
+  edgeConfirmationTimeout: 600, // Réduit pour une confirmation plus rapide
+  scrollThreshold: 30, // Réduit pour une meilleure sensibilité
   touchThreshold: 50,
-  animationDuration: 1000,
+  wheelGestureTimeout: 400, // Augmenté pour bloquer les gestes longs
+  wheelEventCooldown: 100, // Nouveau: cooldown entre événements wheel
 }
 
 function App() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Références de base
+  // Références consolidées
   const mainRef = useRef(null)
-  const isNavigatingRef = useRef(false)
+  const navigationStateRef = useRef({
+    isNavigating: false,
+    lastNavigationTime: 0,
+    cooldownTimer: null,
+  })
+
+  const wheelStateRef = useRef({
+    isInGesture: false,
+    gestureTimer: null,
+    lastWheelTime: 0,
+    lastNavigationDirection: null,
+    gestureStartTime: 0,
+    totalDelta: 0,
+    eventCount: 0,
+  })
+
   const edgeStateRef = useRef({
-    atEdge: false,
-    edgeDirection: null,
-    lastEdgeTime: 0,
-    waitingForConfirmation: false,
+    isAtEdge: false,
+    direction: null,
+    timestamp: 0,
+    confirmationTimer: null,
   })
 
   // État pour la direction de navigation
   const [direction, setDirection] = useState('down')
 
-  /**
-   * Obtient l'index de la section actuelle
-   */
-  const getCurrentSectionIndex = useCallback(() => {
-    return SECTIONS.findIndex((section) => section.path === location.pathname)
+  // Mémorisation de l'index de section actuelle
+  const currentSectionIndex = useMemo(() => {
+    const index = SECTIONS.findIndex(
+      (section) => section.path === location.pathname
+    )
+    return index
   }, [location.pathname])
 
   /**
-   * Vérifie si on peut scroller dans un élément
+   * Fonction de nettoyage complète
    */
-  const getScrollInfo = (element) => {
-    const scrollTop = element.scrollTop
-    const scrollHeight = element.scrollHeight
-    const clientHeight = element.clientHeight
-    const epsilon = 2
+  const cleanupAllStates = useCallback(() => {
+    const navState = navigationStateRef.current
+    const wheelState = wheelStateRef.current
+    const edgeState = edgeStateRef.current
+
+    // Nettoyer les timers
+    if (navState.cooldownTimer) {
+      clearTimeout(navState.cooldownTimer)
+      navState.cooldownTimer = null
+    }
+    if (wheelState.gestureTimer) {
+      clearTimeout(wheelState.gestureTimer)
+      wheelState.gestureTimer = null
+    }
+    if (edgeState.confirmationTimer) {
+      clearTimeout(edgeState.confirmationTimer)
+      edgeState.confirmationTimer = null
+    }
+
+    // Reset des états
+    wheelState.isInGesture = false
+    wheelState.totalDelta = 0
+    wheelState.eventCount = 0
+    edgeState.isAtEdge = false
+    edgeState.direction = null
+  }, [])
+
+  /**
+   * Utilitaire pour vérifier si on peut scroller
+   */
+  const getScrollInfo = useCallback((element) => {
+    if (!element) return { canScroll: false, atBottom: false, atTop: true }
+
+    const { scrollTop, scrollHeight, clientHeight } = element
+    const epsilon = 3
 
     return {
       canScroll: scrollHeight - clientHeight > epsilon,
       atBottom: scrollTop + clientHeight >= scrollHeight - epsilon,
       atTop: scrollTop <= epsilon,
     }
-  }
+  }, [])
 
   /**
-   * Navigation vers une section
+   * Vérification zone scrollable
+   */
+  const isScrollableArea = useCallback((target) => {
+    return target.closest(
+      '.allowScroll, .features, .scrollable, input, textarea, select, [contenteditable]'
+    )
+  }, [])
+
+  /**
+   * Navigation optimisée vers une section
    */
   const navigateToSection = useCallback(
-    (direction) => {
-      if (isNavigatingRef.current) return
+    (navDirection) => {
+      const navState = navigationStateRef.current
+      const now = Date.now()
 
-      const currentIndex = getCurrentSectionIndex()
-      if (currentIndex === -1) return
+      // Vérifications préliminaires
+      if (navState.isNavigating) {
+        return
+      }
 
+      if (currentSectionIndex === -1) {
+        return
+      }
+
+      // Cooldown entre navigations
+      if (now - navState.lastNavigationTime < CONFIG.navigationCooldown) {
+        return
+      }
+
+      // Calcul de la prochaine section
       let nextIndex
-      if (direction === 'down' && currentIndex < SECTIONS.length - 1) {
-        nextIndex = currentIndex + 1
-      } else if (direction === 'up' && currentIndex > 0) {
-        nextIndex = currentIndex - 1
+      if (
+        navDirection === 'down' &&
+        currentSectionIndex < SECTIONS.length - 1
+      ) {
+        nextIndex = currentSectionIndex + 1
+      } else if (navDirection === 'up' && currentSectionIndex > 0) {
+        nextIndex = currentSectionIndex - 1
       } else {
         return
       }
 
-      // Mise à jour de l'état
-      setDirection(direction)
-      isNavigatingRef.current = true
+      const nextSection = SECTIONS[nextIndex]
+      if (!nextSection?.path) return
 
-      // Reset l'état du bord
-      edgeStateRef.current = {
-        atEdge: false,
-        edgeDirection: null,
-        lastEdgeTime: 0,
-        waitingForConfirmation: false,
-      }
+      // Mise à jour des états
+      navState.isNavigating = true
+      navState.lastNavigationTime = now
+      setDirection(navDirection)
+
+      // Nettoyage des autres états
+      cleanupAllStates()
 
       // Navigation
-      navigate(SECTIONS[nextIndex].path)
+      navigate(nextSection.path)
 
-      // Reset après cooldown
-      setTimeout(() => {
-        isNavigatingRef.current = false
+      // Timer de cooldown
+      navState.cooldownTimer = setTimeout(() => {
+        navState.isNavigating = false
       }, CONFIG.navigationCooldown)
     },
-    [getCurrentSectionIndex, navigate]
+    [currentSectionIndex, navigate, cleanupAllStates]
   )
 
   /**
-   * Vérifie si on est dans une zone scrollable
-   */
-  const isScrollableArea = (target) => {
-    return target.closest('.allowScroll, .features, .scrollable')
-  }
-
-  /**
-   * Gestionnaire de wheel unifié et simple
+   * Gestionnaire de wheel avec protection renforcée contre les gestes multiples
    */
   useEffect(() => {
-    let wheelGestureTimer = null
-    let isInWheelGesture = false
-
     const handleWheel = (e) => {
-      // Bloquer si navigation en cours
-      if (isNavigatingRef.current) {
-        e.preventDefault()
+      const navState = navigationStateRef.current
+      const wheelState = wheelStateRef.current
+      const edgeState = edgeStateRef.current
+      const now = Date.now()
+
+      // Blocages préliminaires
+      if (navState.isNavigating || isScrollableArea(e.target)) {
         return
       }
-
-      // Zones scrollables spéciales
-      if (isScrollableArea(e.target)) return
-
-      const el = mainRef.current
-      if (!el) return
 
       // Ignorer les petits mouvements
-      if (Math.abs(e.deltaY) < CONFIG.scrollThreshold) return
-
-      const now = Date.now()
-      const { canScroll, atBottom, atTop } = getScrollInfo(el)
-      const scrollDirection = e.deltaY > 0 ? 'down' : 'up'
-
-      // Cas 1: Page non scrollable → navigation directe
-      if (!canScroll) {
-        e.preventDefault()
-        navigateToSection(scrollDirection)
+      if (Math.abs(e.deltaY) < CONFIG.scrollThreshold) {
         return
       }
 
-      // Déterminer si on est au bord dans la direction du scroll
-      const currentlyAtEdge =
-        (scrollDirection === 'down' && atBottom) ||
-        (scrollDirection === 'up' && atTop)
-
-      // Cas 2: Page scrollable
-      if (currentlyAtEdge) {
-        // Si on est déjà dans un geste wheel continu au bord, on ignore
-        if (isInWheelGesture) {
-          e.preventDefault()
-          return
-        }
-
-        // Si on attend déjà une confirmation dans la même direction
-        if (
-          edgeStateRef.current.waitingForConfirmation &&
-          edgeStateRef.current.edgeDirection === scrollDirection &&
-          now - edgeStateRef.current.lastEdgeTime <=
-            CONFIG.edgeConfirmationTimeout
-        ) {
-          // Confirmation reçue → navigation
-          e.preventDefault()
-
-          // Reset complètement les états avant navigation
-          edgeStateRef.current = {
-            atEdge: false,
-            edgeDirection: null,
-            lastEdgeTime: 0,
-            waitingForConfirmation: false,
-          }
-
-          isInWheelGesture = false
-          if (wheelGestureTimer) {
-            clearTimeout(wheelGestureTimer)
-            wheelGestureTimer = null
-          }
-
-          navigateToSection(scrollDirection)
-          return
-        }
-
-        // Si on vient d'arriver au bord ou c'est une nouvelle direction
-        if (
-          !edgeStateRef.current.atEdge ||
-          edgeStateRef.current.edgeDirection !== scrollDirection ||
-          now - edgeStateRef.current.lastEdgeTime >
-            CONFIG.edgeConfirmationTimeout
-        ) {
-          // Première fois au bord → attendre confirmation
-          e.preventDefault()
-          edgeStateRef.current = {
-            atEdge: true,
-            edgeDirection: scrollDirection,
-            lastEdgeTime: now,
-            waitingForConfirmation: true,
-          }
-
-          // Marquer qu'on est dans un geste continu
-          isInWheelGesture = true
-          if (wheelGestureTimer) clearTimeout(wheelGestureTimer)
-          wheelGestureTimer = setTimeout(() => {
-            isInWheelGesture = false
-          }, 300)
-          return
-        }
-
-        // Sinon on bloque le scroll au bord
+      // Protection contre les événements wheel trop rapprochés
+      if (now - wheelState.lastWheelTime < CONFIG.wheelEventCooldown) {
         e.preventDefault()
+        return
+      }
+
+      const element = mainRef.current
+      if (!element) return
+
+      const scrollInfo = getScrollInfo(element)
+      const scrollDirection = e.deltaY > 0 ? 'down' : 'up'
+
+      // Détecter si c'est le début d'un nouveau geste
+      const isNewGesture =
+        !wheelState.isInGesture ||
+        now - wheelState.gestureStartTime > CONFIG.wheelGestureTimeout ||
+        wheelState.lastNavigationDirection !== scrollDirection
+
+      if (isNewGesture) {
+        // Réinitialiser le suivi du geste
+        wheelState.gestureStartTime = now
+        wheelState.totalDelta = 0
+        wheelState.eventCount = 0
+        wheelState.lastNavigationDirection = scrollDirection
+      }
+
+      // Accumuler les données du geste
+      wheelState.totalDelta += Math.abs(e.deltaY)
+      wheelState.eventCount++
+      wheelState.lastWheelTime = now
+
+      // Page non scrollable → navigation directe (mais avec protection)
+      if (!scrollInfo.canScroll) {
+        e.preventDefault()
+
+        // Pour les pages non scrollables, on navigue immédiatement mais on bloque les suivants
+        if (!wheelState.isInGesture) {
+          wheelState.isInGesture = true
+          navigateToSection(scrollDirection)
+
+          // Bloquer les événements suivants du même geste
+          if (wheelState.gestureTimer) clearTimeout(wheelState.gestureTimer)
+          wheelState.gestureTimer = setTimeout(() => {
+            wheelState.isInGesture = false
+            wheelState.totalDelta = 0
+            wheelState.eventCount = 0
+          }, CONFIG.wheelGestureTimeout)
+        }
+        return
+      }
+
+      // Détecter si on est au bord
+      const atEdge =
+        (scrollDirection === 'down' && scrollInfo.atBottom) ||
+        (scrollDirection === 'up' && scrollInfo.atTop)
+
+      if (atEdge) {
+        e.preventDefault()
+
+        // Si on est déjà en train de traiter un geste, ignorer
+        if (wheelState.isInGesture) {
+          return
+        }
+
+        // Vérifier si on attend déjà une confirmation dans cette direction
+        const isAwaitingConfirmation =
+          edgeState.isAtEdge &&
+          edgeState.direction === scrollDirection &&
+          now - edgeState.timestamp <= CONFIG.edgeConfirmationTimeout
+
+        if (isAwaitingConfirmation) {
+          // Confirmation reçue → navigation avec protection
+          wheelState.isInGesture = true
+          navigateToSection(scrollDirection)
+
+          // Bloquer les événements suivants
+          if (wheelState.gestureTimer) clearTimeout(wheelState.gestureTimer)
+          wheelState.gestureTimer = setTimeout(() => {
+            wheelState.isInGesture = false
+            wheelState.totalDelta = 0
+            wheelState.eventCount = 0
+          }, CONFIG.wheelGestureTimeout)
+
+          return
+        }
+
+        // Premier passage au bord → attendre confirmation
+        edgeState.isAtEdge = true
+        edgeState.direction = scrollDirection
+        edgeState.timestamp = now
+
+        // Nettoyer le timer précédent
+        if (edgeState.confirmationTimer) {
+          clearTimeout(edgeState.confirmationTimer)
+        }
+
+        // Timer de confirmation
+        edgeState.confirmationTimer = setTimeout(() => {
+          edgeState.isAtEdge = false
+          edgeState.direction = null
+        }, CONFIG.edgeConfirmationTimeout)
       } else {
-        // On n'est pas au bord, on peut scroller normalement
-        // Reset l'état si on quitte le bord
-        if (edgeStateRef.current.atEdge) {
-          edgeStateRef.current = {
-            atEdge: false,
-            edgeDirection: null,
-            lastEdgeTime: 0,
-            waitingForConfirmation: false,
+        // Pas au bord, reset de l'état edge si nécessaire
+        if (edgeState.isAtEdge) {
+          edgeState.isAtEdge = false
+          edgeState.direction = null
+          if (edgeState.confirmationTimer) {
+            clearTimeout(edgeState.confirmationTimer)
+            edgeState.confirmationTimer = null
           }
         }
 
-        // Reset le geste wheel
-        isInWheelGesture = false
-        if (wheelGestureTimer) {
-          clearTimeout(wheelGestureTimer)
-          wheelGestureTimer = null
+        // Reset du geste wheel si on scroll normalement
+        if (wheelState.isInGesture) {
+          wheelState.isInGesture = false
+          wheelState.totalDelta = 0
+          wheelState.eventCount = 0
         }
       }
     }
 
-    const el = mainRef.current
-    if (!el) return
+    const element = mainRef.current
+    if (!element) return
 
-    el.addEventListener('wheel', handleWheel, { passive: false })
+    element.addEventListener('wheel', handleWheel, { passive: false })
 
     return () => {
-      el.removeEventListener('wheel', handleWheel)
-      if (wheelGestureTimer) {
-        clearTimeout(wheelGestureTimer)
-      }
+      element.removeEventListener('wheel', handleWheel)
+      cleanupAllStates()
     }
-  }, [navigateToSection])
+  }, [
+    navigateToSection,
+    getScrollInfo,
+    isScrollableArea,
+    cleanupAllStates,
+    currentSectionIndex,
+  ])
 
   /**
-   * Gestionnaire tactile simple
+   * Gestionnaire tactile optimisé
    */
   useEffect(() => {
     let touchStart = { x: 0, y: 0 }
-    let isSwiping = false
+    let touchActive = false
 
     const handleTouchStart = (e) => {
       if (isScrollableArea(e.target)) return
-      touchStart = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      }
-      isSwiping = true
+
+      const touch = e.touches[0]
+      touchStart = { x: touch.clientX, y: touch.clientY }
+      touchActive = true
     }
 
     const handleTouchEnd = (e) => {
-      if (!isSwiping || isNavigatingRef.current || isScrollableArea(e.target)) {
-        isSwiping = false
+      if (
+        !touchActive ||
+        navigationStateRef.current.isNavigating ||
+        isScrollableArea(e.target)
+      ) {
+        touchActive = false
         return
       }
 
-      const touchEnd = {
-        x: e.changedTouches[0].clientX,
-        y: e.changedTouches[0].clientY,
-      }
+      const touch = e.changedTouches[0]
+      const deltaY = touch.clientY - touchStart.y
+      const deltaX = touch.clientX - touchStart.x
 
-      const deltaY = touchEnd.y - touchStart.y
-      const deltaX = touchEnd.x - touchStart.x
+      touchActive = false
 
-      // Ignorer si pas un swipe vertical ou trop petit
+      // Vérifier que c'est un swipe vertical
       if (
         Math.abs(deltaY) <= Math.abs(deltaX) ||
         Math.abs(deltaY) < CONFIG.touchThreshold
       ) {
-        isSwiping = false
         return
       }
 
-      const el = mainRef.current
-      if (!el) return
+      const element = mainRef.current
+      if (!element) return
 
-      const now = Date.now()
-      const { canScroll, atBottom, atTop } = getScrollInfo(el)
+      const scrollInfo = getScrollInfo(element)
       const swipeDirection = deltaY < 0 ? 'down' : 'up'
 
-      // Page non scrollable → navigation directe
-      if (!canScroll) {
+      // Navigation directe pour pages non scrollables ou si au bord
+      if (
+        !scrollInfo.canScroll ||
+        (swipeDirection === 'down' && scrollInfo.atBottom) ||
+        (swipeDirection === 'up' && scrollInfo.atTop)
+      ) {
         navigateToSection(swipeDirection)
-        isSwiping = false
-        return
       }
-
-      // Au bord actuellement
-      const currentlyAtEdge =
-        (swipeDirection === 'down' && atBottom) ||
-        (swipeDirection === 'up' && atTop)
-
-      // Page scrollable
-      if (currentlyAtEdge) {
-        // Si on attend déjà une confirmation dans la même direction
-        if (
-          edgeStateRef.current.waitingForConfirmation &&
-          edgeStateRef.current.edgeDirection === swipeDirection &&
-          now - edgeStateRef.current.lastEdgeTime <=
-            CONFIG.edgeConfirmationTimeout
-        ) {
-          // Confirmation reçue → navigation
-          navigateToSection(swipeDirection)
-        } else {
-          // Première fois au bord ou nouvelle direction → attendre confirmation
-          edgeStateRef.current = {
-            atEdge: true,
-            edgeDirection: swipeDirection,
-            lastEdgeTime: now,
-            waitingForConfirmation: true,
-          }
-        }
-      } else {
-        // Pas au bord, reset si nécessaire
-        if (edgeStateRef.current.atEdge) {
-          edgeStateRef.current = {
-            atEdge: false,
-            edgeDirection: null,
-            lastEdgeTime: 0,
-            waitingForConfirmation: false,
-          }
-        }
-      }
-
-      isSwiping = false
     }
 
-    const el = mainRef.current
-    if (!el) return
+    const element = mainRef.current
+    if (!element) return
 
-    el.addEventListener('touchstart', handleTouchStart, { passive: true })
-    el.addEventListener('touchend', handleTouchEnd, { passive: true })
+    element.addEventListener('touchstart', handleTouchStart, { passive: true })
+    element.addEventListener('touchend', handleTouchEnd, { passive: true })
 
     return () => {
-      if (el) {
-        el.removeEventListener('touchstart', handleTouchStart)
-        el.removeEventListener('touchend', handleTouchEnd)
+      if (element) {
+        element.removeEventListener('touchstart', handleTouchStart)
+        element.removeEventListener('touchend', handleTouchEnd)
       }
     }
-  }, [navigateToSection])
+  }, [navigateToSection, getScrollInfo, isScrollableArea, currentSectionIndex])
 
   /**
-   * Navigation au clavier
+   * Navigation clavier optimisée
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (isNavigatingRef.current) return
+      if (navigationStateRef.current.isNavigating) return
 
       const activeElement = document.activeElement
       const isInInput =
@@ -385,7 +433,7 @@ function App() {
           break
         case 'Home':
           e.preventDefault()
-          if (getCurrentSectionIndex() !== 0) {
+          if (currentSectionIndex !== 0) {
             setDirection('up')
             navigate(SECTIONS[0].path)
           }
@@ -393,7 +441,7 @@ function App() {
         case 'End': {
           e.preventDefault()
           const lastIndex = SECTIONS.length - 1
-          if (getCurrentSectionIndex() !== lastIndex) {
+          if (currentSectionIndex !== lastIndex) {
             setDirection('down')
             navigate(SECTIONS[lastIndex].path)
           }
@@ -404,41 +452,44 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [navigateToSection, navigate, getCurrentSectionIndex])
+  }, [navigateToSection, navigate, currentSectionIndex])
 
   /**
    * Reset au changement de route
    */
   useEffect(() => {
+    // Reset scroll position
     if (mainRef.current) {
       mainRef.current.scrollTop = 0
     }
 
-    // Reset tous les états
-    edgeStateRef.current = {
-      atEdge: false,
-      edgeDirection: null,
-      lastEdgeTime: 0,
-      waitingForConfirmation: false,
-    }
+    // Nettoyage complet des états
+    cleanupAllStates()
 
+    // Reset navigation avec un délai minimal
     const timer = setTimeout(() => {
-      isNavigatingRef.current = false
-    }, 150)
+      navigationStateRef.current.isNavigating = false
+    }, 50)
 
     return () => clearTimeout(timer)
-  }, [location.pathname])
+  }, [location.pathname, cleanupAllStates])
+
+  // Valeur du contexte mémorisée
+  const contextValue = useMemo(
+    () => ({
+      direction,
+      containerRef: mainRef,
+      resetNavigation: () => {
+        navigationStateRef.current.isNavigating = false
+        cleanupAllStates()
+      },
+      currentSectionIndex,
+    }),
+    [direction, currentSectionIndex, cleanupAllStates]
+  )
 
   return (
-    <NavigationContext.Provider
-      value={{
-        direction,
-        containerRef: mainRef,
-        resetNavigation: () => {
-          isNavigatingRef.current = false
-        },
-      }}
-    >
+    <NavigationContext.Provider value={contextValue}>
       <div className="app-container">
         <Header />
         <main ref={mainRef} className="main-content">

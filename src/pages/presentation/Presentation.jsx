@@ -41,7 +41,6 @@ function Presentation() {
     const criticalImage =
       window.innerWidth > 768 ? portraitDesktop : portraitMobile
     const link = document.createElement('link')
-    link.rel = 'preload'
     link.as = 'image'
     link.href = criticalImage
     link.type = 'image/webp'
@@ -104,7 +103,6 @@ function Presentation() {
                   <img
                     src={portraitMobile}
                     alt="Portrait of Romain Calmelet"
-                    loading="lazy"
                     onError={handleMobileImageError}
                     width="300"
                     height="300"
@@ -166,7 +164,6 @@ function Presentation() {
                   className={styles.img}
                   src={portraitTablet}
                   alt="Portrait of Romain Calmelet"
-                  loading="lazy"
                   onError={handleDesktopImageError}
                   width="400"
                   height="533"
