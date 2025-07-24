@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import ContactGame from '../contactGame/ContactGame'
 import PhoneGame from '../phoneGame/PhoneGame'
 import styles from './fullscreenGame.module.scss'
+import { useTranslation } from '../../hooks/useTranslation'
 
 // Debounce utility function to limit the rate of function calls
 // Improves performance by preventing excessive re-renders during window resize
@@ -14,6 +15,7 @@ const debounce = (func, wait) => {
 }
 
 const FullscreenGame = ({ gameType, backToMenu }) => {
+  const { t } = useTranslation()
   // State to control orientation/screen size warning message
   const [shouldShowMessage, setShouldShowMessage] = useState(false)
 
@@ -56,7 +58,8 @@ const FullscreenGame = ({ gameType, backToMenu }) => {
         title="Return to menu (Esc)"
       >
         {/* Arrow icon hidden from screen readers as it's decorative */}
-        <span aria-hidden="true">←</span> Retour
+        <span aria-hidden="true">←</span>
+        {t('fullScreenGame.backButton')}
       </button>
 
       {/* Conditional rendering based on screen size */}
@@ -65,8 +68,8 @@ const FullscreenGame = ({ gameType, backToMenu }) => {
         <div className={styles.orientationMessage}>
           <div className={styles.messageContent}>
             <span className={styles.rotateIcon}>📱</span>
-            <h2>Veuillez tourner votre appareil</h2>
-            <p>Ce jeu a été optimisé pour le mode portrait</p>
+            <h2>{t('fullScreenGame.orientationWarning1')}</h2>
+            <p>{t('fullScreenGame.orientationWarning2')}</p>
           </div>
         </div>
       ) : (

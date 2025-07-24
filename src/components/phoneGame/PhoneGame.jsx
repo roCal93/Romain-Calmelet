@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './phoneGame.module.scss'
 import littleWheel from '../../assets/img/imgPhoneGame/rouePetite.png'
 import averageWheel from '../../assets/img/imgPhoneGame/roueMoyenne.png'
@@ -6,7 +7,6 @@ import bigWheel from '../../assets/img/imgPhoneGame/roueGrande.png'
 import PhoneMessage from '../phoneMessage/PhoneMessage'
 
 // Constants
-const PHONE_NUMBER = '07 45 22 96 97'
 const RESET_DELAY = 2000
 const CORRECT_SEQUENCE = [2, 1, 3]
 const SLOT_COUNT = 3
@@ -30,38 +30,41 @@ const GameSlot = ({
   getImageById,
   styles,
   isDragOver,
-}) => (
-  <div
-    className={classNames(
-      styles.slot,
-      'slot',
-      slot !== null && styles.filled,
-      isDragOver && styles.dragOver
-    )}
-    data-slot={index}
-    role="button"
-    tabIndex={0}
-    aria-label={`Emplacement ${index + 1}${
-      slot ? ` contenant ${getImageById(slot).name}` : ' vide'
-    }`}
-    onDragOver={onDragOver}
-    onDrop={(e) => onDrop(e, index)}
-    onClick={() => onClick(index)}
-    onKeyDown={(e) => e.key === 'Enter' && onClick(index)}
-  >
-    {slot !== null ? (
-      <img
-        src={getImageById(slot).src}
-        alt={getImageById(slot).name}
-        className={classNames(styles.slotImage, styles[`wheel${slot}`])}
-      />
-    ) : (
-      <div className={styles.emptySlot}>
-        <span className={styles.slotHint}>Déposez ici</span>
-      </div>
-    )}
-  </div>
-)
+}) => {
+  const { t } = useTranslation()
+  return (
+    <div
+      className={classNames(
+        styles.slot,
+        'slot',
+        slot !== null && styles.filled,
+        isDragOver && styles.dragOver
+      )}
+      data-slot={index}
+      role="button"
+      tabIndex={0}
+      aria-label={`Emplacement ${index + 1}${
+        slot ? ` contenant ${getImageById(slot).name}` : ' vide'
+      }`}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, index)}
+      onClick={() => onClick(index)}
+      onKeyDown={(e) => e.key === 'Enter' && onClick(index)}
+    >
+      {slot !== null ? (
+        <img
+          src={getImageById(slot).src}
+          alt={getImageById(slot).name}
+          className={classNames(styles.slotImage, styles[`wheel${slot}`])}
+        />
+      ) : (
+        <div className={styles.emptySlot}>
+          <span className={styles.slotHint}>{t('phoneGame.slotHint')}</span>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Draggable image component
 const DraggableImage = ({
@@ -83,10 +86,12 @@ const DraggableImage = ({
     draggable={!placed}
     role="button"
     tabIndex={placed ? -1 : 0}
-    aria-label={`${image.name}${placed ? ' - déjà placée' : ' - disponible'}`}
+    aria-label={`${image.name}${
+      placed ? ' - already placed' : ' - available to drag'
+    }`}
     onDragStart={(e) => !placed && onDragStart(e, image.id)}
     onKeyDown={(e) =>
-      !placed && e.key === 'Enter' && console.log('Image sélectionnée')
+      !placed && e.key === 'Enter' && console.log('image selected')
     }
     style={{
       touchAction: 'manipulation',
@@ -104,11 +109,12 @@ const DraggableImage = ({
 
 // Status bar component
 const StatusBar = ({ isCompleted, showError, styles }) => {
+  const { t } = useTranslation()
   const statusText = isCompleted
-    ? '✓ SÉQUENCE CORRECTE'
+    ? t('phoneGame.correctSequence')
     : showError
-    ? '✗ MAUVAIS ORDRE - RÉESSAYEZ !'
-    : 'TROUVEZ LE BON ORDRE...'
+    ? t('phoneGame.incorrectSequence')
+    : t('phoneGame.sequenceHint')
 
   return (
     <div
@@ -126,6 +132,7 @@ const StatusBar = ({ isCompleted, showError, styles }) => {
 }
 
 function PhoneGame({ backButton }) {
+  const { t } = useTranslation()
   const [isLoaded, setIsLoaded] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [showError, setShowError] = useState(false)
@@ -506,7 +513,10 @@ function PhoneGame({ backButton }) {
       >
         {/* Success modal */}
         {showSuccessModal && (
-          <PhoneMessage phoneNumber={PHONE_NUMBER} onClose={backButton} />
+          <PhoneMessage
+            phoneNumber={t('phoneGame.phoneNumber')}
+            onClose={backButton}
+          />
         )}
 
         <div className={styles.gameArea}>
@@ -519,7 +529,7 @@ function PhoneGame({ backButton }) {
             <div
               className={styles.slotsContainer}
               role="group"
-              aria-label="Emplacements pour les roues"
+              aria-label="Slots for placing wheels"
               onDragLeave={handleDragLeave}
             >
               {slots.map((slot, index) => (
@@ -547,12 +557,14 @@ function PhoneGame({ backButton }) {
 
           {/* Available images */}
           <section>
-            <h2 className="sr-only">Roues disponibles</h2>
-            <div aria-label="Roues disponibles">Roues disponibles :</div>
+            <h2 className="sr-only">{t('phoneGame.availableWheels')}</h2>
+            <div aria-label="Wheels available">
+              {t('phoneGame.availableWheels')}
+            </div>
             <div
               className={styles.imagesList}
               role="group"
-              aria-label="Liste des roues à placer"
+              aria-label="List of draggable wheels"
             >
               {IMAGES.map((image, index) => {
                 const placed = isImagePlaced(image.id)
@@ -576,10 +588,7 @@ function PhoneGame({ backButton }) {
           </section>
 
           <div className={styles.interactionHint}>
-            <p>
-              Glissez-déposez les roues dans les emplacements, pour changer de
-              place une roue cliquez dessus
-            </p>
+            <p>{t('phoneGame.interactionHint')}</p>
           </div>
         </div>
       </div>

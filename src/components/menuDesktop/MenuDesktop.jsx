@@ -1,13 +1,7 @@
 // MenuDesktop.jsx
 import styles from './menuDesktop.module.scss'
 import { NavLink } from 'react-router-dom'
-
-// Navigation menu items configuration
-const menuItems = [
-  { path: 'presentation', label: 'PRÉSENTATION' },
-  { path: 'portfolio', label: 'PORTFOLIO' },
-  { path: 'contact', label: 'CONTACT' },
-]
+import { useTranslation } from '../../hooks/useTranslation'
 
 /**
  * Desktop navigation menu component
@@ -18,6 +12,14 @@ const menuItems = [
  * - Accessibility support (aria-label, aria-current)
  */
 const MenuDesktop = () => {
+  const { t } = useTranslation()
+  // Navigation menu items configuration
+  const menuItems = [
+    { path: 'presentation', label: t('navigation.presentation') },
+    { path: 'portfolio', label: t('navigation.portfolio') },
+    { path: 'contact', label: t('navigation.contact') },
+  ]
+
   return (
     <nav aria-label="Menu principal">
       <ul className={styles.menu}>

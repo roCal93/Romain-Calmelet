@@ -2,7 +2,8 @@
 import { useEffect, useState, useContext, useCallback } from 'react'
 
 // Contexts
-import { NavigationContext } from '../../app/navigationContext'
+import { NavigationContext } from '../../contexts/NavigationContext'
+import { useTranslation } from '../../hooks/useTranslation'
 
 // Components
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
@@ -29,6 +30,7 @@ function Contact() {
   const [showPhoneNumber, setShowPhoneNumber] = useState(false)
 
   // Context
+  const { t } = useTranslation()
   const { direction, resetNavigation } = useContext(NavigationContext)
 
   // Initial setup effect
@@ -97,7 +99,7 @@ function Contact() {
 
     const handleBeforeUnload = (e) => {
       e.preventDefault()
-      e.returnValue = 'Êtes-vous sûr de vouloir quitter le jeu ?'
+      e.returnValue = t('contact.leaveGameWarning')
       return e.returnValue
     }
 
@@ -106,7 +108,7 @@ function Contact() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [activeGame])
+  }, [activeGame, t])
 
   // Handle logo clicks
   const handleLogoClick = useCallback((type) => {
@@ -134,7 +136,7 @@ function Contact() {
         {/* Navigation arrow - hidden when game is active */}
         {!activeGame && (
           <div className={styles.navUp}>
-            <ArrowUp aria-label="Naviguer vers la section précédente" />
+            <ArrowUp aria-label="Navigate to previous section" />
           </div>
         )}
 
@@ -145,14 +147,14 @@ function Contact() {
           {/* Page header */}
           <header className={styles.title}>
             <div className={styles.text}>
-              <h1 id="contact-title">Contactez-moi</h1>
+              <h1 id="contact-title">{t('contact.title')}</h1>
             </div>
           </header>
 
           {/* Game area */}
           <section
             className={styles.gameWrapper}
-            aria-label="Zone de jeu et contact"
+            aria-label="Contact and games section"
           >
             {!activeGame ? (
               <GameMenu startGame={startGame} />

@@ -1,13 +1,14 @@
 // pages/portfolio/Portfolio.jsx
 import { useEffect, useState, useContext, useMemo, useCallback } from 'react'
-import { NavigationContext } from '../../app/navigationContext'
+import { NavigationContext } from '../../contexts/NavigationContext'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './portfolio.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
 import BackgroundPortfolio from '../../components/backgroundPortfolio/BackgroundPortfolio'
 import ProjectCarousel from '../../components/projectCarousel/ProjectCarousel'
 import ProjectCard from '../../components/projectCard/ProjectCard'
-import { projects } from '../../assets/data/projects'
+import { useProjects } from '../../assets/data/projects'
 
 // Constants
 const VARIANTS = {
@@ -16,6 +17,8 @@ const VARIANTS = {
 }
 
 function Portfolio() {
+  const { t, language } = useTranslation()
+  const projects = useProjects(language)
   const [isVisible, setIsVisible] = useState(false)
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0)
   const { direction, resetNavigation } = useContext(NavigationContext)
@@ -44,7 +47,7 @@ function Portfolio() {
           variant={VARIANTS.FRONT}
         />
       )),
-    []
+    [projects]
   )
 
   const cards = useMemo(
@@ -56,7 +59,7 @@ function Portfolio() {
           variant={VARIANTS.DETAILED}
         />
       )),
-    []
+    [projects]
   )
 
   // Handle carousel navigation
@@ -126,8 +129,8 @@ function Portfolio() {
           {/* Portfolio header */}
           <header className={styles.title}>
             <div className={styles.text}>
-              <h1 id="portfolio-title">Mes réalisations</h1>
-              <p>Voici les différents projets que j'ai accomplis</p>
+              <h1 id="portfolio-title">{t('portfolio.title')}</h1>
+              <p>{t('portfolio.description')}</p>
             </div>
           </header>
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { useMediaQuery } from 'react-responsive'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './contactGame.module.scss'
 
 // ==================== CONSTANTS ====================
@@ -97,39 +98,9 @@ const GitHubIcon = ({ size }) => (
   </svg>
 )
 
-const Notification = ({ url, type, onAction, onClose }) => (
-  <div className={`${styles.popupNotification} ${styles[type]}`}>
-    <div className={styles.notificationContent}>
-      {type === 'error' ? (
-        <>
-          <p>Votre navigateur a bloqué l'ouverture du lien.</p>
-          <p className={styles.notificationUrl}>{url}</p>
-          <div className={styles.notificationActions}>
-            <button onClick={onAction} className={styles.notificationButton}>
-              Ouvrir
-            </button>
-            <button onClick={onClose} className={styles.secondaryButton}>
-              Annuler
-            </button>
-          </div>
-        </>
-      ) : type === 'success' ? (
-        <>
-          <p>Lien ouvert avec succès !</p>
-          <p className={styles.notificationUrl}>{url}</p>
-        </>
-      ) : (
-        <p className={styles.successMessage}>{url}</p>
-      )}
-    </div>
-    <button onClick={onClose} className={styles.closeButton} aria-label="Close">
-      ✕
-    </button>
-  </div>
-)
-
 // ==================== MAIN COMPONENT ====================
 function ContactGame() {
+  const { t } = useTranslation()
   // Refs
   const gameContainerRef = useRef(null)
   const animationRef = useRef(null)
@@ -196,6 +167,41 @@ function ContactGame() {
   useEffect(() => {
     setLogos(initializeLogos())
   }, [initializeLogos])
+
+  const Notification = ({ url, type, onAction, onClose }) => (
+    <div className={`${styles.popupNotification} ${styles[type]}`}>
+      <div className={styles.notificationContent}>
+        {type === 'error' ? (
+          <>
+            <p>{t('contactGame.notificationTitle')}</p>
+            <p className={styles.notificationUrl}>{url}</p>
+            <div className={styles.notificationActions}>
+              <button onClick={onAction} className={styles.notificationButton}>
+                {t('contactGame.notificationOpen')}
+              </button>
+              <button onClick={onClose} className={styles.secondaryButton}>
+                {t('contactGame.notificationCancel')}
+              </button>
+            </div>
+          </>
+        ) : type === 'success' ? (
+          <>
+            <p>{t('contactGame.notificationSuccess')}</p>
+            <p className={styles.notificationUrl}>{url}</p>
+          </>
+        ) : (
+          <p className={styles.successMessage}>{url}</p>
+        )}
+      </div>
+      <button
+        onClick={onClose}
+        className={styles.closeButton}
+        aria-label="Close"
+      >
+        ✕
+      </button>
+    </div>
+  )
 
   // ==================== EVENT HANDLERS ====================
   const openLink = useCallback(async (url, logoId) => {
@@ -498,7 +504,7 @@ function ContactGame() {
           height: `${config.detectionZone}px`,
         }}
       >
-        <span className={styles.zoneText}>Amenez le logo ici !</span>
+        <span className={styles.zoneText}>{t('contactGame.dropZone')}</span>
       </div>
 
       {/* Logos */}
@@ -528,10 +534,7 @@ function ContactGame() {
 
       {/* Help text */}
       <div className={styles.interactionHint}>
-        <p>
-          Approchez votre souris des logos, puis poussez-les dans la zone pour
-          ouvrir les liens
-        </p>
+        <p>{t('contactGame.interactionHint')}</p>
       </div>
 
       {/* Notification */}

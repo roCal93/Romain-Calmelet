@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { NavigationContext } from './navigationContext'
+import { NavigationContext } from '../contexts/NavigationContext'
 import Header from '../components/header/Header'
 import '../styles/reset.scss'
 import '../styles/global.scss'

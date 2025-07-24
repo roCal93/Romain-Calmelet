@@ -1,4 +1,5 @@
 import styles from './projectCard.module.scss'
+import { useTranslation } from '../../hooks/useTranslation'
 
 // Constants for component variants
 const VARIANTS = {
@@ -11,6 +12,7 @@ const DEFAULT_IMAGE = '/images/default-project.jpg'
 const DEFAULT_LOGO = '/images/default-logo.svg'
 
 function ProjectCard({ project, variant = VARIANTS.DETAILED }) {
+  const { t } = useTranslation()
   // Early return if no project data
   if (!project) {
     console.warn('ProjectCard: No project data provided')
@@ -91,7 +93,7 @@ function ProjectCard({ project, variant = VARIANTS.DETAILED }) {
       {/* Features section */}
       {features.length > 0 && (
         <section className={`${styles.features} scrollable`}>
-          <h4 id={featuresHeadingId}>Fonctionnalités principales:</h4>
+          <h4 id={featuresHeadingId}>{t('projectCard.keyFeatures')}</h4>
           <ul
             tabIndex="0"
             role="list"

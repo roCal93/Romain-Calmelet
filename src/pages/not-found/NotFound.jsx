@@ -1,9 +1,11 @@
 // NotFound.jsx
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './notFound.module.scss'
 
 const NotFound = () => {
+  const { t } = useTranslation()
   // State to control fade-in animation on component mount
   const [isVisible, setIsVisible] = useState(false)
 
@@ -17,7 +19,7 @@ const NotFound = () => {
   return (
     <>
       {/* Dynamic page title for SEO and browser tab */}
-      <title>Romain Calmelet - Page Introuvable</title>
+      <title>{t('notFound.title')}</title>
 
       {/* Main page container with conditional visibility class */}
       <div
@@ -38,25 +40,21 @@ const NotFound = () => {
                   404
                 </h1>
                 {/* Descriptive error message in French */}
-                <h2 className={styles.errorMessage}>Page introuvable</h2>
+                <h2 className={styles.errorMessage}>{t('notFound.text1')}</h2>
               </header>
 
               {/* Content section with poetic error description */}
               <section className={styles.contentSection}>
                 <div className={styles.paragraphs}>
-                  <p>
-                    Comme un mécanisme horloger déréglé, cette page semble avoir
-                    disparu dans les rouages du temps numérique.
-                  </p>
-                  <p>
-                    Mais pas d'inquiétude, je peux vous aider à retrouver votre
-                    chemin.
-                  </p>
+                  <p>{t('notFound.text2')}</p>
+                  <p>{t('notFound.text3')}</p>
                 </div>
 
                 {/* Navigation link back to homepage */}
                 <Link to="/" className={styles.homeLink}>
-                  <span className={styles.linkText}>Retour à l'accueil</span>
+                  <span className={styles.linkText}>
+                    {t('notFound.homeButton')}
+                  </span>
                   <span className={styles.linkArrow}>→</span>
                 </Link>
               </section>

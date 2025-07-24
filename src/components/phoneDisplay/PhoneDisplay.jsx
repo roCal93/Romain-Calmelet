@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './phoneDisplay.module.scss'
 
 const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
+  const { t } = useTranslation()
   const [isExiting, setIsExiting] = useState(false)
   const [copiedItem, setCopiedItem] = useState(null)
   const modalRef = useRef(null)
@@ -102,11 +104,9 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
 
   // Helper function to get screen reader message
   const getScreenReaderMessage = () => {
-    if (copiedItem === 'phone')
-      return 'Numéro de téléphone copié dans le presse-papier'
-    if (copiedItem === 'email')
-      return 'Adresse email copiée dans le presse-papier'
-    if (copiedItem === 'error') return 'Échec de la copie'
+    if (copiedItem === 'phone') return 'Phone number copied to clipboard'
+    if (copiedItem === 'email') return 'Email address copied to clipboard'
+    if (copiedItem === 'error') return 'Error copying to clipboard'
     return ''
   }
 
@@ -124,20 +124,20 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.phoneContent}>
-          <h3 id="modal-title">Mes coordonnées</h3>
+          <h3 id="modal-title">{t('phoneDisplay.title')}</h3>
 
           <button
             onClick={() => copyToClipboard('0745229697', 'phone')}
             className={styles.contactLink}
             ref={firstFocusableElementRef}
-            aria-label="Copier le numéro de téléphone 07 45 22 96 97"
+            aria-label="Copy phone number +33745229697"
             tabIndex="0"
           >
             <span className={styles.icon}>📞</span>
-            <span className={styles.text}>07 45 22 96 97</span>
+            <span className={styles.text}>{t('phoneDisplay.phoneNumber')}</span>
             {copiedItem === 'phone' && (
               <span className={styles.copiedMessage} aria-hidden="true">
-                ✓ Copié !
+                ✓ {t('phoneDisplay.copyMessage')}
               </span>
             )}
           </button>
@@ -145,14 +145,14 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
           <button
             onClick={() => copyToClipboard('romaincalmelet@gmail.com', 'email')}
             className={styles.contactLink}
-            aria-label="Copier l'adresse email romaincalmelet@gmail.com"
+            aria-label="Copy email address romaincalmelet@gmail.com"
             tabIndex="0"
           >
             <span className={styles.icon}>✉️</span>
             <span className={styles.text}>romaincalmelet@gmail.com</span>
             {copiedItem === 'email' && (
               <span className={styles.copiedMessage} aria-hidden="true">
-                ✓ Copié !
+                ✓ {t('phoneDisplay.copyMessage')}
               </span>
             )}
           </button>
@@ -160,7 +160,7 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
           {/* Error message for copy failure */}
           {copiedItem === 'error' && (
             <span className={styles.errorMessage} aria-hidden="true">
-              ❌ Erreur lors de la copie
+              ❌ {t('phoneDisplay.errorMessage')}
             </span>
           )}
 
@@ -168,10 +168,10 @@ const PhoneDisplay = ({ showPhoneNumber, setShowPhoneNumber }) => {
             onClick={handleClose}
             className={styles.closeButton}
             ref={lastFocusableElementRef}
-            aria-label="Fermer la fenêtre"
+            aria-label="Close phone display"
             tabIndex="0"
           >
-            Fermer
+            <span className={styles.text}>{t('phoneDisplay.closeButton')}</span>
           </button>
         </div>
 

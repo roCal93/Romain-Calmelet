@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import styles from './menuMobile.module.scss'
 import { useNavigate } from 'react-router'
-
-// Navigation items configuration
-const NAVIGATION_ITEMS = [
-  { path: '/presentation', label: 'PRESENTATION' },
-  { path: '/portfolio', label: 'PORTFOLIO' },
-  { path: '/contact', label: 'CONTACT' },
-]
+import { useTranslation } from '../../hooks/useTranslation'
 
 const MenuMobile = ({ onMenuStateChange }) => {
+  const { t } = useTranslation()
+
+  // Déplacer NAVIGATION_ITEMS dans useMemo pour qu'il se mette à jour avec la langue
+  const NAVIGATION_ITEMS = useMemo(
+    () => [
+      { path: '/presentation', label: t('navigation.presentation') },
+      { path: '/portfolio', label: t('navigation.portfolio') },
+      { path: '/contact', label: t('navigation.contact') },
+    ],
+    [t]
+  ) // Dépendance sur t pour se recalculer quand la langue change
+
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
   const buttonRef = useRef(null)
@@ -51,7 +57,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
     [navigate, closeMenu]
   )
 
-  // Memoized navigation items to prevent unnecessary re-renders
+  // ✅ Mettre à jour les dépendances pour inclure NAVIGATION_ITEMS
   const navigationItems = useMemo(
     () =>
       NAVIGATION_ITEMS.map((item) => (
@@ -67,7 +73,7 @@ const MenuMobile = ({ onMenuStateChange }) => {
           </button>
         </li>
       )),
-    [handleLinkClick]
+    [NAVIGATION_ITEMS, handleLinkClick] // Ajouter NAVIGATION_ITEMS dans les dépendances
   )
 
   // Focus management when menu opens/closes

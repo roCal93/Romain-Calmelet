@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "presentation": "PRÉSENTATION",
+    "portfolio": "PORTFOLIO",
+    "contact": "CONTACT"
+  },
+  "home": {
+    "title": "Salut !"
+  },
+  "textIntro": {
+    "sentence": "Moi, c'est Romain et je suis",
+    "words": {
+      "developer": "Développeur web",
+      "integrator": "Intégrateur",
+      "curious": "Curieux",
+      "inventive": "Inventif",
+      "precision": "Précis"
+    }
+  },
+  "introduction": {
+    "title": "Quelques mots sur moi",
+    "text1": "Après dix années passées dans l'horlogerie, où précision, rigueur et sens du détail faisaient partie de mon quotidien, j'ai décidé de relever un nouveau défi : le développement web.",
+    "text2": "Ce domaine me passionne par la diversité de ses tâches et l'infinité de ses possibilités. On peut établir de nombreux parallèles entre la mécanique horlogère et celle du code, et je prends plaisir chaque jour à imaginer et inventer de nouveaux mécanismes virtuels.",
+    "text3": "Je suis plus motivé que jamais à évoluer dans cet univers, et à y apporter ma sensibilité artisanale acquise au long de mon parcours."
+  },
+  "portfolio": {
+    "title": "Mes réalisations",
+    "description": "Voici les différents projets que j'ai accomplis"
+  },
+  "projectCard": {
+    "keyFeatures": "Fonctionnalités clés:"
+  },
+  "contact": {
+    "title": "Contactez-moi"
+  },
+  "gameMenu": {
+    "mode1": "Mode simple:",
+    "mode2": "Mode jeux:",
+    "instructions1": " Cliquez directement sur les logos en bas à droite.",
+    "instructions2": " Réussissez les deux jeux pour accéder à mes infos !",
+    "game1": "La chasse aux profils",
+    "game2": "Séquence Mécanique",
+    "infoGame1": "Guidez un logo dans une zone pour ouvrir un lien vers mon profil LinkedIn ou GitHub.",
+    "infoGame2": "Placez les 3 roues dans le bon ordre pour révéler mon numéro de téléphone.",
+    "gameButton": "C'est parti !",
+    "loading": "Chargement..."
+  },
+  "fullScreenGame": {
+    "backButton": " Retour",
+    "orientationWarning1": "Veuillez tourner votre appareil",
+    "orientationWarning2": "Ce jeu a été optimisé pour le mode portrait"
+  },
+  "contactGame": {
+    "notificationTitle": "Votre navigateur a bloqué l'ouverture du lien.",
+    "notificationOpen": "Ouvrir",
+    "notificationCancel": "Annuler",
+    "notificationSuccess": "Lien ouvert avec succès !",
+    "dropZone": "Amenez le logo ici !",
+    "interactionHint": "Approchez votre souris des logos, puis poussez-les dans la zone pour ouvrir les liens.",
+    "leaveGameWarning": "Êtes-vous sûr de vouloir quitter le jeu ?"
+  },
+  "phoneGame": {
+    "slotHint": "Déposez ici",
+    "correctSequence": "✓ SÉQUENCE CORRECTE",
+    "incorrectSequence": "✗ MAUVAIS ORDRE - RÉESSAYEZ !",
+    "sequenceHint": "TROUVEZ LE BON ORDRE...",
+    "availableWheels": "Roues disponibles",
+    "interactionHint": "Glissez-déposez les roues dans les emplacements, pour changer de place une roue cliquez dessus",
+    "phoneNumber": "07 45 22 96 97"
+  },
+  "phoneMessage": {
+    "title": "Félicitations !",
+    "text1": "Vous avez trouvé la bonne séquence !",
+    "text2": "Numéro déverrouillé :",
+    "copyMessage": "Copié !",
+    "closeButton": "Fermer"
+  },
+  "phoneDisplay": {
+    "title": "Mes coordonnées",
+    "phoneNumber": "07 45 22 96 97",
+    "closeButton": "Fermer",
+    "copyMessage": "Copié !",
+    "errorMessage": "Échec de la copie"
+  },
+  "notFound": {
+    "title": "Romain Calmelet - Page Introuvable",
+    "text1": "Page introuvable",
+    "text2": "Comme un mécanisme horloger déréglé, cette page semble avoir disparu dans les rouages du temps numérique.",
+    "text3": "Mais pas d'inquiétude, je peux vous aider à retrouver votre chemin.",
+    "homeButton": "Retour à l'accueil"
+  }
+}

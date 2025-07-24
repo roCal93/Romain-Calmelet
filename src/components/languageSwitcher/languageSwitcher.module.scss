@@ -1,0 +1,36 @@
+@use '../../styles/variables.module' as *;
+@use 'sass:color';
+
+.languageSwitcher {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.button {
+  background: color.adjust(#666363, $alpha: -0.84);
+  color: white;
+  border: none;
+  padding: 0.5rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: $primary;
+    transform: translateX(-2px);
+
+    @media (max-width: 768px) {
+      // Keep subtle background on mobile
+      background: color.adjust(#666363, $alpha: -0.84);
+    }
+  }
+
+  &:focus-visible {
+    outline: $focus-color;
+    outline-offset: 2px;
+  }
+}

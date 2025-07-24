@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "presentation": "INTRODUCTION",
+    "portfolio": "PORTFOLIO",
+    "contact": "CONTACT"
+  },
+  "home": {
+    "title": "Hi!"
+  },
+  "textIntro": {
+    "sentence": "I'm Romain, and I'm",
+    "words": {
+      "developer": "A Web Developer",
+      "integrator": "A Web Integrator",
+      "curious": "Curious",
+      "inventive": "Inventive",
+      "precision": "Precise"
+    }
+  },
+  "introduction": {
+    "title": "A few words about me",
+    "text1": "After ten years in watchmaking, where precision, rigor, and attention to detail were part of my daily life, I decided to take on a new challenge : web development.",
+    "text2": "This field fascinates me with its variety of tasks and endless possibilities. Many parallels can be drawn between watchmaking mechanics and code mechanics, and I enjoy imagining and inventing new virtual mechanisms every day.",
+    "text3": "I am more motivated than ever to evolve in this universe and to bring my artisanal sensitivity acquired throughout my journey."
+  },
+  "portfolio": {
+    "title": "My achievements",
+    "description": "Here are the various projects I have completed"
+  },
+  "projectCard": {
+    "keyFeatures": "Key Features:"
+  },
+  "contact": {
+    "title": "Contact me"
+  },
+  "gameMenu": {
+    "mode1": "Easy mode:",
+    "mode2": "Game mode:",
+    "instructions1": " Click directly on the logos at the bottom right.",
+    "instructions2": " Complete both games to access my info!",
+    "game1": "Profile Hunt",
+    "game2": "Mechanical Sequence",
+    "infoGame1": "Guide a logo into an area to open a link to my LinkedIn or GitHub profile.",
+    "infoGame2": "Place the 3 wheels in the correct order to reveal my phone number.",
+    "gameButton": "Let's go!",
+    "loading": "Loading..."
+  },
+  "fullScreenGame": {
+    "backButton": " Back",
+    "orientationWarning1": "Please rotate your device",
+    "orientationWarning2": "This game has been optimized for portrait mode"
+  },
+  "contactGame": {
+    "notificationTitle": "Your browser has blocked the link opening.",
+    "notificationOpen": "Open",
+    "notificationCancel": "Cancel",
+    "notificationSuccess": "Link opened successfully!",
+    "dropZone": "Bring the logo here!",
+    "interactionHint": "Get your mouse close to the logos to direct them to the drop zone and open the links.",
+    "leaveGameWarning": "Are you sure you want to leave the game?"
+  },
+  "phoneGame": {
+    "slotHint": "Drop here",
+    "correctSequence": "✓ CORRECT SEQUENCE",
+    "incorrectSequence": "✗ WRONG ORDER - TRY AGAIN!",
+    "sequenceHint": "FIND THE RIGHT ORDER...",
+    "availableWheels": "Available wheels:",
+    "interactionHint": "Drag and drop the wheels into the slots, click on a wheel to change its position.",
+    "phoneNumber": "+33 7 45 22 96 97"
+  },
+  "phoneMessage": {
+    "title": "Good job!",
+    "text1": "You found the correct sequence!",
+    "text2": "Unlocked number:",
+    "copyMessage": "Copié!",
+    "closeButton": "Close"
+  },
+  "phoneDisplay": {
+    "title": "My contact details",
+    "phoneNumber": "+33 7 45 22 96 97",
+    "closeButton": "Close",
+    "copyMessage": "Copied!",
+    "errorMessage": "Failed to copy"
+  },
+  "notFound": {
+    "title": "Romain Calmelet - Page Not Found",
+    "text1": "Oops! This page seems to have disappeared.",
+    "text2": "Like a malfunctioning timepiece, this page appears to have slipped away into the gears of digital time.",
+    "text3": "But don't worry, I can help you find your way back.",
+    "homeButton": "Back to Home"
+  }
+}

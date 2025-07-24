@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createHashRouter, RouterProvider } from 'react-router-dom'
+import { LanguageProvider } from './contexts/LanguageContext.jsx'
 import App from './app/App.jsx'
 import NotFound from './pages/not-found/NotFound.jsx'
 import Presentation from './pages/presentation/Presentation.jsx'
@@ -43,9 +44,10 @@ const router = createHashRouter([
 // Mount the React application to the DOM element with id 'root'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {' '}
-    {/* Enables additional checks and warnings in development */}
-    <RouterProvider router={router} />{' '}
+    <LanguageProvider>
+      {/* Enables additional checks and warnings in development */}
+      <RouterProvider router={router} />
+    </LanguageProvider>
     {/* Provides routing context to the app */}
   </React.StrictMode>
 )

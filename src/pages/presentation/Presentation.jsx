@@ -6,7 +6,7 @@ import {
   Suspense,
   useCallback,
 } from 'react'
-import { NavigationContext } from '../../app/navigationContext'
+import { NavigationContext } from '../../contexts/NavigationContext'
 import styles from './presentation.module.scss'
 import ArrowUp from '../../components/navigationArrows/ArrowUp'
 import ArrowDown from '../../components/navigationArrows/ArrowDown'
@@ -15,6 +15,7 @@ import portraitDesktop from '../../assets/img/portraitRC/portraitDesktop.webp'
 import portraitTablet from '../../assets/img/portraitRC/portraitTablet.webp'
 import portraitMobile from '../../assets/img/portraitRC/portraitMobile.webp'
 import BackgroundPresentation from '../../components/backgroundPresentation/BackgroundPresentation'
+import { useTranslation } from '../../hooks/useTranslation'
 
 // Lazy loading for AutoCarousel component
 const AutoCarousel = lazy(() =>
@@ -22,6 +23,7 @@ const AutoCarousel = lazy(() =>
 )
 
 function Presentation() {
+  const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
   const [imageErrorMobile, setImageErrorMobile] = useState(false)
   const [imageErrorDesktop, setImageErrorDesktop] = useState(false)
@@ -88,7 +90,7 @@ function Presentation() {
         <article className={styles.aboutMe} aria-labelledby="about-title">
           <div className={styles.text}>
             <header>
-              <h1 id="about-title">Quelques mots sur moi</h1>
+              <h1 id="about-title">{t('introduction.title')}</h1>
             </header>
 
             <section
@@ -111,24 +113,9 @@ function Presentation() {
               </div>
 
               <div className={styles.paragraphs}>
-                <p>
-                  Après dix années passées dans l'horlogerie, où précision,
-                  rigueur et sens du détail faisaient partie de mon quotidien,
-                  j'ai décidé de relever un nouveau défi&nbsp;:
-                  le&nbsp;développement&nbsp;web.
-                </p>
-                <p>
-                  Ce domaine me passionne par la diversité de ses tâches et
-                  l'infinité de ses possibilités. On peut établir de nombreux
-                  parallèles entre la mécanique horlogère et celle du code, et
-                  je prends plaisir chaque jour à imaginer et inventer de
-                  nouveaux mécanismes virtuels.
-                </p>
-                <p>
-                  Je suis plus motivé que jamais à évoluer dans cet univers, et
-                  à y apporter ma sensibilité artisanale acquise au long de mon
-                  parcours.
-                </p>
+                <p>{t('introduction.text1')}</p>
+                <p>{t('introduction.text2')}</p>
+                <p>{t('introduction.text3')}</p>
               </div>
             </section>
 

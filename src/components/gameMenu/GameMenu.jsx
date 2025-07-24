@@ -1,6 +1,6 @@
 // GameMenu.jsx
 import styles from './gameMenu.module.scss'
-
+import { useTranslation } from '../../hooks/useTranslation'
 /**
  * GameMenu Component
  * Displays game selection menu with two mini-games options
@@ -18,24 +18,21 @@ const GameMenu = ({ startGame, isLoading = false }) => {
       startGame(gameType)
     }
   }
+  const { t } = useTranslation()
 
   return (
     <div className={styles.gameMenuWrapper}>
       {/* Main navigation container with accessibility attributes */}
-      <div
-        className={styles.gameMenu}
-        role="navigation"
-        aria-label="Menu de jeu"
-      >
+      <div className={styles.gameMenu} role="navigation" aria-label="Game Menu">
         {/* Instructions list */}
         <ul role="list">
           <li>
-            <strong>Mode simple :</strong> Cliquez directement sur les logos en
-            bas à droite.
+            <strong>{t('gameMenu.mode1')}</strong>
+            {t('gameMenu.instructions1')}
           </li>
           <li>
-            <strong>Mode jeu :</strong> Réussissez les deux jeux pour accéder à
-            mes infos !
+            <strong>{t('gameMenu.mode2')}</strong>
+            {t('gameMenu.instructions2')}
           </li>
         </ul>
 
@@ -43,15 +40,12 @@ const GameMenu = ({ startGame, isLoading = false }) => {
         <div
           className={styles.gameButtons}
           role="group"
-          aria-label="Choix de jeux"
+          aria-label="Game Choices"
         >
           {/* Contact game card */}
           <article className={styles.gameCard}>
-            <h3 id="game-contact">La chasse aux profils</h3>
-            <p id="desc-contact">
-              Guidez un logo dans une zone pour ouvrir un lien vers mon profil
-              LinkedIn ou GitHub.
-            </p>
+            <h3 id="game-contact">{t('gameMenu.game1')}</h3>
+            <p id="desc-contact">{t('gameMenu.infoGame1')}</p>
             <button
               onClick={() => handleGameStart('contact')}
               className={styles.gameButton}
@@ -61,17 +55,14 @@ const GameMenu = ({ startGame, isLoading = false }) => {
               aria-busy={isLoading} // Indicates loading state to screen readers
               tabIndex={0}
             >
-              {isLoading ? 'Chargement...' : "C'est parti !"}
+              {isLoading ? t('gameMenu.loading') : t('gameMenu.gameButton')}
             </button>
           </article>
 
           {/* Phone game card */}
           <article className={styles.gameCard}>
-            <h3 id="game-phone">Séquence Mécanique</h3>
-            <p id="desc-phone">
-              Placez les 3 roues dans le bon ordre pour révéler mon numéro de
-              téléphone.
-            </p>
+            <h3 id="game-phone">{t('gameMenu.game2')}</h3>
+            <p id="desc-phone">{t('gameMenu.infoGame2')}</p>
             <button
               onClick={() => handleGameStart('phone')}
               className={styles.gameButton}
@@ -81,7 +72,7 @@ const GameMenu = ({ startGame, isLoading = false }) => {
               aria-busy={isLoading}
               tabIndex={0}
             >
-              {isLoading ? 'Chargement...' : "C'est parti !"}
+              {isLoading ? t('gameMenu.loading') : t('gameMenu.gameButton')}
             </button>
           </article>
         </div>

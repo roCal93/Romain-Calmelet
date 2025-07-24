@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useTranslation } from '../../hooks/useTranslation'
 import styles from './phoneMessage.module.scss'
 import Confetti from 'react-confetti'
 
@@ -44,6 +45,7 @@ const useWindowDimensions = () => {
  * @param {Function} onClose - Callback function when modal is closed
  */
 const SuccessModal = ({ phoneNumber, onClose }) => {
+  const { t } = useTranslation()
   const [showContent, setShowContent] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState(null)
@@ -156,17 +158,17 @@ const SuccessModal = ({ phoneNumber, onClose }) => {
 
         {/* Success title */}
         <h2 id="success-title" className={styles.congratsTitle}>
-          Félicitations !
+          {t('phoneMessage.title')}
         </h2>
 
         {/* Success description */}
         <p id="success-description" className={styles.congratsText}>
-          Vous avez trouvé la bonne séquence !
+          {t('phoneMessage.text1')}
         </p>
 
         {/* Phone number reveal section */}
         <div className={styles.phoneReveal}>
-          <span className={styles.phoneLabel}>Numéro déverrouillé :</span>
+          <span className={styles.phoneLabel}>{t('phoneMessage.text2')}</span>
           <div
             className={`${styles.phoneNumberReveal} ${styles.clickable}`}
             onClick={handleCopyPhone}
@@ -184,7 +186,7 @@ const SuccessModal = ({ phoneNumber, onClose }) => {
             {phoneNumber}
             {copied && (
               <span className={styles.copiedMessage} aria-live="polite">
-                Copié !
+                {t('phoneMessage.copyMessage')}
               </span>
             )}
             {error && (
@@ -201,7 +203,7 @@ const SuccessModal = ({ phoneNumber, onClose }) => {
           onClick={onClose}
           aria-label="Close success modal"
         >
-          Fermer
+          {t('phoneMessage.closeButton')}
         </button>
       </div>
     </div>
