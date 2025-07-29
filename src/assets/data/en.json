@@ -57,7 +57,12 @@
     "notificationSuccess": "Link opened successfully!",
     "dropZone": "Bring the logo here!",
     "interactionHint": "Get your mouse close to the logos to direct them to the drop zone and open the links.",
-    "leaveGameWarning": "Are you sure you want to leave the game?"
+    "leaveGameWarning": "Are you sure you want to leave the game?",
+    "dropSuccessTitle": " Success!",
+    "dropSuccessText1": "You caught the logo ",
+    "dropSuccessText2": "You can now visit my profile:",
+    "dropSuccessOpenButton": "Visit",
+    "dropSuccessCloseButton": "Close"
   },
   "phoneGame": {
     "slotHint": "Drop here",

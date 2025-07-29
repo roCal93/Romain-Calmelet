@@ -57,7 +57,12 @@
     "notificationSuccess": "Lien ouvert avec succès !",
     "dropZone": "Amenez le logo ici !",
     "interactionHint": "Approchez votre souris des logos, puis poussez-les dans la zone pour ouvrir les liens.",
-    "leaveGameWarning": "Êtes-vous sûr de vouloir quitter le jeu ?"
+    "leaveGameWarning": "Êtes-vous sûr de vouloir quitter le jeu ?",
+    "dropSuccessTitle": " Succès !",
+    "dropSuccessText1": "Tu as attrapé le logo ",
+    "dropSuccessText2": "Tu peux maintenant visiter mon profil :",
+    "dropSuccessOpenButton": "Visiter",
+    "dropSuccessCloseButton": "Fermer"
   },
   "phoneGame": {
     "slotHint": "Déposez ici",
