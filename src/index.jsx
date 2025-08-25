@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createHashRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { LanguageProvider } from './contexts/LanguageContext.jsx'
 import App from './app/App.jsx'
 import NotFound from './pages/not-found/NotFound.jsx'
@@ -9,45 +9,40 @@ import Home from './pages/home/Home.jsx'
 import Portfolio from './pages/portfolio/Portfolio.jsx'
 import Contact from './pages/contact/contact.jsx'
 
-// Replace createBrowserRouter with createHashRouter
-// This creates a router that uses hash-based routing (URLs with #)
-const router = createHashRouter([
+// On passe à createBrowserRouter pour avoir de vraies URLs SEO-friendly
+const router = createBrowserRouter([
   {
-    path: '/', // Note: no need for basename with HashRouter
-    element: <App />, // Main app component that serves as the layout
+    path: '/',
+    element: <App />,
     children: [
-      // Nested routes that will render inside App component
       {
-        index: true, // This route renders when the parent route matches exactly
-        element: <Home />, // Home page component
+        index: true,
+        element: <Home />,
       },
       {
-        path: 'presentation', // Route for the presentation page
+        path: 'presentation',
         element: <Presentation />,
       },
       {
-        path: 'portfolio', // Route for the portfolio page
+        path: 'portfolio',
         element: <Portfolio />,
       },
       {
-        path: 'contact', // Route for the contact page
+        path: 'contact',
         element: <Contact />,
       },
     ],
   },
   {
-    path: '*', // Catch-all route for any unmatched paths
-    element: <NotFound />, // 404 Not Found page component
+    path: '*',
+    element: <NotFound />,
   },
 ])
 
-// Mount the React application to the DOM element with id 'root'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <LanguageProvider>
-      {/* Enables additional checks and warnings in development */}
       <RouterProvider router={router} />
     </LanguageProvider>
-    {/* Provides routing context to the app */}
   </React.StrictMode>
 )
