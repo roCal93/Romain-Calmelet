@@ -6,6 +6,8 @@ import ohMyFoodCover from '../img/imgPortfolio/ohMyFood.webp'
 import ohMyFoodLogo from '../img/imgPortfolio/ohMyFoodLogo.webp'
 import portfolioCover from '../img/imgPortfolio/portfolioCover.webp'
 import portfolioLogo from '../img/imgPortfolio/portfolioLogo.webp'
+import blogLogo from '../img/imgPortfolio/blogLogo.webp'
+import blogCover from '../img/imgPortfolio/blogLogo.webp'
 
 // Données des projets avec traductions
 export const projectsData = {
@@ -67,6 +69,24 @@ export const projectsData = {
         },
         {
             id: 4,
+            name: "Exemple Blog CodeIgniter Bootstrap",
+            description: "Ce projet est un exemple de blog développé avec CodeIgniter et Bootstrap, illustrant l'intégration d'un framework PHP léger avec un framework CSS pour réaliser une application web complète, moderne et responsive. Il propose la gestion d'articles, d'utilisateur et une interface d'administration.",
+            technologies: ["PHP", "CodeIgniter", "Bootstrap", "MySQL", "HTML", "CSS", "JavaScript"],
+            image: blogCover,
+            logo: blogLogo,
+            githubLink: "https://github.com/roCal93/exemple-blog-codeigniter-bootstrap-code",
+            demoLink: "https://exemple-blog-codeigniter-bootstrap.up.railway.app/blog",
+            features: [
+                "Création, modification et suppression d'articles de blog",
+                "Interface d'administration sécurisée",
+                "Utilisation de Bootstrap pour un design responsive",
+                "Utilisation de CodeIgniter pour une structure MVC claire",
+                "Connexion et gestion des utilisateurs",
+                "Affichage dynamique des articles et tri par date et par auteur"
+            ]
+        },
+        {
+            id: 5,
             name: "Mon portfolio",
             description: "Dans ce projet, j'ai choisi React et React Router pour développer mon portfolio, alliant performance, modularité et navigation sans rechargement de page. Il présente mon parcours, mes compétences, mes réalisations et permet une navigation dynamique entre les différentes sections.",
             technologies: ["React", "React Router", "React Responsive", "Sass", "Vite", "ESLint", "gh-pages"],
@@ -82,7 +102,7 @@ export const projectsData = {
                 "Expérience utilisateur améliorée par des transitions et animations modernes",
                 "Accessibilité: navigation possible au clavier, organisation sémantique"
             ]
-        }
+        },
     ],
     en: [
         {
@@ -142,6 +162,24 @@ export const projectsData = {
         },
         {
             id: 4,
+            name: "CodeIgniter Bootstrap Blog Example",
+            description: "This project is a blog example developed with CodeIgniter and Bootstrap, illustrating the integration of a lightweight PHP framework with a CSS framework to create a complete, modern, and responsive web application. It features article and user management, as well as an admin interface.",
+            technologies: ["PHP", "CodeIgniter", "Bootstrap", "MySQL", "HTML", "CSS", "JavaScript"],
+            image: blogCover,
+            logo: blogLogo,
+            githubLink: "https://github.com/roCal93/exemple-blog-codeigniter-bootstrap-code",
+            demoLink: "https://exemple-blog-codeigniter-bootstrap.up.railway.app/blog",
+            features: [
+                "Create, edit, and delete blog articles",
+                "Secured admin interface",
+                "Bootstrap for responsive design",
+                "CodeIgniter for clear MVC structure",
+                "User login and management",
+                "Dynamic article display and sorting by date and author"
+            ]
+        },
+        {
+            id: 5,
             name: "My Portfolio",
             description: "In this project, I chose React and React Router to develop my portfolio, combining performance, modularity and navigation without page reload. It presents my background, skills, achievements and allows dynamic navigation between different sections.",
             technologies: ["React", "React Router", "React Responsive", "Sass", "Vite", "ESLint", "gh-pages"],
