@@ -75,7 +75,7 @@ export const projectsData = {
             image: blogCover,
             logo: blogLogo,
             githubLink: "https://github.com/roCal93/exemple-blog-codeigniter-bootstrap-code",
-            demoLink: "https://exemple-blog-codeigniter-bootstrap.up.railway.app/blog",
+            demoLink: "https://exemple-blog-codeigniter-bootstrap.up.railway.app",
             features: [
                 "Création, modification et suppression d'articles de blog",
                 "Interface d'administration sécurisée",
