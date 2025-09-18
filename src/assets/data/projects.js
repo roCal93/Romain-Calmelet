@@ -7,7 +7,7 @@ import ohMyFoodLogo from '../img/imgPortfolio/ohMyFoodLogo.webp'
 import portfolioCover from '../img/imgPortfolio/portfolioCover.webp'
 import portfolioLogo from '../img/imgPortfolio/portfolioLogo.webp'
 import blogLogo from '../img/imgPortfolio/blogLogo.webp'
-import blogCover from '../img/imgPortfolio/blogLogo.webp'
+import blogCover from '../img/imgPortfolio/blogCover.webp'
 
 // Données des projets avec traductions
 export const projectsData = {
