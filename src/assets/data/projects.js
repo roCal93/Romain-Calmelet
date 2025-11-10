@@ -8,6 +8,8 @@ import portfolioCover from '../img/imgPortfolio/portfolioCover.webp'
 import portfolioLogo from '../img/imgPortfolio/portfolioLogo.webp'
 import blogLogo from '../img/imgPortfolio/blogLogo.webp'
 import blogCover from '../img/imgPortfolio/blogCover.webp'
+import salondefredCover from '../img/imgPortfolio/salondefredCover.webp'
+import lesalondefredLogo from '../img/imgPortfolio/lesalondefredLogo.webp'
 
 // Données des projets avec traductions
 export const projectsData = {
@@ -87,6 +89,26 @@ export const projectsData = {
         },
         {
             id: 5,
+            name: "Le Salon de Fred - Coiffeur à Thônes",
+            description: "Site vitrine pour Le Salon de Fred à Thônes, présentant les services de coiffure pour femmes, hommes et enfants. Le site fournit les horaires d'ouverture, l'adresse, les moyens de contact, l'accès aux avis Google, et une expérience utilisateur optimisée pour le référencement local et un chargement rapide.",
+            technologies: ["HTML", "CSS", "JavaScript", "SEO", "PWA", "WebP"],
+            image: salondefredCover,
+            logo: lesalondefredLogo,
+            githubLink: "https://github.com/lesalondefredsite/lesalondefredsite",
+            demoLink: "https://lesalondefred.fr",
+            features: [
+                "Présentation des services de coiffure (femmes, hommes, enfants)",
+                "Horaires d'ouverture et prise de rendez-vous téléphonique",
+                "Affichage dynamique des horaires d'ouverture et de l'adresse",
+                "Intégration des avis Google et liens vers les réseaux sociaux",
+                "Optimisation SEO local et données structurées",
+                "Design responsive et images WebP pour la rapidité",
+                "Application Web Progressive (PWA) pour l'installation mobile",
+                "Chargement différé de Google Maps pour les performances"
+            ]
+        },
+        {
+            id: 6,
             name: "Mon portfolio",
             description: "Dans ce projet, j'ai choisi React et React Router pour développer mon portfolio, alliant performance, modularité et navigation sans rechargement de page. Il présente mon parcours, mes compétences, mes réalisations et permet une navigation dynamique entre les différentes sections.",
             technologies: ["React", "React Router", "React Responsive", "Sass", "Vite", "ESLint", "gh-pages"],
@@ -180,6 +202,27 @@ export const projectsData = {
         },
         {
             id: 5,
+            name: "Le Salon de Fred - Hairdresser in Thônes",
+            description: "Showcase site for Le Salon de Fred in Thônes, presenting hairdressing services for women, men, and children. The site provides opening hours, address, contact methods, access to Google reviews, and an optimized user experience for local SEO and fast loading.",
+            technologies: ["HTML", "CSS", "JavaScript", "SEO", "PWA", "WebP"],
+            image: salondefredCover,
+            logo: lesalondefredLogo,
+            githubLink: "https://github.com/lesalondefredsite/lesalondefredsite",
+            demoLink: "https://lesalondefred.fr",
+            features: [
+                "Presentation of hairdressing services (women, men, children)",
+                "Opening hours and phone appointment booking",
+                "Dynamic display of opening hours and address",
+                "Google reviews integration and social media links",
+                "Local SEO optimization and structured data",
+                "Responsive design and WebP images for speed",
+                "Progressive Web App (PWA) for mobile installation",
+                "Lazy loading of Google Maps for performance"
+            ]
+        },
+
+        {
+            id: 6,
             name: "My Portfolio",
             description: "In this project, I chose React and React Router to develop my portfolio, combining performance, modularity and navigation without page reload. It presents my background, skills, achievements and allows dynamic navigation between different sections.",
             technologies: ["React", "React Router", "React Responsive", "Sass", "Vite", "ESLint", "gh-pages"],
