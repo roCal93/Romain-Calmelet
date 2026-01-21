@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       {/* Copyright notice with site creation year */}
-      <p>&copy; 2025 Romain Calmelet</p>
+      <p>&copy; {new Date().getFullYear()} Romain Calmelet</p>
     </footer>
   )
 }
